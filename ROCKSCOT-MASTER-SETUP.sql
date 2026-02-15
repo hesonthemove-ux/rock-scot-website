@@ -795,12 +795,12 @@ CREATE TRIGGER trg_invoice_number
     BEFORE INSERT ON invoices
     FOR EACH ROW EXECUTE FUNCTION generate_invoice_number();
 
--- C) Auto-purge Wire news older than 7 days
+-- C) Auto-purge Wire news older than 30 days (keeps THE WIRE searchable for 30 days)
 CREATE OR REPLACE FUNCTION purge_old_wire_news()
 RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
 BEGIN
     DELETE FROM wire_news
-    WHERE created_at < NOW() - INTERVAL '7 days';
+    WHERE created_at < NOW() - INTERVAL '30 days';
     RETURN NULL;
 END;
 $$;

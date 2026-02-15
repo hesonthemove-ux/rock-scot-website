@@ -882,13 +882,13 @@
                     </a>
                 </p>
                 <p style="margin-top: 0.75rem;">
-                    <a href="/cdn-cgi/l/email-protection#a3d0d7d6c7cacce3d1ccc0c88dd0c0ccd7"><span class="__cf_email__" data-cfemail="e192959485888ea1938e828acf92828e95">[email&#160;protected]</span></a>
+                    <a href="mailto:studio@rock.scot" style="color:#FF6600;">studio@rock.scot</a>
                 </p>
                 <p>
-                    <a href="/cdn-cgi/l/email-protection#502022392631332910223f333b7e23333f24"><span class="__cf_email__" data-cfemail="fc8c8e958a9d9f85bc8e939f97d28f9f9388">[email&#160;protected]</span></a>
+                    <a href="mailto:advertise@rock.scot" style="color:#FF6600;">advertise@rock.scot</a>
                 </p>
                 <p>
-                    <a href="/cdn-cgi/l/email-protection#f787859e8196948eb78598949cd984949883"><span class="__cf_email__" data-cfemail="7707051e0116140e370518141c5904141803">[email&#160;protected]</span></a>
+                    <a href="mailto:studio@rock.scot" style="color:#FF6600;">studio@rock.scot</a>
                 </p>
                 <p style="margin-top: 1rem;">
                     <a href="https://bsky.app/profile/rockscot.bsky.social" target="_blank" rel="noopener">Bluesky</a>
@@ -901,8 +901,9 @@
         </div>
     </footer>
     
-    <!-- Supabase JS SDK -->
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Supabase config + SDK (config sets SUPABASE_URL and SUPABASE_ANON_KEY) -->
+    <script src="js/supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
     // ================================================================
@@ -910,9 +911,9 @@
     // THE WIRE realtime ticker + all UX enhancements
     // ================================================================
 
-    // ── CONFIG ──────────────────────────────────────────────────────
-    const SUPABASE_URL      = 'https://pwzeapvopeeoahpyicdm.supabase.co';
-    const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY'; // ← Paste your anon key here
+    // ── CONFIG (from js/supabase-config.js) ─────────────────────────
+    const SUPABASE_URL      = window.SUPABASE_URL || 'https://pwzeapvopeeoahpyicdm.supabase.co';
+    const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         realtime: { params: { eventsPerSecond: 10 } }
@@ -989,8 +990,10 @@
             }
         });
 
-    // Initial load
-    loadWireNews();
+    // Initial load — if no key or error, fallback shows after loadWireNews()
+    loadWireNews().catch(() => {
+        ticker.textContent = '⚡ ROCK.SCOT LIVE ON DAB+ — SCOTLAND\'S HOME OF ROCK   ◆   ';
+    });
 
     // Reload every 5 minutes as a fallback
     setInterval(loadWireNews, 5 * 60 * 1000);

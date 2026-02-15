@@ -521,10 +521,10 @@
                     
                     <button type="button" class="btn-calculate" onclick="calculateQuote()">Calculate Quote</button>
                     
-                    <div class="quote-result" id="quote-result">
+                    <div class="quote-result show" id="quote-result">
                         <h3 style="font-family: 'Bebas Neue'; font-size: 2rem; margin-bottom: 1rem; letter-spacing: 0.1em;">Your Quote</h3>
-                        <div class="quote-total" id="quote-total">£0</div>
-                        <div class="quote-breakdown" id="quote-breakdown"></div>
+                        <div class="quote-total" id="quote-total">—</div>
+                        <div class="quote-breakdown" id="quote-breakdown"><p style="color:rgba(255,255,255,0.7);">Select a <strong>package</strong> and <strong>start date</strong> above, then click <strong>Calculate Quote</strong> to see your price.</p></div>
                     </div>
                     
                     <button type="submit" class="btn-submit" id="submit-btn" style="display: none;">Submit Booking Request</button>
@@ -751,11 +751,27 @@
         const startDate = document.getElementById('start-date').value;
         const length    = parseInt(document.getElementById('campaign-length').value) || 28;
         const hasBoltOn = document.getElementById('bolt-on') && document.getElementById('bolt-on').checked;
+        const quoteResult = document.getElementById('quote-result');
+        const quoteTotal = document.getElementById('quote-total');
+        const quoteBreakdown = document.getElementById('quote-breakdown');
+        const submitBtn = document.getElementById('submit-btn');
 
-        if (!pkgKey || !startDate) return;
+        if (!pkgKey || !startDate) {
+            quoteResult.classList.add('show');
+            quoteTotal.textContent = '—';
+            quoteBreakdown.innerHTML = '<p style="color:rgba(255,255,255,0.7);">Select a <strong>package</strong> and <strong>start date</strong> above, then click <strong>Calculate Quote</strong> to see your price.</p>';
+            if (submitBtn) submitBtn.style.display = 'none';
+            return;
+        }
 
         const pkg = PACKAGES[pkgKey];
-        if (!pkg) return;
+        if (!pkg) {
+            quoteResult.classList.add('show');
+            quoteTotal.textContent = '—';
+            quoteBreakdown.innerHTML = '<p style="color:rgba(255,255,255,0.7);">Please select a package and start date.</p>';
+            if (submitBtn) submitBtn.style.display = 'none';
+            return;
+        }
 
         const today    = new Date();
         const start    = new Date(startDate);
@@ -785,8 +801,8 @@
             'toh':    'All 3 Mux (integrated station ident)',
         }[pkg.muxType];
 
-        document.getElementById('quote-total').textContent = `£${(netPence/100).toLocaleString()}`;
-        document.getElementById('quote-breakdown').innerHTML = `
+        quoteTotal.textContent = `£${(netPence/100).toLocaleString()}`;
+        quoteBreakdown.innerHTML = `
             <p><strong>Package:</strong> ${pkg.name}</p>
             <p><strong>Coverage:</strong> ${muxLabel}</p>
             <p><strong>Plays:</strong> ${playsText}</p>
@@ -801,8 +817,8 @@
             </p>
         `;
 
-        document.getElementById('quote-result').classList.add('show');
-        document.getElementById('submit-btn').style.display = 'block';
+        quoteResult.classList.add('show');
+        if (submitBtn) submitBtn.style.display = 'block';
 
         // Check capacity whenever quote is calculated
         if (startDate) checkCapacityLive(pkgKey);
@@ -904,31 +920,37 @@
                 throw new Error(result.error || 'Submission failed');
             }
 
-            // Success
-            document.getElementById('quote-form').style.display = 'none';
+            // Success — hide form, show confirmation, scroll into view
+            const formEl = document.getElementById('quote-form');
+            const successEl = document.getElementById('success-message');
+            if (formEl) formEl.style.display = 'none';
             const muxDesc = pkg.muxType === 'single'
-                ? selectedMux.replace('_', ' ').replace(/\w/g, l => l.toUpperCase())
+                ? selectedMux.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
                 : 'All 3 Mux Areas';
+            const bookingRef = result.booking_id ? String(result.booking_id).slice(0, 8).toUpperCase() : '';
 
-            document.getElementById('success-message').innerHTML = `
+            successEl.innerHTML = `
                 <div style="text-align:center;padding:3rem 1rem;">
-                    <div style="font-size:4rem;margin-bottom:1rem;">🎸</div>
-                    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:#FF6600;margin-bottom:1rem;">
-                        Booking Received!
+                    <div style="font-size:4rem;margin-bottom:1rem;">✓</div>
+                    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:#00ff88;margin-bottom:1rem;">
+                        Request received
                     </h3>
-                    <p style="font-size:1.1rem;margin-bottom:0.5rem;">
-                        <strong>${payload.first_name}</strong>, your <strong>${pkg.name}</strong> campaign is confirmed.
+                    <p style="font-size:1.2rem;margin-bottom:0.75rem;color:#fff;">
+                        Thank you, <strong>${payload.first_name}</strong>. Your <strong>${pkg.name}</strong> advertising enquiry has been submitted.
                     </p>
+                    ${bookingRef ? `<p style="color:rgba(255,255,255,0.8);font-size:0.9rem;margin-bottom:1rem;">Reference: <strong>${bookingRef}</strong></p>` : ''}
                     <p style="color:#ccc;margin-bottom:0.5rem;">Coverage: <strong>${muxDesc}</strong></p>
-                    <p style="color:#ccc;margin-bottom:2rem;">
-                        ${pkg.plays} plays${pkg.muxType === 'toh' ? ' — every hour, integrated into our station ident' : ' over 28 days at :20 and :40 past each hour'}
+                    <p style="color:#ccc;margin-bottom:1.5rem;">
+                        ${pkg.plays} plays${pkg.muxType === 'toh' ? ' — every hour' : ' over 28 days at :20 and :40 past each hour'}
                     </p>
-                    <p style="color:#999;font-size:0.9rem;">
-                        Check your inbox at <strong>${payload.email}</strong> — we'll be in touch within 1 business day.
+                    <p style="color:#00ff88;font-size:1rem;margin-bottom:0;">
+                        We'll email you at <strong>${payload.email}</strong> within 24 hours to confirm next steps.
                     </p>
                 </div>
             `;
-            document.getElementById('success-message').style.display = 'block';
+            successEl.classList.add('show');
+            successEl.style.display = 'block';
+            successEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
         } catch (err) {
             console.error('Submission error:', err);

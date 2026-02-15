@@ -1,5 +1,47 @@
 # ROCK.SCOT — Deploy to Raspberry Pi or GitHub
 
+## Quick reference — terminal commands
+
+**Important:** On the **Pi** the repo path is `~/rock-scot-website`. On the **Mac** it is `~/Rock\ Scot/rock-scot-website` (with a space). Never use the Pi path on the Mac or you'll get "No such file or directory".
+
+**Push latest changes from Mac to GitHub:**
+```bash
+cd ~/Rock\ Scot/rock-scot-website
+git add .
+git commit -m "Update site"
+git push origin main
+```
+
+**On the Pi — pull and run site (port 8081):**
+```bash
+ssh rockscot@192.168.0.200
+cd ~/rock-scot-website
+git pull
+python3 -m http.server 8081
+```
+Then open **http://192.168.0.200:8081**
+
+**If port 8081 is already in use, kill it then start:**
+```bash
+sudo kill $(sudo lsof -t -i :8081)
+cd ~/rock-scot-website
+python3 -m http.server 8081
+```
+
+---
+
+## THE WIRE (news ticker) and redacted emails
+
+**If the ticker stays on "Connecting to Scottish rock news…":**
+- Ensure `js/supabase-config.js` has your real Supabase anon key (same project where you ran the SQL).
+- In Supabase, run the **30-day retention** change: SQL Editor → run `supabase/migrations/009_wire_retention_30_days.sql`.
+- Deploy the **fetch_wire_rss** Edge Function and call it on a schedule (e.g. every 30 min via [cron-job.org](https://cron-job.org) or Supabase Dashboard → Edge Functions → fetch_wire_rss → Invoke). That fills `wire_news` from RSS feeds so the ticker has content.
+
+**If footer emails still show "(email protected)":**
+- Do a **hard refresh**: **Ctrl+Shift+R** (Windows/Linux) or **Cmd+Shift+R** (Mac), or clear the browser cache for the site. The site now uses plain `mailto:` links (no Cloudflare).
+
+---
+
 ## Where is this project on your Mac?
 
 - **In Cursor:** Your workspace is **"Rock Scot"**; the website files are in the folder **rock-scot-website** inside it.
