@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROCK.SCOT Admin - Discount Manager</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 2rem;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #FF6600; margin-bottom: 2rem; }
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        input, select, button {
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            width: 100%;
+        }
+        button {
+            background: #FF6600;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 700;
+            border: none;
+        }
+        button:hover { background: #FF8833; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #444;
+        }
+        th { background: rgba(255, 102, 0, 0.2); }
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+        .badge-pending { background: #FFA500; color: #000; }
+        .badge-approved { background: #00ff88; color: #000; }
+        .error { color: #ff4444; margin-top: 1rem; }
+        .success { color: #00ff88; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        <h1>🔐 ROCK.SCOT Admin Dashboard</h1>
+        
+        <!-- Create Discount Section -->
+        <div class="section">
+            <h2>Create Discount Code</h2>
+            <form id="create-form">
+                <input type="text" id="code" placeholder="Discount Code (e.g., SPRING50)" required>
+                <select id="type" required>
+                    <option value="">Select Type...</option>
+                    <option value="fixed">Fixed Amount (£)</option>
+                    <option value="percent">Percentage (%)</option>
+                </select>
+                <input type="number" id="value" placeholder="Value (50 for £50 or 10 for 10%)" required>
+                <input type="text" id="note" placeholder="Note (e.g., Spring promotion)">
+                <button type="submit">Create Discount</button>
+            </form>
+            <div id="create-result"></div>
+        </div>
+        
+        <!-- Pending Discounts Section -->
+        <div class="section">
+            <h2>Pending Discounts</h2>
+            <button onclick="loadPendingDiscounts()">🔄 Refresh</button>
+            <table id="pending-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Type</th>
+                        <th>Value</th>
+                        <th>Created</th>
+                        <th>Note</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="pending-body">
+                    <tr><td colspan="6">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- All Discounts Section -->
+        <div class="section">
+            <h2>All Discounts</h2>
+            <button onclick="loadAllDiscounts()">🔄 Refresh</button>
+            <table id="all-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Type</th>
+                        <th>Value</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Approved</th>
+                    </tr>
+                </thead>
+                <tbody id="all-body">
+                    <tr><td colspan="6">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        // ⚠️ WARNING: Replace with your actual Supabase credentials
+        // ⚠️ NEVER commit service_role key to git!
+        const SUPABASE_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
+        const SUPABASE_SERVICE_ROLE = 'YOUR_SERVICE_ROLE_KEY_HERE'; // ⚠️ KEEP SECRET!
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE);
+        
+        // Get current admin user ID (you'll need to implement proper auth)
+        const ADMIN_USER_ID = 'YOUR_ADMIN_UUID'; // Replace with actual admin UUID
+        
+        // Create discount
+        document.getElementById('create-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const code = document.getElementById('code').value.toUpperCase();
+            const type = document.getElementById('type').value;
+            const value = parseInt(document.getElementById('value').value);
+            const note = document.getElementById('note').value;
+            
+            const amountPence = type === 'fixed' ? value * 100 : null;
+            const percentOff = type === 'percent' ? value : null;
+            
+            try {
+                const { data, error } = await supabase.rpc('create_discount', {
+                    p_code: code,
+                    p_amount_pence: amountPence,
+                    p_percent_off: percentOff,
+                    p_created_by: ADMIN_USER_ID,
+                    p_note: note
+                });
+                
+                if (error) throw error;
+                
+                document.getElementById('create-result').innerHTML = 
+                    `<p class="success">✓ Created discount: ${code}</p>`;
+                document.getElementById('create-form').reset();
+                loadPendingDiscounts();
+                
+            } catch (err) {
+                document.getElementById('create-result').innerHTML = 
+                    `<p class="error">Error: ${err.message}</p>`;
+            }
+        });
+        
+        // Load pending discounts
+        async function loadPendingDiscounts() {
+            try {
+                const { data, error } = await supabase.rpc('list_pending_discounts');
+                
+                if (error) throw error;
+                
+                const tbody = document.getElementById('pending-body');
+                
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6">No pending discounts</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = data.map(d => `
+                    <tr>
+                        <td><strong>${d.code}</strong></td>
+                        <td>${d.amount_pence ? 'Fixed' : 'Percent'}</td>
+                        <td>${d.amount_pence ? '£' + (d.amount_pence/100) : d.percent_off + '%'}</td>
+                        <td>${new Date(d.created_at).toLocaleDateString()}</td>
+                        <td>${d.note || '-'}</td>
+                        <td>
+                            <button onclick="approveDiscount('${d.id}', '${d.code}')">
+                                ✓ Approve
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+                
+            } catch (err) {
+                console.error('Error loading pending:', err);
+            }
+        }
+        
+        // Approve discount
+        async function approveDiscount(discountId, code) {
+            if (!confirm(`Approve discount code: ${code}?`)) return;
+            
+            try {
+                const { error } = await supabase.rpc('approve_discount', {
+                    p_discount_id: discountId,
+                    p_approved_by: ADMIN_USER_ID,
+                    p_note: 'Approved via admin dashboard'
+                });
+                
+                if (error) throw error;
+                
+                alert(`✓ Approved: ${code}`);
+                loadPendingDiscounts();
+                loadAllDiscounts();
+                
+            } catch (err) {
+                alert(`Error: ${err.message}`);
+            }
+        }
+        
+        // Load all discounts
+        async function loadAllDiscounts() {
+            try {
+                const { data, error } = await supabase
+                    .from('discounts')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                const tbody = document.getElementById('all-body');
+                
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6">No discounts yet</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = data.map(d => `
+                    <tr>
+                        <td><strong>${d.code}</strong></td>
+                        <td>${d.amount_pence ? 'Fixed' : 'Percent'}</td>
+                        <td>${d.amount_pence ? '£' + (d.amount_pence/100) : d.percent_off + '%'}</td>
+                        <td>
+                            ${d.approved_at ? 
+                                '<span class="badge badge-approved">Approved</span>' : 
+                                '<span class="badge badge-pending">Pending</span>'}
+                        </td>
+                        <td>${new Date(d.created_at).toLocaleDateString()}</td>
+                        <td>${d.approved_at ? new Date(d.approved_at).toLocaleDateString() : '-'}</td>
+                    </tr>
+                `).join('');
+                
+            } catch (err) {
+                console.error('Error loading all:', err);
+            }
+        }
+        
+        // Load data on page load
+        loadPendingDiscounts();
+        loadAllDiscounts();
+    </script>
+    
+</body>
+</html>

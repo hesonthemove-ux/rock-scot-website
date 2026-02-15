@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+
+# Priority pages
+Allow: /index.html
+Allow: /advertise.html
+
+# Block admin (keep private)
+Disallow: /admin.html
+Disallow: /admin-dashboard.html
+
+# Sitemap
+Sitemap: https://rock.scot/sitemap.xml
+
+# Crawl-delay (be nice to search engines)
+Crawl-delay: 1

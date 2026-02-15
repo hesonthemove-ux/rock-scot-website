@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- =====================================================
+         PRIMARY SEO — ADVERTISE PAGE
+         ===================================================== -->
+    <title>Advertise on ROCK.SCOT | Scottish Radio Advertising | DAB+ from £299</title>
+    <meta name="description" content="Reach 410,000+ dedicated rock fans across Scotland on DAB+ digital radio. Advertising packages from £299. Regional, Multi-Regional & Top of Hour spots. Professional production available.">
+    <meta name="keywords" content="Scottish radio advertising, advertise on Scottish radio, DAB radio advertising Scotland, rock radio advertising, Glasgow radio advertising, Edinburgh radio advertising, radio advertising packages Scotland, digital radio advertising UK, radio commercials Scotland, Scottish business advertising, radio spots Scotland, broadcast advertising Scotland">
+
+    <!-- Geographic -->
+    <meta name="geo.region" content="GB-SCT">
+    <meta name="geo.placename" content="Scotland, United Kingdom">
+
+    <!-- Directives -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <meta name="author" content="Caledonia TX Ltd — ROCK.SCOT">
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://rock.scot/advertise.html">
+    <link rel="alternate" hreflang="en-gb" href="https://rock.scot/advertise.html">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="ROCK.SCOT">
+    <meta property="og:title" content="Advertise on ROCK.SCOT — Reach Scotland's Rock Audience from £299">
+    <meta property="og:description" content="410,000+ dedicated rock fans. DAB+ digital radio advertising across Inverclyde, North Ayrshire & South Lanarkshire — and expanding. Packages from £299 + professional production.">
+    <meta property="og:url" content="https://rock.scot/advertise.html">
+    <meta property="og:image" content="https://rock.scot/assets/images/hero-graffiti-main.jpg">
+    <meta property="og:locale" content="en_GB">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Advertise on ROCK.SCOT — Scottish DAB+ Radio Advertising from £299">
+    <meta name="twitter:description" content="Reach 410,000+ rock fans across Scotland on DAB+ digital radio. Packages from £299. Professional production available.">
+    <meta name="twitter:image" content="https://rock.scot/assets/images/hero-graffiti-main.jpg">
+
+    <!-- Schema — Advertising Service -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "@id": "https://rock.scot/advertise.html#service",
+      "name": "ROCK.SCOT Radio Advertising",
+      "serviceType": "Radio Advertising",
+      "description": "Reach 410,000+ dedicated rock music fans across Scotland on DAB+ digital radio. Professional advertising packages with optional production service.",
+      "provider": {
+        "@type": "RadioStation",
+        "name": "ROCK.SCOT",
+        "url": "https://rock.scot"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Scotland"
+      },
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Advertising Packages",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "name": "Regional DAB+ Radio Advertising",
+            "price": "299",
+            "priceCurrency": "GBP",
+            "priceSpecification": {"@type": "UnitPriceSpecification", "price": "299", "priceCurrency": "GBP"},
+            "description": "134 plays over 28 days, single region coverage across DAB+ broadcast area"
+          },
+          {
+            "@type": "Offer",
+            "name": "Multi-Regional DAB+ Radio Advertising",
+            "price": "449",
+            "priceCurrency": "GBP",
+            "description": "134 plays over 28 days across all current ROCK.SCOT broadcast areas"
+          },
+          {
+            "@type": "Offer",
+            "name": "Top of Hour Premium Advertising",
+            "price": "2500",
+            "priceCurrency": "GBP",
+            "description": "Premium top-of-hour positioning for maximum impact and recall"
+          },
+          {
+            "@type": "Offer",
+            "name": "Professional Radio Advert Production",
+            "price": "195",
+            "priceCurrency": "GBP",
+            "description": "Professional 30-second radio-ready advert including 3 redrafts. Available with any advertising package."
+          }
+        ]
+      },
+      "url": "https://rock.scot/advertise.html"
+    }
+    </script>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+    <meta name="theme-color" content="#FF6600">
+
+    <!-- Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://pwzeapvopeeoahpyicdm.supabase.co">
+
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Supabase config (set SUPABASE_ANON_KEY in js/supabase-config.js) -->
+    <script src="js/supabase-config.js"></script>
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        /* Additional styles for advertise page */
+        .packages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .package-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--orange);
+            border-radius: 15px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .package-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(255, 102, 0, 0.4);
+            border-color: var(--gold);
+        }
+        
+        .package-name {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            color: var(--orange);
+            margin-bottom: 1rem;
+            letter-spacing: 0.1em;
+        }
+        
+        .package-price {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 3rem;
+            color: var(--gold);
+            margin: 1.5rem 0;
+        }
+        
+        .package-plays {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .package-features {
+            list-style: none;
+            margin: 2rem 0;
+            text-align: left;
+        }
+        
+        .package-features li {
+            padding: 0.5rem 0;
+            color: rgba(255, 255, 255, 0.7);
+            position: relative;
+            padding-left: 1.5rem;
+        }
+        
+        .package-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--orange);
+            font-weight: 700;
+        }
+        
+        .quote-calculator {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid var(--orange);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 4rem 0;
+        }
+        
+        .form-group {
+            margin-bottom: 2rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: var(--white);
+            font-family: 'Roboto', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--orange);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .quote-result {
+            background: linear-gradient(135deg, var(--orange), #FF8833);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-top: 2rem;
+            text-align: center;
+            display: none;
+        }
+        
+        .quote-result.show {
+            display: block;
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .quote-total {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 3.5rem;
+            color: var(--white);
+            margin: 1rem 0;
+        }
+        
+        .quote-breakdown {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 1.5rem;
+            text-align: left;
+        }
+        
+        .quote-breakdown p {
+            margin: 0.5rem 0;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .surcharge-warning {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid var(--gold);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            display: none;
+        }
+        
+        .surcharge-warning.show {
+            display: block;
+        }
+        
+        .surcharge-warning strong {
+            color: var(--gold);
+        }
+        
+        .btn-calculate {
+            width: 100%;
+            background: linear-gradient(135deg, var(--orange), #FF8833);
+            color: var(--white);
+            border: none;
+            padding: 1.2rem 3rem;
+            border-radius: 50px;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 0.15em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 102, 0, 0.6);
+        }
+        
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, var(--gold), #FFA500);
+            color: var(--black);
+            border: none;
+            padding: 1.2rem 3rem;
+            border-radius: 50px;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 0.15em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 2rem;
+        }
+        
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.6);
+        }
+        
+        .success-message {
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            color: #00ff88;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+            margin: 2rem 0;
+        }
+        
+        .success-message.show {
+            display: block;
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .quote-calculator {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- HEADER -->
+    <header>
+        <div class="header-container">
+            <a href="index.html"><img src="assets/images/logo.png" alt="ROCK.SCOT" class="logo"></a>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="index.html#genres">Genres</a>
+                <a href="index.html#schedule">Schedule</a>
+                <a href="advertise.html">Advertise</a>
+            </nav>
+            <button class="btn-listen-live">Listen Live</button>
+        </div>
+    </header>
+    
+    <!-- HERO -->
+    <section style="padding: 10rem 2rem 4rem; text-align: center; background: linear-gradient(180deg, var(--black), var(--navy));">
+        <div style="max-width: 900px; margin: 0 auto;">
+            <h1 style="font-family: 'Bebas Neue'; font-size: 4rem; color: var(--orange); margin-bottom: 1.5rem; letter-spacing: 0.1em;">Advertise with ROCK.SCOT</h1>
+            <p style="font-size: 1.3rem; color: rgba(255,255,255,0.8); margin-bottom: 2rem;">Reach 410,000+ rock fans across West Scotland on DAB+</p>
+        </div>
+    </section>
+    
+    <!-- PACKAGES -->
+    <section style="padding: 4rem 2rem;">
+        <div style="max-width: 1400px; margin: 0 auto;">
+            <h2>Advertising Packages</h2>
+            <p class="intro">Professional radio advertising with guaranteed plays</p>
+            
+            <div class="packages-grid">
+                <div class="package-card">
+                    <div class="package-name">Regional</div>
+                    <div class="package-price">£299</div>
+                    <div class="package-plays">134 plays over 28 days</div>
+                    <ul class="package-features">
+                        <li>Single region coverage</li>
+                        <li>Inverclyde, North Ayrshire, or South Lanarkshire</li>
+                        <li>:20 & :40 past every hour</li>
+                        <li>30-second ad slot</li>
+                        <li>Professional production available</li>
+                    </ul>
+                    <button class="btn btn-primary" onclick="selectPackage('regional')">Get Quote</button>
+                </div>
+                
+                <div class="package-card" style="border-color: var(--gold); transform: scale(1.05);">
+                    <div style="background: var(--gold); color: var(--black); padding: 0.5rem 1rem; border-radius: 20px; display: inline-block; margin-bottom: 1rem; font-weight: 700; font-size: 0.9rem;">MOST POPULAR</div>
+                    <div class="package-name">Multi-Regional</div>
+                    <div class="package-price">£449</div>
+                    <div class="package-plays">134 plays over 28 days</div>
+                    <ul class="package-features">
+                        <li>All 3 regions coverage</li>
+                        <li>Inverclyde + North Ayrshire + South Lanarkshire</li>
+                        <li>:20 & :40 past every hour</li>
+                        <li>30-second ad slot</li>
+                        <li>Professional production included</li>
+                        <li>Maximum reach: 410,000+</li>
+                    </ul>
+                    <button class="btn btn-primary" onclick="selectPackage('multi-regional')">Get Quote</button>
+                </div>
+                
+                <div class="package-card">
+                    <div class="package-name">Top of Hour</div>
+                    <div class="package-price">£2,500</div>
+                    <div class="package-plays">Exclusive positioning</div>
+                    <ul class="package-features">
+                        <li>Premium :00 slot placement</li>
+                        <li>All 3 regions coverage</li>
+                        <li>30 days campaign</li>
+                        <li>60-second ad slot</li>
+                        <li>Priority scheduling</li>
+                        <li>Professional production included</li>
+                        <li>Highest impact positioning</li>
+                    </ul>
+                    <button class="btn btn-primary" onclick="selectPackage('top-of-hour')">Get Quote</button>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- QUOTE CALCULATOR -->
+    <section style="padding: 4rem 2rem; background: rgba(255, 102, 0, 0.02);">
+        <div style="max-width: 900px; margin: 0 auto;">
+            <h2>Get Your Quote</h2>
+            <p class="intro">Fill out the form below for an instant quote</p>
+            
+            <div class="quote-calculator">
+                <form id="quote-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>First Name *</label>
+                            <input type="text" id="first-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name *</label>
+                            <input type="text" id="last-name" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Company Name *</label>
+                            <input type="text" id="company" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" id="email" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Phone Number *</label>
+                            <input type="tel" id="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Package *</label>
+                            <select id="package" required onchange="onPackageChange()">
+                                <option value="">Select package...</option>
+                                <option value="regional">Regional — Single Mux (£299)</option>
+                                <option value="multi-regional">Multi-Regional — All 3 Mux (£449)</option>
+                                <option value="top-of-hour">Top of Hour — Station Ident (£2,500)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- MUX SELECTOR: shown only for Regional (single-mux) -->
+                    <div class="form-group" id="mux-selector-group" style="display:none;">
+                        <label>Select Your Region *</label>
+                        <select id="selected-mux" onchange="calculateQuote()">
+                            <option value="">Choose your broadcast area...</option>
+                            <option value="inverclyde">Inverclyde</option>
+                            <option value="north_ayrshire">North Ayrshire</option>
+                            <option value="south_lanarkshire">South Lanarkshire</option>
+                        </select>
+                        <p style="color:#999;font-size:0.85rem;margin-top:0.5rem;">
+                            Your ad plays on this mux only. Upgrade to Multi-Regional for all 3 areas.
+                        </p>
+                    </div>
+
+                    <!-- CAPACITY CHECK: live availability indicator -->
+                    <div id="capacity-indicator" style="display:none;padding:0.75rem 1rem;border-radius:6px;margin-bottom:1rem;font-size:0.9rem;"></div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Campaign Start Date *</label>
+                            <input type="date" id="start-date" required onchange="calculateQuote()">
+                        </div>
+                        <div class="form-group">
+                            <label>Campaign Length (days) *</label>
+                            <input type="number" id="campaign-length" min="1" max="90" value="28" required onchange="calculateQuote()">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Discount Code (Optional)</label>
+                        <input type="text" id="discount-code" placeholder="Enter discount code if you have one" style="text-transform: uppercase;">
+                    </div>
+
+                    <div class="form-group" id="bolt-on-group">
+                        <label><input type="checkbox" id="bolt-on" onchange="calculateQuote()"> Add professional production (+£150)</label>
+                        <p style="color:#999;font-size:0.85rem;margin-top:0.25rem;">30-second radio-ready advert, 3 redrafts. Available with Regional and Multi-Regional.</p>
+                    </div>
+                    
+                    <div class="surcharge-warning" id="surcharge-warning">
+                        <strong>⚠️ Rush Order Surcharge Applied</strong>
+                        <p>Campaign starting within 27 days: +£50 surcharge</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Additional Notes (Optional)</label>
+                        <textarea id="notes" rows="4" placeholder="Tell us about your business and campaign goals..."></textarea>
+                    </div>
+                    
+                    <button type="button" class="btn-calculate" onclick="calculateQuote()">Calculate Quote</button>
+                    
+                    <div class="quote-result" id="quote-result">
+                        <h3 style="font-family: 'Bebas Neue'; font-size: 2rem; margin-bottom: 1rem; letter-spacing: 0.1em;">Your Quote</h3>
+                        <div class="quote-total" id="quote-total">£0</div>
+                        <div class="quote-breakdown" id="quote-breakdown"></div>
+                    </div>
+                    
+                    <button type="submit" class="btn-submit" id="submit-btn" style="display: none;">Submit Booking Request</button>
+                </form>
+                
+                <div class="success-message" id="success-message">
+                    <h3 style="font-family: 'Bebas Neue'; font-size: 2rem; margin-bottom: 1rem;">✓ Quote Submitted Successfully!</h3>
+                    <p>Thank you! We'll be in touch within 24 hours to confirm your booking.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- WHY ADVERTISE -->
+    <section style="padding: 4rem 2rem;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <h2>Why Advertise on ROCK.SCOT?</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-top: 3rem;">
+                <div style="background: rgba(255, 255, 255, 0.03); padding: 2rem; border-radius: 15px; border-left: 4px solid var(--orange);">
+                    <h3 style="color: var(--orange); margin-bottom: 1rem;">📻 DAB+ Quality</h3>
+                    <p>Crystal-clear digital audio across West Scotland</p>
+                </div>
+                
+                <div style="background: rgba(255, 255, 255, 0.03); padding: 2rem; border-radius: 15px; border-left: 4px solid var(--orange);">
+                    <h3 style="color: var(--orange); margin-bottom: 1rem;">🎯 Targeted Audience</h3>
+                    <p>Reach 410,000+ rock music fans in your area</p>
+                </div>
+                
+                <div style="background: rgba(255, 255, 255, 0.03); padding: 2rem; border-radius: 15px; border-left: 4px solid var(--orange);">
+                    <h3 style="color: var(--orange); margin-bottom: 1rem;">✅ Guaranteed Plays</h3>
+                    <p>134 plays minimum - your ad will be heard</p>
+                </div>
+                
+                <div style="background: rgba(255, 255, 255, 0.03); padding: 2rem; border-radius: 15px; border-left: 4px solid var(--orange);">
+                    <h3 style="color: var(--orange); margin-bottom: 1rem;">🎙️ Ofcom Licensed</h3>
+                    <p>Fully compliant and professional broadcaster</p>
+                </div>
+                
+                <div style="background: rgba(255, 255, 255, 0.03); padding: 2rem; border-radius: 15px; border-left: 4px solid var(--orange);">
+                    <h3 style="color: var(--orange); margin-bottom: 1rem;">🏴󠁧󠁢󠁳󠁣󠁴󠁿 Local Reach</h3>
+                    <p>Inverclyde, North Ayrshire & South Lanarkshire</p>
+                </div>
+                
+                <div style="background: rgba(255, 255, 255, 0.03); padding: 2rem; border-radius: 15px; border-left: 4px solid var(--orange);">
+                    <h3 style="color: var(--orange); margin-bottom: 1rem;">💰 Great Value</h3>
+                    <p>From just £299 for 28 days of coverage</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>ROCK.SCOT</h4>
+                <p>Scotland's rock station on DAB+</p>
+                <p style="margin-top: 1rem;"><strong>Ofcom Licensed</strong><br>SC646223 | VAT 491589639</p>
+            </div>
+            <div class="footer-section">
+                <h4>Advertising</h4>
+                <p>Regional: £299<br>Multi-Regional: £449<br>Top of Hour: £2,500</p>
+            </div>
+            <div class="footer-section">
+                <h4>Coverage</h4>
+                <p>Inverclyde<br>North Ayrshire<br>South Lanarkshire<br><br>410,000+ Reach</p>
+            </div>
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <p><a href="tel:01414597625" style="color:#FF6600; font-weight:700;">📞 0141 459 ROCK</a></p>
+                <p><a href="mailto:studio@rock.scot" style="color:#FF6600;">studio@rock.scot</a></p>
+                <p><a href="mailto:studio@rock.scot" style="color:#FF6600;">studio@rock.scot</a></p>
+            </div>
+        </div>
+        <div class="copyright">© 2026 ROCK.SCOT | Ofcom Licensed | SC646223</div>
+    </footer>
+    
+    <script src="js/main.js"></script>
+    <script>
+    // ================================================================
+    // ROCK.SCOT ADVERTISE PAGE — ENTERPRISE BOOKING SYSTEM
+    // Mux-aware capacity checking + Edge Function submission
+    // ================================================================
+
+    const SUPABASE_URL  = window.SUPABASE_URL || 'https://pwzeapvopeeoahpyicdm.supabase.co';
+    const SUPABASE_KEY  = window.SUPABASE_ANON_KEY || 'YOUR_ANON_KEY';
+    const EDGE_URL      = `${SUPABASE_URL}/functions/v1/book_campaign`;
+    const supabase      = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ── BROADCAST CONSTANTS (mirrors broadcast_constants table) ──
+    const BC = {
+        playsStandard:  134,   // single + multi campaigns
+        playsTOH:       672,   // top of hour (1/hr × 24 × 28)
+        maxCapacity:    120,   // 40 × weight_3
+        weightMulti:    3,
+        weightSingle:   1,
+        weightTOH:      3,
+        breakTimes:     ['20', '40'],  // :20 and :40 past each hour
+        spotsPerBreak:  4,
+    };
+
+    // ── PACKAGES ─────────────────────────────────────────────────
+    const PACKAGES = {
+        'regional': {
+            name:        'Regional',
+            productId:   'regional',
+            pricePence:  29900,
+            muxType:     'single',
+            muxWeight:   1,
+            plays:       BC.playsStandard,
+            boltOnAvail: true,
+            description: '134 plays over 28 days on your chosen mux',
+        },
+        'multi-regional': {
+            name:        'Multi-Regional',
+            productId:   'multi_regional',
+            pricePence:  44900,
+            muxType:     'multi',
+            muxWeight:   3,
+            plays:       BC.playsStandard,
+            boltOnAvail: true,
+            description: '134 plays over 28 days across all 3 mux areas',
+        },
+        'top-of-hour': {
+            name:        'Top of Hour',
+            productId:   'top_of_hour',
+            pricePence:  250000,
+            muxType:     'toh',
+            muxWeight:   3,
+            plays:       BC.playsTOH,
+            boltOnAvail: false,
+            description: '672 plays — integrated into the station ident every hour',
+        },
+    };
+
+    const BOLT_ON_PENCE  = 15000;  // £150 production add-on
+    const RUSH_PENCE     = 5000;   // £50 rush surcharge
+
+    // ── PACKAGE CHANGE: show/hide mux selector ───────────────────
+    function onPackageChange() {
+        const pkg = document.getElementById('package').value;
+        const muxGroup = document.getElementById('mux-selector-group');
+        const muxSelect = document.getElementById('selected-mux');
+
+        if (pkg === 'regional') {
+            muxGroup.style.display = 'block';
+            muxSelect.required = true;
+        } else {
+            muxGroup.style.display = 'none';
+            muxSelect.required = false;
+            muxSelect.value = '';
+        }
+
+        const boltOnGroup = document.getElementById('bolt-on-group');
+        if (boltOnGroup) boltOnGroup.style.display = (pkg && PACKAGES[pkg] && PACKAGES[pkg].boltOnAvail) ? 'block' : 'none';
+
+        // Reset capacity indicator
+        document.getElementById('capacity-indicator').style.display = 'none';
+
+        if (pkg) checkCapacityLive(pkg);
+        calculateQuote();
+    }
+
+    // ── LIVE CAPACITY CHECK ───────────────────────────────────────
+    async function checkCapacityLive(pkgKey) {
+        const indicator = document.getElementById('capacity-indicator');
+        const startDate = document.getElementById('start-date').value;
+        if (!pkgKey || !startDate) return;
+
+        const pkg = PACKAGES[pkgKey];
+        if (!pkg) return;
+
+        indicator.style.display = 'block';
+        indicator.style.background = '#1a1a1a';
+        indicator.style.border = '1px solid #333';
+        indicator.style.color = '#999';
+        indicator.innerHTML = '⏳ Checking availability...';
+
+        try {
+            // Get current capacity used via RPC
+            const endDate = new Date(startDate);
+            endDate.setDate(endDate.getDate() + 28);
+            const endStr = endDate.toISOString().split('T')[0];
+
+            const { data, error } = await supabase
+                .rpc('check_capacity', {
+                    p_mux_type:   pkg.muxType,
+                    p_start_date: startDate,
+                    p_end_date:   endStr,
+                });
+
+            if (error) throw error;
+
+            const result = typeof data === 'string' ? JSON.parse(data) : data;
+            const remaining = result.capacity_remaining;
+            const pct = Math.round((result.capacity_used / BC.maxCapacity) * 100);
+
+            if (!result.can_approve) {
+                indicator.style.background = '#2a0000';
+                indicator.style.border = '1px solid #aa0000';
+                indicator.style.color = '#ff6666';
+                indicator.innerHTML = `⛔ <strong>${result.reason}</strong> — <a href="mailto:advertise@rock.scot" style="color:#FF6600;">Contact us</a> to join the waitlist.`;
+            } else if (remaining <= 15) {
+                indicator.style.background = '#2a1500';
+                indicator.style.border = '1px solid #FF6600';
+                indicator.style.color = '#FF9933';
+                indicator.innerHTML = `⚠️ <strong>Limited availability</strong> — only ${remaining} capacity unit${remaining !== 1 ? 's' : ''} remaining. Book now.`;
+            } else {
+                indicator.style.background = '#002a00';
+                indicator.style.border = '1px solid #006600';
+                indicator.style.color = '#00cc44';
+                indicator.innerHTML = `✅ <strong>Available</strong> — ${remaining} of ${BC.maxCapacity} capacity units free. ${pct}% booked.`;
+            }
+        } catch (err) {
+            indicator.style.display = 'none';
+            console.warn('Capacity check failed:', err.message);
+        }
+    }
+
+    // ── QUOTE CALCULATOR ─────────────────────────────────────────
+    function calculateQuote() {
+        const pkgKey    = document.getElementById('package').value;
+        const startDate = document.getElementById('start-date').value;
+        const length    = parseInt(document.getElementById('campaign-length').value) || 28;
+        const hasBoltOn = document.getElementById('bolt-on') && document.getElementById('bolt-on').checked;
+
+        if (!pkgKey || !startDate) return;
+
+        const pkg = PACKAGES[pkgKey];
+        if (!pkg) return;
+
+        const today    = new Date();
+        const start    = new Date(startDate);
+        const daysOut  = Math.ceil((start - today) / 86400000);
+        const isRush   = daysOut >= 0 && daysOut < 27;
+        const rushAmt  = isRush ? RUSH_PENCE : 0;
+        const boltAmt  = (hasBoltOn && pkg.boltOnAvail) ? BOLT_ON_PENCE : 0;
+
+        const netPence = pkg.pricePence + rushAmt + boltAmt;
+        const vatPence = Math.round(netPence * 0.20);
+        const totPence = netPence + vatPence;
+
+        // Show/hide rush warning
+        const warn = document.getElementById('surcharge-warning');
+        if (warn) warn.classList.toggle('show', isRush);
+
+        // Plays display
+        const playsText = pkgKey === 'top-of-hour'
+            ? `672 plays (every hour, 24/7, all 3 mux)`
+            : `${BC.playsStandard} plays over ${length} days` +
+              (pkgKey === 'multi-regional' ? ` across all 3 mux areas` : ` on your selected mux`);
+
+        // Mux display
+        const muxLabel = {
+            'single': 'Single Mux (1 area)',
+            'multi':  'Multi-Mux (all 3 areas — Inverclyde, N.Ayrshire, S.Lanarkshire)',
+            'toh':    'All 3 Mux (integrated station ident)',
+        }[pkg.muxType];
+
+        document.getElementById('quote-total').textContent = `£${(netPence/100).toLocaleString()}`;
+        document.getElementById('quote-breakdown').innerHTML = `
+            <p><strong>Package:</strong> ${pkg.name}</p>
+            <p><strong>Coverage:</strong> ${muxLabel}</p>
+            <p><strong>Plays:</strong> ${playsText}</p>
+            <p><strong>Break times:</strong> :20 and :40 past each hour</p>
+            <p><strong>Base price:</strong> £${(pkg.pricePence/100).toLocaleString()}</p>
+            ${isRush   ? `<p><strong>Rush surcharge:</strong> £${(RUSH_PENCE/100).toLocaleString()}</p>` : ''}
+            ${boltAmt  ? `<p><strong>Production add-on:</strong> £${(BOLT_ON_PENCE/100).toLocaleString()}</p>` : ''}
+            <p><strong>Net:</strong> £${(netPence/100).toLocaleString()}</p>
+            <p><strong>VAT (20%):</strong> £${(vatPence/100).toLocaleString()}</p>
+            <p style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(255,255,255,0.2);">
+                <strong>Total inc. VAT:</strong> £${(totPence/100).toLocaleString()}
+            </p>
+        `;
+
+        document.getElementById('quote-result').classList.add('show');
+        document.getElementById('submit-btn').style.display = 'block';
+
+        // Check capacity whenever quote is calculated
+        if (startDate) checkCapacityLive(pkgKey);
+    }
+
+    // Recalculate when start date changes
+    document.getElementById('start-date').addEventListener('change', () => {
+        calculateQuote();
+        const pkg = document.getElementById('package').value;
+        if (pkg) checkCapacityLive(pkg);
+    });
+
+    // ── FORM SUBMISSION ───────────────────────────────────────────
+    document.getElementById('quote-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const btn = document.getElementById('submit-btn');
+        btn.textContent = 'Submitting...';
+        btn.disabled = true;
+
+        const pkgKey        = document.getElementById('package').value;
+        const pkg           = PACKAGES[pkgKey];
+        const startDate     = document.getElementById('start-date').value;
+        const length        = parseInt(document.getElementById('campaign-length').value) || 28;
+        const discountCode  = document.getElementById('discount-code')?.value.trim().toUpperCase() || null;
+        const selectedMux   = document.getElementById('selected-mux')?.value || null;
+        const hasBoltOn     = document.getElementById('bolt-on')?.checked || false;
+        const notes         = document.getElementById('notes')?.value || '';
+
+        const today   = new Date();
+        const start   = new Date(startDate);
+        const daysOut = Math.ceil((start - today) / 86400000);
+        const isRush  = daysOut >= 0 && daysOut < 27;
+        const rushAmt = isRush ? RUSH_PENCE : 0;
+        const boltAmt = (hasBoltOn && pkg.boltOnAvail) ? BOLT_ON_PENCE : 0;
+        const netPence = pkg.pricePence + rushAmt + boltAmt;
+
+        // Validate: single-mux must have selected_mux
+        if (pkg.muxType === 'single' && !selectedMux) {
+            alert('Please select your broadcast region.');
+            btn.textContent = 'Submit Booking Request';
+            btn.disabled = false;
+            return;
+        }
+
+        // Check capacity one final time before submitting
+        const endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + length);
+        const { data: capData } = await supabase.rpc('check_capacity', {
+            p_mux_type:   pkg.muxType,
+            p_start_date: startDate,
+            p_end_date:   endDate.toISOString().split('T')[0],
+        });
+        const cap = typeof capData === 'string' ? JSON.parse(capData) : capData;
+        if (cap && !cap.can_approve) {
+            alert(`Sorry — ${cap.reason}. Please contact advertise@rock.scot.`);
+            btn.textContent = 'Submit Booking Request';
+            btn.disabled = false;
+            return;
+        }
+
+        const payload = {
+            first_name:           document.getElementById('first-name').value.trim(),
+            last_name:            document.getElementById('last-name').value.trim(),
+            company:              document.getElementById('company').value.trim(),
+            email:                document.getElementById('email').value.trim().toLowerCase(),
+            phone:                document.getElementById('phone').value.trim(),
+            product_id:           pkg.productId,
+            product_name:         pkg.name,
+            campaign_length_days: length,
+            mux_type:             pkg.muxType,
+            mux_weight:           pkg.muxWeight,
+            selected_mux:         pkg.muxType === 'single' ? selectedMux : null,
+            product_net_pence:    netPence,
+            bolt_on_included:     hasBoltOn,
+            bolt_on_cost_pence:   boltAmt,
+            is_rush:              isRush,
+            discount_code:        discountCode,
+            final_price_pence:    netPence,
+            start_date:           startDate,
+            message:              notes,
+            submitted_via:        'web',
+        };
+
+        try {
+            // Use Edge Function (server-side validation + email)
+            const resp = await fetch(EDGE_URL, {
+                method:  'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey':        SUPABASE_KEY,
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const result = await resp.json();
+
+            if (!resp.ok) {
+                throw new Error(result.error || 'Submission failed');
+            }
+
+            // Success
+            document.getElementById('quote-form').style.display = 'none';
+            const muxDesc = pkg.muxType === 'single'
+                ? selectedMux.replace('_', ' ').replace(/\w/g, l => l.toUpperCase())
+                : 'All 3 Mux Areas';
+
+            document.getElementById('success-message').innerHTML = `
+                <div style="text-align:center;padding:3rem 1rem;">
+                    <div style="font-size:4rem;margin-bottom:1rem;">🎸</div>
+                    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:#FF6600;margin-bottom:1rem;">
+                        Booking Received!
+                    </h3>
+                    <p style="font-size:1.1rem;margin-bottom:0.5rem;">
+                        <strong>${payload.first_name}</strong>, your <strong>${pkg.name}</strong> campaign is confirmed.
+                    </p>
+                    <p style="color:#ccc;margin-bottom:0.5rem;">Coverage: <strong>${muxDesc}</strong></p>
+                    <p style="color:#ccc;margin-bottom:2rem;">
+                        ${pkg.plays} plays${pkg.muxType === 'toh' ? ' — every hour, integrated into our station ident' : ' over 28 days at :20 and :40 past each hour'}
+                    </p>
+                    <p style="color:#999;font-size:0.9rem;">
+                        Check your inbox at <strong>${payload.email}</strong> — we'll be in touch within 1 business day.
+                    </p>
+                </div>
+            `;
+            document.getElementById('success-message').style.display = 'block';
+
+        } catch (err) {
+            console.error('Submission error:', err);
+            alert(`Error: ${err.message}
+
+Please email advertise@rock.scot or call 0141 459 ROCK.`);
+            btn.textContent = 'Submit Booking Request';
+            btn.disabled = false;
+        }
+    });
+
+    // Pre-select package if URL has ?package=... param
+    const urlParams = new URLSearchParams(window.location.search);
+    const preselect = urlParams.get('package');
+    if (preselect && PACKAGES[preselect]) {
+        document.getElementById('package').value = preselect;
+        onPackageChange();
+        document.getElementById('quote-form').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    </script>
+</body>
+</html>

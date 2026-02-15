@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | ROCK.SCOT Customer Portal</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
+            color: #FFF;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-container {
+            background: #1a1a1a;
+            border: 3px solid #FF6600;
+            border-radius: 15px;
+            padding: 3rem;
+            max-width: 450px;
+            width: 100%;
+            margin: 2rem;
+        }
+        
+        .logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 3rem;
+            color: #FF6600;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #999;
+            margin-bottom: 2rem;
+        }
+        
+        h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            color: #FFF;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #FF6600;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+        
+        input {
+            width: 100%;
+            padding: 1rem;
+            background: #000;
+            border: 2px solid #333;
+            border-radius: 5px;
+            color: white;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #FF6600;
+        }
+        
+        .btn {
+            width: 100%;
+            background: #FF6600;
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            transition: 0.3s;
+            margin-top: 1rem;
+        }
+        
+        .btn:hover {
+            background: #FF8800;
+            transform: scale(1.02);
+        }
+        
+        .btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
+        .divider {
+            text-align: center;
+            margin: 2rem 0;
+            color: #666;
+            position: relative;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: #333;
+        }
+        
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+        
+        .link {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #999;
+        }
+        
+        .link a {
+            color: #FF6600;
+            text-decoration: none;
+            font-weight: 700;
+        }
+        
+        .link a:hover {
+            text-decoration: underline;
+        }
+        
+        .message {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .message.error {
+            background: #AA0000;
+            border: 2px solid #FF0000;
+        }
+        
+        .message.success {
+            background: #006600;
+            border: 2px solid #00AA00;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            background: transparent;
+            border: 2px solid #333;
+            color: #999;
+            cursor: pointer;
+            transition: 0.3s;
+            text-align: center;
+            font-weight: 700;
+            border-radius: 5px;
+        }
+        
+        .tab.active {
+            background: #FF6600;
+            border-color: #FF6600;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">ROCK.SCOT</div>
+        <div class="subtitle">Customer Portal</div>
+        
+        <div id="message" style="display:none;"></div>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('login')">Login</div>
+            <div class="tab" onclick="showTab('signup')">Sign Up</div>
+        </div>
+        
+        <!-- Login Form -->
+        <div id="login-form">
+            <h2>Welcome Back</h2>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button type="submit" class="btn">Login</button>
+            </form>
+            
+            <div class="divider">OR</div>
+            
+            <button class="btn" style="background:#333;" onclick="sendMagicLink()">
+                Send Magic Link
+            </button>
+            
+            <div class="link">
+                <a href="#" onclick="showTab('reset'); return false;">Forgot password?</a>
+            </div>
+        </div>
+        
+        <!-- Signup Form -->
+        <div id="signup-form" style="display:none;">
+            <h2>Create Account</h2>
+            <form onsubmit="handleSignup(event)">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" id="signup-firstname" required>
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" id="signup-lastname" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="signup-email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signup-password" required minlength="6">
+                </div>
+                <button type="submit" class="btn">Create Account</button>
+            </form>
+        </div>
+        
+        <!-- Reset Password Form -->
+        <div id="reset-form" style="display:none;">
+            <h2>Reset Password</h2>
+            <form onsubmit="handleReset(event)">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="reset-email" required>
+                </div>
+                <button type="submit" class="btn">Send Reset Link</button>
+            </form>
+            <div class="link">
+                <a href="#" onclick="showTab('login'); return false;">Back to login</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co'
+        const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY'
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        
+        function showTab(tab) {
+            // Hide all forms
+            document.getElementById('login-form').style.display = 'none'
+            document.getElementById('signup-form').style.display = 'none'
+            document.getElementById('reset-form').style.display = 'none'
+            
+            // Update tab styles
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+            
+            // Show selected form
+            if (tab === 'login') {
+                document.getElementById('login-form').style.display = 'block'
+                document.querySelectorAll('.tab')[0].classList.add('active')
+            } else if (tab === 'signup') {
+                document.getElementById('signup-form').style.display = 'block'
+                document.querySelectorAll('.tab')[1].classList.add('active')
+            } else if (tab === 'reset') {
+                document.getElementById('reset-form').style.display = 'block'
+            }
+        }
+        
+        async function handleLogin(e) {
+            e.preventDefault()
+            
+            const email = document.getElementById('login-email').value
+            const password = document.getElementById('login-password').value
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                })
+                
+                if (error) throw error
+                
+                showMessage('Login successful! Redirecting...', 'success')
+                setTimeout(() => window.location.href = '/customer-portal.html', 1000)
+                
+            } catch (error) {
+                showMessage(error.message, 'error')
+            }
+        }
+        
+        async function handleSignup(e) {
+            e.preventDefault()
+            
+            const email = document.getElementById('signup-email').value
+            const password = document.getElementById('signup-password').value
+            const firstName = document.getElementById('signup-firstname').value
+            const lastName = document.getElementById('signup-lastname').value
+            
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            first_name: firstName,
+                            last_name: lastName
+                        }
+                    }
+                })
+                
+                if (error) throw error
+                
+                showMessage('Account created! Check your email to verify.', 'success')
+                
+            } catch (error) {
+                showMessage(error.message, 'error')
+            }
+        }
+        
+        async function sendMagicLink() {
+            const email = document.getElementById('login-email').value
+            
+            if (!email) {
+                showMessage('Please enter your email first', 'error')
+                return
+            }
+            
+            try {
+                const { error } = await supabase.auth.signInWithOtp({
+                    email,
+                    options: {
+                        emailRedirectTo: window.location.origin + '/customer-portal.html'
+                    }
+                })
+                
+                if (error) throw error
+                
+                showMessage('Magic link sent! Check your email.', 'success')
+                
+            } catch (error) {
+                showMessage(error.message, 'error')
+            }
+        }
+        
+        async function handleReset(e) {
+            e.preventDefault()
+            
+            const email = document.getElementById('reset-email').value
+            
+            try {
+                const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: window.location.origin + '/reset-password.html'
+                })
+                
+                if (error) throw error
+                
+                showMessage('Password reset link sent! Check your email.', 'success')
+                
+            } catch (error) {
+                showMessage(error.message, 'error')
+            }
+        }
+        
+        function showMessage(text, type) {
+            const msg = document.getElementById('message')
+            msg.textContent = text
+            msg.className = 'message ' + type
+            msg.style.display = 'block'
+            
+            setTimeout(() => {
+                msg.style.display = 'none'
+            }, 5000)
+        }
+        
+        // Check if already logged in
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                window.location.href = '/customer-portal.html'
+            }
+        })
+    </script>
+</body>
+</html>

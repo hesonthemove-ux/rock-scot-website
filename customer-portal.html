@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Portal | ROCK.SCOT</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #000;
+            color: #FFF;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
+            border-bottom: 3px solid #FF6600;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.5rem;
+            color: #FF6600;
+            text-decoration: none;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logout-btn {
+            background: #FF6600;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: #FF8800;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 2rem;
+            transition: 0.3s;
+        }
+        
+        .stat-card:hover {
+            border-color: #FF6600;
+            transform: translateY(-5px);
+        }
+        
+        .stat-card h3 {
+            color: #999;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #FF6600;
+        }
+        
+        .section {
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .section h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            color: #FF6600;
+            margin-bottom: 1.5rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: #000;
+            color: #FF6600;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+        
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #333;
+        }
+        
+        tr:hover {
+            background: #222;
+        }
+        
+        .status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .status.paid { background: #00AA00; color: white; }
+        .status.sent { background: #FF6600; color: white; }
+        .status.pending { background: #666; color: white; }
+        .status.active { background: #00AA00; color: white; }
+        .status.completed { background: #666; color: white; }
+        
+        .btn {
+            background: #FF6600;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-block;
+            transition: 0.3s;
+        }
+        
+        .btn:hover {
+            background: #FF8800;
+            transform: scale(1.05);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid #FF6600;
+            color: #FF6600;
+        }
+        
+        .btn-secondary:hover {
+            background: #FF6600;
+            color: white;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #666;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            font-size: 1.5rem;
+            color: #FF6600;
+        }
+        
+        .error {
+            background: #AA0000;
+            color: white;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="/" class="logo">ROCK.SCOT</a>
+            <div class="user-info">
+                <span id="user-email"></span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="loading" class="loading">Loading your dashboard...</div>
+        <div id="error" class="error" style="display:none;"></div>
+        
+        <div id="dashboard" style="display:none;">
+            <!-- Stats Grid -->
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <h3>Total Bookings</h3>
+                    <div class="value" id="total-bookings">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Active Campaigns</h3>
+                    <div class="value" id="active-campaigns">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Spent</h3>
+                    <div class="value" id="total-spent">£0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Pending Invoices</h3>
+                    <div class="value" id="pending-invoices">0</div>
+                </div>
+            </div>
+
+            <!-- Campaigns -->
+            <div class="section">
+                <h2>My Campaigns</h2>
+                <div id="campaigns-list"></div>
+            </div>
+
+            <!-- Invoices -->
+            <div class="section">
+                <h2>Invoices</h2>
+                <div id="invoices-list"></div>
+            </div>
+
+            <!-- Bookings -->
+            <div class="section">
+                <h2>All Bookings</h2>
+                <div id="bookings-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co'
+        const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY'
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession()
+            
+            if (!session) {
+                window.location.href = '/login.html'
+                return null
+            }
+            
+            return session
+        }
+        
+        async function loadDashboard() {
+            const session = await checkAuth()
+            if (!session) return
+            
+            document.getElementById('user-email').textContent = session.user.email
+            
+            try {
+                // Get dashboard stats
+                const { data: stats, error: statsError } = await supabase
+                    .rpc('get_customer_dashboard_stats', { p_user_id: session.user.id })
+                
+                if (statsError) throw statsError
+                
+                // Update stats
+                document.getElementById('total-bookings').textContent = stats.total_bookings
+                document.getElementById('active-campaigns').textContent = stats.active_campaigns
+                document.getElementById('total-spent').textContent = '£' + (stats.total_spent_pence / 100).toFixed(2)
+                document.getElementById('pending-invoices').textContent = stats.pending_invoices
+                
+                // Load campaigns
+                await loadCampaigns(session.user.id)
+                
+                // Load invoices
+                await loadInvoices(session.user.id)
+                
+                // Load bookings
+                await loadBookings(session.user.id)
+                
+                document.getElementById('loading').style.display = 'none'
+                document.getElementById('dashboard').style.display = 'block'
+                
+            } catch (error) {
+                console.error('Error:', error)
+                showError('Failed to load dashboard: ' + error.message)
+            }
+        }
+        
+        async function loadCampaigns(userId) {
+            const { data, error } = await supabase
+                .from('campaigns')
+                .select('*')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false })
+            
+            if (error) throw error
+            
+            const container = document.getElementById('campaigns-list')
+            
+            if (data.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>No campaigns yet</h3><p>Book an advertising package to get started!</p></div>'
+                return
+            }
+            
+            container.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Campaign</th>
+                            <th>Package</th>
+                            <th>Dates</th>
+                            <th>Plays</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(c => `
+                            <tr>
+                                <td><strong>${c.name}</strong></td>
+                                <td>${c.package_type}</td>
+                                <td>${new Date(c.start_date).toLocaleDateString()} - ${new Date(c.end_date).toLocaleDateString()}</td>
+                                <td>${c.plays_completed} / ${c.total_plays}</td>
+                                <td><span class="status ${c.status}">${c.status}</span></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `
+        }
+        
+        async function loadInvoices(userId) {
+            const { data, error } = await supabase
+                .from('invoices')
+                .select('*')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false })
+            
+            if (error) throw error
+            
+            const container = document.getElementById('invoices-list')
+            
+            if (data.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>No invoices yet</h3></div>'
+                return
+            }
+            
+            container.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Invoice #</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(inv => `
+                            <tr>
+                                <td><strong>${inv.invoice_number}</strong></td>
+                                <td>${new Date(inv.invoice_date).toLocaleDateString()}</td>
+                                <td>£${(inv.total_pence / 100).toFixed(2)}</td>
+                                <td><span class="status ${inv.status}">${inv.status}</span></td>
+                                <td>
+                                    ${inv.pdf_url ? `<a href="${inv.pdf_url}" class="btn btn-secondary" target="_blank">Download</a>` : ''}
+                                    ${inv.status === 'sent' ? `<button class="btn" onclick="payInvoice('${inv.id}')">Pay Now</button>` : ''}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `
+        }
+        
+        async function loadBookings(userId) {
+            const { data, error } = await supabase
+                .from('advertising_leads')
+                .select('*')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false })
+            
+            if (error) throw error
+            
+            const container = document.getElementById('bookings-list')
+            
+            if (data.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>No bookings yet</h3><p><a href="/advertise.html" class="btn">Book Now</a></p></div>'
+                return
+            }
+            
+            container.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Package</th>
+                            <th>Duration</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(b => `
+                            <tr>
+                                <td>${new Date(b.created_at).toLocaleDateString()}</td>
+                                <td><strong>${b.product_name}</strong></td>
+                                <td>${b.campaign_length_days} days</td>
+                                <td>£${(b.final_price_pence / 100).toFixed(2)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `
+        }
+        
+        async function payInvoice(invoiceId) {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY
+                    },
+                    body: JSON.stringify({ invoice_id: invoiceId })
+                })
+                
+                const { checkout_url } = await response.json()
+                window.location.href = checkout_url
+                
+            } catch (error) {
+                alert('Failed to create payment session: ' + error.message)
+            }
+        }
+        
+        async function logout() {
+            await supabase.auth.signOut()
+            window.location.href = '/login.html'
+        }
+        
+        function showError(message) {
+            const errorEl = document.getElementById('error')
+            errorEl.textContent = message
+            errorEl.style.display = 'block'
+            document.getElementById('loading').style.display = 'none'
+        }
+        
+        // Load dashboard on page load
+        loadDashboard()
+    </script>
+</body>
+</html>
