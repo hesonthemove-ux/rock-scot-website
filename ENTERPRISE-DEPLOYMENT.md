@@ -138,10 +138,10 @@ This is the same system BBC, Global Radio, and Bauer Media use internally (they 
 
 ```sql
 -- In Supabase SQL Editor
-INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+INSERT INTO storage.buckets (id, name, public)
 VALUES 
-  ('documents', 'documents', true, 10485760, ARRAY['application/pdf', 'text/html', 'application/zip', 'application/x-zip-compressed']),
-  ('campaign-assets', 'campaign-assets', false, 52428800, ARRAY['audio/mpeg', 'audio/wav', 'audio/mp3', 'audio/ogg', 'application/pdf', 'image/jpeg', 'image/png']);
+  ('documents', 'documents', true),
+  ('campaign-assets', 'campaign-assets', false);
 
 -- RLS policies for uploads
 CREATE POLICY "Authenticated users can upload documents"
