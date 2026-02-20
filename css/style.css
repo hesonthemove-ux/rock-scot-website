@@ -315,6 +315,82 @@ footer {
     font-family: 'Barlow Condensed', sans-serif; font-weight: 600;
     letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; font-size: 0.95rem;
 }
+.cookie-decline:hover { border-color: var(--orange); color: var(--white); }
+
+#cookie-settings-modal {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 2100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+#cookie-settings-modal.visible { display: flex; }
+.cookie-settings-panel {
+    width: 100%;
+    max-width: 520px;
+    background: #111;
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--orange);
+    padding: 1.5rem;
+}
+.cookie-settings-panel h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.35rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 0.75rem;
+}
+.cookie-settings-panel p {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+.cookie-settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 0.9rem 1rem;
+    margin-bottom: 1rem;
+}
+.cookie-settings-row label {
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.04em;
+    color: var(--white);
+}
+.cookie-settings-row small {
+    display: block;
+    color: var(--text-dim);
+    margin-top: 0.2rem;
+    font-size: 0.82rem;
+}
+.cookie-settings-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+.cookie-settings-actions button {
+    padding: 0.55rem 1rem;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+.cookie-settings-save {
+    background: var(--orange);
+    color: var(--white);
+    border: none;
+}
+.cookie-settings-cancel {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid rgba(255,255,255,0.2);
+}
 
 /* ── BACK TO TOP ─────────────────────────────────────────────── */
 #back-to-top {

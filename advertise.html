@@ -367,11 +367,21 @@
                             <label for="package">Advertising Package *</label>
                             <select id="package" name="package" required>
                                 <option value="">— Select a package —</option>
-                                <option value="regional-29900">Regional — £299 + VAT / 28 days</option>
-                                <option value="multi-44900">Multi-Regional — £449 + VAT / 28 days</option>
-                                <option value="topofhour-250000">Top of Hour — £2,500 + VAT / 28 days</option>
-                                <option value="production-19500">Production Only — from £195 + VAT</option>
+                                <option value="regional">Regional — £299 + VAT / 28 days</option>
+                                <option value="multi_regional">Multi-Regional — £449 + VAT / 28 days</option>
+                                <option value="top_of_hour">Top of Hour — £2,500 + VAT / 28 days</option>
+                                <option value="production">Production Only — from £195 + VAT</option>
                             </select>
+                        </div>
+                        <div class="form-group" id="regional-mux-group" style="display:none">
+                            <label for="regional-mux">Regional Area *</label>
+                            <select id="regional-mux" name="regional-mux">
+                                <option value="">— Select coverage area —</option>
+                                <option value="inverclyde">Inverclyde</option>
+                                <option value="north_ayrshire">North Ayrshire</option>
+                                <option value="south_lanarkshire">South Lanarkshire</option>
+                            </select>
+                            <div class="form-hint">Required for Regional package bookings.</div>
                         </div>
                         <div class="form-group">
                             <label for="start-date">Preferred Start Date</label>
@@ -464,6 +474,7 @@
         <div class="cookie-btns">
             <button class="cookie-accept" id="cookie-accept">Accept All</button>
             <button class="cookie-decline" id="cookie-decline">Essential Only</button>
+            <button class="cookie-decline" id="cookie-customize">Customize</button>
         </div>
     </div>
 
@@ -471,21 +482,45 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/main.js"></script>
     <script>
-    // ── PACKAGE PRICES ────────────────────────────────────────
+    // ── PACKAGE PRICES + SQL MUX MAPPING ──────────────────────
     const PRICES = {
-        'regional-29900':    { name: 'Regional',      net: 29900 },
-        'multi-44900':       { name: 'Multi-Regional', net: 44900 },
-        'topofhour-250000':  { name: 'Top of Hour',   net: 250000 },
-        'production-19500':  { name: 'Production',    net: 19500 }
+        regional:       { name: 'Regional',       net: 29900,  mux_type: 'single', mux_weight: 1 },
+        multi_regional: { name: 'Multi-Regional', net: 44900,  mux_type: 'multi',  mux_weight: 3 },
+        top_of_hour:    { name: 'Top of Hour',    net: 250000, mux_type: 'toh',    mux_weight: 3 },
+        production:     { name: 'Production',     net: 19500,  mux_type: 'single', mux_weight: 1 }
     };
 
     let appliedDiscount = null;
+    const packageInput = document.getElementById('package');
+    const startDateInput = document.getElementById('start-date');
+    const regionalMuxGroup = document.getElementById('regional-mux-group');
+    const regionalMuxInput = document.getElementById('regional-mux');
 
     // ── LIVE QUOTE ────────────────────────────────────────────
-    document.getElementById('package').addEventListener('change', updateQuote);
+    packageInput.addEventListener('change', () => {
+        setRegionalMuxVisibility();
+        updateQuote();
+    });
+    startDateInput.addEventListener('change', updateQuote);
+
+    function isRushStartDate(startDateValue) {
+        if (!startDateValue) return false;
+        const start = new Date(`${startDateValue}T00:00:00`);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const diffDays = Math.ceil((start - today) / (1000 * 60 * 60 * 24));
+        return diffDays < 27;
+    }
+
+    function setRegionalMuxVisibility() {
+        const isRegional = packageInput.value === 'regional';
+        regionalMuxGroup.style.display = isRegional ? 'block' : 'none';
+        regionalMuxInput.required = isRegional;
+        if (!isRegional) regionalMuxInput.value = '';
+    }
 
     function updateQuote() {
-        const val = document.getElementById('package').value;
+        const val = packageInput.value;
         if (!val || !PRICES[val]) {
             document.getElementById('quote-display').classList.remove('visible');
             return;
@@ -493,6 +528,7 @@
         const pkg = PRICES[val];
         let net = pkg.net;
         let discountAmount = 0;
+        const rushFee = isRushStartDate(startDateInput.value) ? 5000 : 0;
 
         if (appliedDiscount) {
             if (appliedDiscount.amount_pence) {
@@ -502,12 +538,12 @@
             }
         }
 
-        const discounted = Math.max(0, net - discountAmount);
+        const discounted = Math.max(0, net - discountAmount) + rushFee;
         const vat = Math.round(discounted * 0.2);
         const total = discounted + vat;
 
         document.getElementById('q-package-name').textContent = pkg.name;
-        document.getElementById('q-net').textContent  = '£' + (net / 100).toFixed(2);
+        document.getElementById('q-net').textContent  = '£' + (net / 100).toFixed(2) + (rushFee ? ' (+£50 rush)' : '');
         document.getElementById('q-vat').textContent  = '£' + (vat / 100).toFixed(2);
         document.getElementById('q-total').textContent = 'Total: £' + (total / 100).toFixed(2) + ' inc. VAT';
         document.getElementById('quote-display').classList.add('visible');
@@ -553,45 +589,77 @@
     document.getElementById('advertising-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         const btn = document.getElementById('submit-btn');
+        const errBox = document.getElementById('form-error');
+        const okBox = document.getElementById('form-success');
         btn.disabled = true;
         btn.textContent = 'Submitting…';
 
-        const pkgVal   = document.getElementById('package').value;
-        const pkgData  = PRICES[pkgVal] || {};
-
-        const payload = {
-            first_name:           document.getElementById('first-name').value.trim(),
-            last_name:            document.getElementById('last-name').value.trim(),
-            company:              document.getElementById('company').value.trim() || null,
-            email:                document.getElementById('email').value.trim(),
-            phone:                document.getElementById('phone').value.trim() || null,
-            product_id:           pkgVal,
-            product_name:         pkgData.name || pkgVal,
-            campaign_length_days: 28,
-            product_net_pence:    pkgData.net || 0,
-            discount_code:        document.getElementById('discount-code').value.toUpperCase().trim() || null,
-            message:              document.getElementById('message').value.trim() || null,
-            user_agent:           navigator.userAgent,
-            meta: {
-                submitted_at: new Date().toISOString(),
-                page_url: window.location.href,
-                start_date: document.getElementById('start-date').value || null
-            }
-        };
-
         try {
-            if (!sb) throw new Error('Database not connected');
-            const { error } = await sb.from('advertising_leads').insert([payload]);
-            if (error) throw error;
-            document.getElementById('form-success').style.display = 'block';
-            document.getElementById('form-error').style.display   = 'none';
+            const pkgVal  = packageInput.value;
+            const pkgData = PRICES[pkgVal];
+            if (!pkgData) throw new Error('Please select an advertising package.');
+
+            const startDate = startDateInput.value || null;
+            const isRush = isRushStartDate(startDate);
+            const selectedMux = pkgVal === 'regional' ? (regionalMuxInput.value || null) : null;
+            if (pkgVal === 'regional' && !selectedMux) {
+                throw new Error('Please choose a regional coverage area.');
+            }
+
+            const payload = {
+                first_name:           document.getElementById('first-name').value.trim(),
+                last_name:            document.getElementById('last-name').value.trim(),
+                company:              document.getElementById('company').value.trim() || null,
+                email:                document.getElementById('email').value.trim(),
+                phone:                document.getElementById('phone').value.trim() || null,
+                product_id:           pkgVal,
+                product_name:         pkgData.name,
+                campaign_length_days: 28,
+                product_net_pence:    pkgData.net,
+                mux_type:             pkgData.mux_type,
+                mux_weight:           pkgData.mux_weight,
+                selected_mux:         selectedMux,
+                start_date:           startDate,
+                is_rush:              isRush,
+                discount_code:        document.getElementById('discount-code').value.toUpperCase().trim() || null,
+                message:              document.getElementById('message').value.trim() || null,
+                submitted_via:        'web_form',
+                meta: {
+                    submitted_at: new Date().toISOString(),
+                    page_url: window.location.href
+                }
+            };
+
+            const supabaseUrl = window.SUPABASE_URL || '';
+            const anonKey = window.SUPABASE_ANON_KEY || '';
+            if (!supabaseUrl || !anonKey) throw new Error('Booking service is not configured.');
+
+            const response = await fetch(`${supabaseUrl}/functions/v1/book_campaign`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': anonKey,
+                    'Authorization': `Bearer ${anonKey}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(result.error || 'Unable to submit your booking right now.');
+
+            okBox.style.display = 'block';
+            okBox.textContent = '✅ Thank you! Your enquiry has been submitted. We will be in touch within 24 hours.';
+            errBox.style.display = 'none';
             e.target.reset();
             appliedDiscount = null;
             document.getElementById('quote-display').classList.remove('visible');
+            document.getElementById('discount-msg').textContent = '';
+            setRegionalMuxVisibility();
         } catch (err) {
             console.error('Submission error:', err);
-            document.getElementById('form-error').style.display   = 'block';
-            document.getElementById('form-success').style.display = 'none';
+            errBox.textContent = '❌ ' + (err.message || 'Something went wrong. Please try again.');
+            errBox.style.display = 'block';
+            okBox.style.display = 'none';
         } finally {
             btn.disabled = false;
             btn.textContent = 'Submit Enquiry →';
@@ -602,6 +670,7 @@
     document.getElementById('discount-code').addEventListener('keydown', e => {
         if (e.key === 'Enter') { e.preventDefault(); validateDiscount(); }
     });
+    setRegionalMuxVisibility();
     </script>
 </body>
 </html>

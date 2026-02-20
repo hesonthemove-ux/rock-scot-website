@@ -99,20 +99,103 @@ if ('IntersectionObserver' in window) {
 
 // ── COOKIE CONSENT ────────────────────────────────────────────
 const cookieBar = document.getElementById('cookie-bar');
-const consent   = localStorage.getItem('rs-cookie-consent');
-if (cookieBar) {
-    if (consent) cookieBar.classList.add('hidden');
-    document.getElementById('cookie-accept')?.addEventListener('click', () => {
-        localStorage.setItem('rs-cookie-consent', 'all');
-        window.analyticsAllowed = true;
-        cookieBar.classList.add('hidden');
-    });
-    document.getElementById('cookie-decline')?.addEventListener('click', () => {
-        localStorage.setItem('rs-cookie-consent', 'essential');
-        cookieBar.classList.add('hidden');
-    });
+const CONSENT_KEY = 'rs-cookie-consent';
+const ANALYTICS_PREF_KEY = 'rs-cookie-analytics';
+
+function isDNTEnabled() {
+    return navigator.doNotTrack === '1' ||
+        window.doNotTrack === '1' ||
+        navigator.msDoNotTrack === '1';
 }
-if (consent === 'all') window.analyticsAllowed = true;
+
+function getConsentState() {
+    const mode = localStorage.getItem(CONSENT_KEY);
+    if (!mode) return { saved: false, mode: null, analytics: false };
+    if (mode === 'all') return { saved: true, mode, analytics: true };
+    if (mode === 'custom') {
+        return {
+            saved: true,
+            mode,
+            analytics: localStorage.getItem(ANALYTICS_PREF_KEY) === 'true'
+        };
+    }
+    return { saved: true, mode: 'essential', analytics: false };
+}
+
+function hideCookieBar() {
+    if (cookieBar) cookieBar.classList.add('hidden');
+}
+
+function closeCookieSettings() {
+    document.getElementById('cookie-settings-modal')?.classList.remove('visible');
+}
+
+function saveConsent(mode, analyticsEnabled) {
+    localStorage.setItem(CONSENT_KEY, mode);
+    localStorage.setItem(ANALYTICS_PREF_KEY, analyticsEnabled ? 'true' : 'false');
+    window.analyticsAllowed = !!analyticsEnabled;
+    hideCookieBar();
+    closeCookieSettings();
+    if (window.analyticsAllowed) trackPageView();
+}
+
+function openCookieSettings() {
+    if (!cookieBar) return;
+    let modal = document.getElementById('cookie-settings-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'cookie-settings-modal';
+        modal.innerHTML = `
+            <div class="cookie-settings-panel" role="dialog" aria-modal="true" aria-label="Cookie preferences">
+                <h3>Cookie Preferences</h3>
+                <p>Choose which optional cookies we can use.</p>
+                <div class="cookie-settings-row">
+                    <div>
+                        <label for="cookie-analytics-toggle">Analytics Cookies</label>
+                        <small>Helps us understand traffic and improve the site.</small>
+                    </div>
+                    <input id="cookie-analytics-toggle" type="checkbox">
+                </div>
+                <div class="cookie-settings-actions">
+                    <button type="button" class="cookie-settings-cancel" id="cookie-settings-cancel">Cancel</button>
+                    <button type="button" class="cookie-settings-save" id="cookie-settings-save">Save</button>
+                </div>
+            </div>`;
+        document.body.appendChild(modal);
+
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) closeCookieSettings();
+        });
+        modal.querySelector('#cookie-settings-cancel')?.addEventListener('click', closeCookieSettings);
+        modal.querySelector('#cookie-settings-save')?.addEventListener('click', () => {
+            const enabled = !!modal.querySelector('#cookie-analytics-toggle')?.checked;
+            saveConsent('custom', enabled);
+        });
+    }
+
+    const current = getConsentState();
+    const toggle = modal.querySelector('#cookie-analytics-toggle');
+    if (toggle) toggle.checked = !!current.analytics;
+    modal.classList.add('visible');
+}
+
+window.showCookieSettings = openCookieSettings;
+window.analyticsAllowed = false;
+
+if (cookieBar) {
+    const existing = getConsentState();
+    if (isDNTEnabled()) {
+        // DNT wins over any prior preference while browser signal is active.
+        saveConsent('essential', false);
+    } else if (existing.saved) {
+        window.analyticsAllowed = !!existing.analytics;
+        hideCookieBar();
+    }
+
+    document.getElementById('cookie-accept')?.addEventListener('click', () => saveConsent('all', true));
+    document.getElementById('cookie-decline')?.addEventListener('click', () => saveConsent('essential', false));
+    document.getElementById('cookie-customize')?.addEventListener('click', openCookieSettings);
+}
 
 // ── ANALYTICS ────────────────────────────────────────────────
 async function trackPageView() {
