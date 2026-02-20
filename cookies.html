@@ -4,284 +4,138 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cookie Policy | ROCK.SCOT — Scotland's Rock Station</title>
-    <meta name="description" content="Cookie policy for ROCK.SCOT. PECR-compliant information on how Scotland's rock radio station uses cookies and how to manage your preferences.">
+    <meta name="description" content="ROCK.SCOT cookie policy. What cookies we use and how to manage them.">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://rock.scot/cookies.html">
+    <link rel="icon" type="image/png" href="assets/images/logo.png">
     <meta name="theme-color" content="#FF6600">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .legal-content {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 10rem 2rem 4rem;
-            line-height: 1.8;
-        }
-        .legal-content h1 { font-size: 2.5rem; color: #FF6600; margin-bottom: 1rem; }
-        .legal-content h2 { font-size: 1.8rem; color: #FF6600; margin-top: 3rem; margin-bottom: 1rem; }
-        .legal-content h3 { font-size: 1.3rem; color: #FFD700; margin-top: 2rem; margin-bottom: 0.5rem; }
-        .legal-content p { margin-bottom: 1rem; color: rgba(255,255,255,0.8); }
-        .legal-content table { width: 100%; border-collapse: collapse; margin: 2rem 0; }
-        .legal-content th, .legal-content td { padding: 1rem; border: 1px solid rgba(255,255,255,0.2); text-align: left; }
-        .legal-content th { background: rgba(255,102,0,0.2); font-weight: 700; }
-        .legal-content ul, .legal-content ol { margin-bottom: 1rem; padding-left: 2rem; color: rgba(255,255,255,0.8); }
-        .legal-content li { margin-bottom: 0.5rem; }
-        .legal-content strong { color: #FFD700; }
-        .update-date { color: rgba(255,255,255,0.5); font-style: italic; margin-bottom: 2rem; }
-        .cookie-settings-btn {
-            background: #FF6600;
-            color: white;
-            padding: 1rem 2rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
-            margin: 1rem 0;
-        }
-        .cookie-settings-btn:hover { background: #FF8833; }
+        .cookie-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9rem; }
+        .cookie-table th { background: rgba(255,102,0,0.15); color: var(--orange); font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.85rem; padding: 0.75rem 1rem; text-align: left; border-bottom: 2px solid var(--orange); }
+        .cookie-table td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.07); color: rgba(255,255,255,0.7); vertical-align: top; }
+        .cookie-table tr:last-child td { border-bottom: none; }
+        .badge { display: inline-block; padding: 0.2rem 0.5rem; font-family: 'Barlow Condensed', sans-serif; font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; border-radius: 2px; }
+        .badge-essential { background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid #4ade80; }
+        .badge-analytics  { background: rgba(255,102,0,0.15); color: var(--orange); border: 1px solid var(--orange); }
     </style>
 </head>
-<body>
-    
-    <header>
+<body class="legal-body">
+
+    <header id="site-header">
         <div class="header-container">
             <a href="index.html"><img src="assets/images/logo.png" alt="ROCK.SCOT" class="logo"></a>
             <nav>
                 <a href="index.html">Home</a>
+                <a href="advertise.html">Advertise</a>
                 <a href="privacy.html">Privacy</a>
                 <a href="terms.html">Terms</a>
-                <a href="cookies.html">Cookies</a>
             </nav>
         </div>
     </header>
-    
+
+    <div id="wire-ticker" aria-live="polite">
+        <div class="wire-label">⚡ THE WIRE</div>
+        <div class="wire-scroll"><div id="ticker-content">ROCK.SCOT — SCOTLAND'S ROCK STATION — DAB+ DIGITAL RADIO — 24/7</div></div>
+    </div>
+
     <div class="legal-content">
         <h1>Cookie Policy</h1>
         <p class="update-date">Last Updated: 8 February 2026</p>
-        
-        <p>
-            This Cookie Policy explains how Caledonia TX Ltd trading as <strong>ROCK.SCOT</strong> 
-            uses cookies and similar technologies on our website, in compliance with the 
-            UK Privacy and Electronic Communications Regulations (PECR) and UK GDPR.
-        </p>
-        
-        <button class="cookie-settings-btn" onclick="window.showCookieSettings()">
-            ⚙️ Manage Cookie Preferences
-        </button>
-        
+
         <h2>1. What Are Cookies?</h2>
-        <p>
-            Cookies are small text files stored on your device when you visit a website. 
-            They help websites remember your preferences and analyze how you use the site.
-        </p>
-        
-        <h2>2. How We Use Cookies</h2>
-        <p>We use cookies for:</p>
-        <ul>
-            <li><strong>Essential Functions:</strong> Making the website work properly</li>
-            <li><strong>Analytics:</strong> Understanding how visitors use our site</li>
-            <li><strong>Player Persistence:</strong> Keeping the audio player active while you browse</li>
-            <li><strong>Preferences:</strong> Remembering your cookie choices</li>
-        </ul>
-        
-        <h2>3. Types of Cookies We Use</h2>
-        
-        <h3>3.1 Strictly Necessary Cookies (Always Allowed)</h3>
-        <p>These cookies are essential for the website to function and cannot be disabled:</p>
-        
-        <table>
+        <p>Cookies are small text files placed on your device when you visit a website. They help websites remember your preferences and understand how you use the site. We also use similar technologies like localStorage and sessionStorage.</p>
+
+        <h2>2. What We Use</h2>
+        <p>We keep our cookie use minimal and transparent. We do not use advertising cookies, third-party tracking networks, or social media pixels.</p>
+
+        <table class="cookie-table">
             <thead>
-                <tr>
-                    <th>Cookie Name</th>
-                    <th>Purpose</th>
-                    <th>Duration</th>
-                </tr>
+                <tr><th>Name</th><th>Type</th><th>Purpose</th><th>Duration</th></tr>
             </thead>
             <tbody>
                 <tr>
-                    <td><strong>cookie_consent</strong></td>
-                    <td>Stores your cookie preferences</td>
-                    <td>1 year</td>
+                    <td><strong>rs-cookie-consent</strong></td>
+                    <td><span class="badge badge-essential">Essential</span></td>
+                    <td>Stores your cookie consent choice so we don't ask again on every visit</td>
+                    <td>1 year (localStorage)</td>
                 </tr>
                 <tr>
-                    <td><strong>rock_session_id</strong></td>
-                    <td>Manages website session</td>
-                    <td>Session (deleted when browser closes)</td>
+                    <td><strong>rs_visitor_id</strong></td>
+                    <td><span class="badge badge-analytics">Analytics</span></td>
+                    <td>Anonymous visitor identifier for traffic counting. Does not identify you personally.</td>
+                    <td>1 year (localStorage) — Consent required</td>
                 </tr>
                 <tr>
-                    <td><strong>player_state</strong></td>
-                    <td>Keeps player running while browsing</td>
-                    <td>Session</td>
+                    <td><strong>rs_session_id</strong></td>
+                    <td><span class="badge badge-analytics">Analytics</span></td>
+                    <td>Anonymous session identifier to count browsing sessions and pages per visit</td>
+                    <td>Session (sessionStorage) — Consent required</td>
+                </tr>
+                <tr>
+                    <td><strong>rockscot-theme</strong></td>
+                    <td><span class="badge badge-essential">Essential</span></td>
+                    <td>Remembers your display preference if applicable</td>
+                    <td>1 year (localStorage)</td>
                 </tr>
             </tbody>
         </table>
-        
-        <h3>3.2 Analytics Cookies (Optional - Requires Consent)</h3>
-        <p>These help us understand how you use our website:</p>
-        
-        <table>
-            <thead>
-                <tr>
-                    <th>Cookie Name</th>
-                    <th>Purpose</th>
-                    <th>Duration</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>rock_visitor_id</strong></td>
-                    <td>Identifies unique visitors (anonymized)</td>
-                    <td>2 years</td>
-                </tr>
-                <tr>
-                    <td><strong>_ga</strong></td>
-                    <td>Google Analytics - visitor tracking</td>
-                    <td>2 years</td>
-                </tr>
-                <tr>
-                    <td><strong>_ga_*</strong></td>
-                    <td>Google Analytics - session data</td>
-                    <td>2 years</td>
-                </tr>
-            </tbody>
-        </table>
-        
-        <p><strong>What we track:</strong></p>
+
+        <h2>3. Analytics Cookies</h2>
+        <p>Analytics cookies are only placed if you click <strong>"Accept All"</strong> on our cookie banner. We use our own first-party analytics (via Supabase) rather than Google Analytics or third-party tools. This means:</p>
         <ul>
-            <li>Pages visited and time spent</li>
-            <li>How you arrived at our site (referrer)</li>
-            <li>Device type (mobile/desktop/tablet)</li>
-            <li>General location (country/region only)</li>
+            <li>Your data stays on our servers — not shared with advertising platforms</li>
+            <li>No cross-site tracking</li>
+            <li>No profiling or behavioural advertising</li>
+            <li>Data is aggregated and anonymised after 90 days</li>
         </ul>
-        
-        <p><strong>What we DON'T track:</strong></p>
-        <ul>
-            <li>Your identity or personal information</li>
-            <li>Specific songs you listen to</li>
-            <li>Detailed browsing history outside our site</li>
-        </ul>
-        
-        <h3>3.3 Local Storage (Not Cookies, But Similar)</h3>
-        <p>We also use browser local storage for:</p>
-        <ul>
-            <li><strong>rock_visitor_id:</strong> Persistent visitor ID (if analytics enabled)</li>
-            <li><strong>rock_session_start:</strong> Session timing</li>
-            <li><strong>rock_page_count:</strong> Pages viewed this session</li>
-        </ul>
-        
+
         <h2>4. Third-Party Cookies</h2>
-        
-        <h3>4.1 Supabase (Database Services)</h3>
-        <p>If you use our advertising booking system:</p>
+        <p>Our live player is embedded from Broadcast.Radio (<a href="https://player.broadcast.radio/caledonia-tx-ltd" target="_blank" rel="noopener">player.broadcast.radio</a>). This may set their own cookies. We do not control these — please refer to Broadcast.Radio's own privacy policy for details.</p>
+        <p>Google Fonts is used to load our typefaces. Google may log the request but does not set cookies for font loading.</p>
+
+        <h2>5. Managing Cookies</h2>
+        <p>You can manage cookies in several ways:</p>
         <ul>
-            <li><strong>Purpose:</strong> User authentication and data storage</li>
-            <li><strong>Provider:</strong> Supabase Inc. (EU/US servers)</li>
-            <li><strong>Duration:</strong> Session + 7 days</li>
+            <li><strong>Our banner:</strong> Choose "Essential Only" to decline analytics cookies</li>
+            <li><strong>Withdraw consent:</strong> Clear localStorage in your browser (DevTools → Application → Local Storage → delete <code>rs-cookie-consent</code>)</li>
+            <li><strong>Browser settings:</strong> Most browsers allow you to block or delete cookies entirely</li>
         </ul>
-        
-        <h3>4.2 Broadcast.Radio (Streaming Player)</h3>
-        <p>When you use our live player:</p>
-        <ul>
-            <li><strong>Purpose:</strong> Stream delivery and playback</li>
-            <li><strong>Provider:</strong> Broadcast.Radio Ltd (UK)</li>
-            <li><strong>Duration:</strong> Session only</li>
-        </ul>
-        
-        <h2>5. Legal Basis</h2>
-        
-        <h3>5.1 Strictly Necessary Cookies</h3>
-        <p>
-            <strong>Legal Basis:</strong> Legitimate Interest (PECR Regulation 6(4))
-            <br>We don't need consent for cookies essential to provide the service you requested.
-        </p>
-        
-        <h3>5.2 Analytics Cookies</h3>
-        <p>
-            <strong>Legal Basis:</strong> Consent (PECR Regulation 6(1))
-            <br>We ask for your explicit consent before setting non-essential cookies.
-        </p>
-        
-        <h2>6. Your Cookie Choices</h2>
-        
-        <h3>6.1 Cookie Consent Banner</h3>
-        <p>
-            When you first visit, you'll see a cookie banner asking for consent. You can:
-        </p>
-        <ul>
-            <li><strong>Accept All:</strong> Allow all cookies including analytics</li>
-            <li><strong>Reject Optional:</strong> Only essential cookies</li>
-            <li><strong>Customize:</strong> Choose which cookie categories to allow</li>
-        </ul>
-        
-        <h3>6.2 Change Your Mind</h3>
-        <p>You can change preferences anytime:</p>
-        <button class="cookie-settings-btn" onclick="window.showCookieSettings()">
-            ⚙️ Manage Cookie Preferences
-        </button>
-        
-        <h3>6.3 Browser Settings</h3>
-        <p>You can also control cookies in your browser:</p>
-        <ul>
-            <li><strong>Chrome:</strong> Settings → Privacy → Cookies</li>
-            <li><strong>Firefox:</strong> Options → Privacy → Cookies</li>
-            <li><strong>Safari:</strong> Preferences → Privacy</li>
-            <li><strong>Edge:</strong> Settings → Privacy → Cookies</li>
-        </ul>
-        
-        <p><strong>Warning:</strong> Blocking all cookies may prevent the website from working properly.</p>
-        
-        <h2>7. Cookie Retention</h2>
-        <p>We follow PECR maximum retention periods:</p>
-        <ul>
-            <li><strong>Essential cookies:</strong> As long as needed for function</li>
-            <li><strong>Analytics cookies:</strong> Maximum 26 months</li>
-            <li><strong>Session cookies:</strong> Deleted when you close your browser</li>
-        </ul>
-        
-        <h2>8. Do Not Track (DNT)</h2>
-        <p>
-            We respect "Do Not Track" browser signals. If DNT is enabled, we will:
-        </p>
-        <ul>
-            <li>Not set non-essential cookies</li>
-            <li>Not track your activity</li>
-            <li>Still provide full functionality</li>
-        </ul>
-        
-        <h2>9. Children's Privacy</h2>
-        <p>
-            We do not knowingly collect data from children under 16. 
-            If you are under 16, please do not use our services without parental consent.
-        </p>
-        
-        <h2>10. Updates to This Policy</h2>
-        <p>
-            We may update this Cookie Policy to reflect changes in technology or regulations. 
-            Check back regularly for updates.
-        </p>
-        
-        <h2>11. Contact Us</h2>
-        <p>
-            Questions about cookies?<br>
-            Email: <a href="mailto:studio@rock.scot" style="color:#FF6600;">studio@rock.scot</a>
-        </p>
-        
-        <h2>12. Useful Links</h2>
-        <ul>
-            <li><a href="https://ico.org.uk/for-the-public/online/cookies/" target="_blank" style="color: #FF6600;">ICO: Cookies and Similar Technologies</a></li>
-            <li><a href="https://www.allaboutcookies.org/" target="_blank" style="color: #FF6600;">All About Cookies</a></li>
-            <li><a href="https://youronlinechoices.eu/" target="_blank" style="color: #FF6600;">Your Online Choices (EU)</a></li>
-        </ul>
-        
-        <p style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1);">
-            <strong>Document Version:</strong> 1.0<br>
-            <strong>Effective Date:</strong> 8 February 2026<br>
-            <strong>Next Review:</strong> 8 February 2027
-        </p>
+        <p>Note: Essential cookies cannot be disabled as the site requires them to function.</p>
+
+        <h2>6. Contact</h2>
+        <p>Questions about our use of cookies: <a href="mailto:info@rock.scot">info@rock.scot</a></p>
+        <p>See also our <a href="privacy.html">Privacy Policy</a> and <a href="terms.html">Terms of Service</a>.</p>
     </div>
-    
+
     <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <h4>Legal</h4>
-                <p><a href="privacy.html">Privacy Policy
+        <div class="footer-grid">
+            <div>
+                <a href="index.html"><img src="assets/images/logo.png" alt="ROCK.SCOT" class="footer-logo"></a>
+                <div class="footer-tagline">Scotland's Rock Station</div>
+                <div class="footer-body">Caledonia TX Ltd · SC646223<br>VAT 491589639 · Ofcom Licensed</div>
+            </div>
+            <div class="footer-col"><h4>Listen</h4><a href="index.html">Homepage</a><a href="index.html#listen">Stream Online</a></div>
+            <div class="footer-col"><h4>Advertise</h4><a href="advertise.html">Ad Packages</a><a href="mailto:advertise@rock.scot" style="color:var(--orange)">advertise@rock.scot</a></div>
+            <div class="footer-col"><h4>Legal</h4><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="cookies.html" style="color:var(--orange)">Cookie Policy</a></div>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-legal">© 2026 ROCK.SCOT · Caledonia TX Ltd · SC646223 · VAT 491589639 · Ofcom Licensed Broadcaster</div>
+        </div>
+    </footer>
+
+    <div id="cookie-bar" role="dialog">
+        <span>We use cookies. <a href="cookies.html" style="color:var(--orange)">Learn more</a></span>
+        <div class="cookie-btns">
+            <button class="cookie-accept" id="cookie-accept">Accept All</button>
+            <button class="cookie-decline" id="cookie-decline">Essential Only</button>
+        </div>
+    </div>
+
+    <script src="js/supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
