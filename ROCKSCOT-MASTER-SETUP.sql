@@ -967,7 +967,7 @@ $$;
 -- ============================================================
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES
-    ('documents',        'documents',        TRUE,  10485760, ARRAY['application/pdf','text/html']),
+    ('documents',        'documents',        TRUE,  10485760, ARRAY['application/pdf','text/html','application/zip','application/x-zip-compressed']),
     ('campaign-assets',  'campaign-assets',  FALSE, 52428800, ARRAY['audio/mpeg','audio/wav','audio/mp3','audio/ogg','application/pdf','image/jpeg','image/png']),
     ('avatars',          'avatars',          TRUE,  2097152,  ARRAY['image/jpeg','image/png','image/webp'])
 ON CONFLICT (id) DO NOTHING;
