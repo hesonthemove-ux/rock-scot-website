@@ -20,13 +20,16 @@ CREATE TABLE IF NOT EXISTS wire_news (
 -- 2. AUTOMATED CLEANUP (PURGE OLD NEWS)
 -- Policy: Keep only news from the last 7 days
 CREATE OR REPLACE FUNCTION purge_old_wire_news()
-RETURNS trigger AS $$
+RETURNS trigger
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = ''
+AS $$
 BEGIN
-    DELETE FROM wire_news
+    DELETE FROM public.wire_news
     WHERE created_at < NOW() - INTERVAL '7 days';
     RETURN NULL;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 CREATE TRIGGER trigger_wire_cleanup
 AFTER INSERT ON wire_news
@@ -44,11 +47,17 @@ CREATE POLICY "allow_public_read_wire" ON wire_news
     FOR SELECT
     USING (is_live = true);
 
--- Only authenticated users can insert (for backend RSS scripts)
+-- Only admin users can insert (for backend RSS scripts)
 CREATE POLICY "allow_authenticated_insert_wire" ON wire_news
     FOR INSERT
     TO authenticated
-    WITH CHECK (true);
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM public.user_profiles p
+            WHERE p.id = auth.uid()
+              AND p.role IN ('admin', 'super_admin')
+        )
+    );
 
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_wire_news_created ON wire_news(created_at DESC);

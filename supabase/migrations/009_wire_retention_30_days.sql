@@ -2,9 +2,11 @@
 -- Run this in Supabase SQL Editor if you already ran ROCKSCOT-MASTER-SETUP.sql
 
 CREATE OR REPLACE FUNCTION purge_old_wire_news()
-RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = ''
+AS $$
 BEGIN
-    DELETE FROM wire_news
+    DELETE FROM public.wire_news
     WHERE created_at < NOW() - INTERVAL '30 days';
     RETURN NULL;
 END;

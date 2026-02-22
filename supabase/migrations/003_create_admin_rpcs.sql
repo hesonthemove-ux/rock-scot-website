@@ -15,11 +15,12 @@ CREATE OR REPLACE FUNCTION create_discount(
 RETURNS uuid
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = ''
 AS $$
 DECLARE
     v_id uuid := gen_random_uuid();
 BEGIN
-    INSERT INTO discounts(id, code, amount_pence, percent_off, created_by, note)
+    INSERT INTO public.discounts(id, code, amount_pence, percent_off, created_by, note)
     VALUES (v_id, p_code, p_amount_pence, p_percent_off, p_created_by, p_note);
     RETURN v_id;
 END;
@@ -38,15 +39,16 @@ CREATE OR REPLACE FUNCTION approve_discount(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = ''
 AS $$
 BEGIN
-    UPDATE discounts 
+    UPDATE public.discounts 
     SET approved_by = p_approved_by,
         approved_at = now(),
         note = COALESCE(note, '') || COALESCE(p_note, '')
     WHERE id = p_discount_id;
     
-    INSERT INTO discount_approvals(discount_id, approved_by, approved_at, note)
+    INSERT INTO public.discount_approvals(discount_id, approved_by, approved_at, note)
     VALUES (p_discount_id, p_approved_by, now(), p_note);
 END;
 $$;
@@ -57,11 +59,12 @@ REVOKE EXECUTE ON FUNCTION approve_discount(uuid,uuid,text) FROM public;
 -- Function: list_pending_discounts
 -- Lists all unapproved discount codes (admin only)
 CREATE OR REPLACE FUNCTION list_pending_discounts()
-RETURNS SETOF discounts
+RETURNS SETOF public.discounts
 LANGUAGE sql
 SECURITY DEFINER
+SET search_path = ''
 AS $$
-    SELECT * FROM discounts WHERE approved_at IS NULL;
+    SELECT * FROM public.discounts WHERE approved_at IS NULL;
 $$;
 
 -- Revoke public access - admin only

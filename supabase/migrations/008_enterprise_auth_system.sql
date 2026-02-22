@@ -159,7 +159,10 @@ CREATE INDEX idx_invoices_number ON invoices(invoice_number);
 
 -- Auto-generate invoice numbers
 CREATE OR REPLACE FUNCTION generate_invoice_number()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = ''
+AS $$
 DECLARE
     year_suffix TEXT;
     next_num INTEGER;
@@ -169,7 +172,7 @@ BEGIN
         
         SELECT COALESCE(MAX(CAST(SUBSTRING(invoice_number FROM 8) AS INTEGER)), 0) + 1
         INTO next_num
-        FROM invoices
+        FROM public.invoices
         WHERE invoice_number LIKE 'INV-' || year_suffix || '%';
         
         NEW.invoice_number := 'INV-' || year_suffix || LPAD(next_num::TEXT, 5, '0');
@@ -177,7 +180,7 @@ BEGIN
     
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 CREATE TRIGGER trigger_generate_invoice_number
 BEFORE INSERT ON invoices
@@ -352,9 +355,12 @@ CREATE INDEX idx_activity_action ON activity_log(action);
 
 -- Create user profile on signup (trigger)
 CREATE OR REPLACE FUNCTION create_user_profile()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = ''
+AS $$
 BEGIN
-    INSERT INTO user_profiles (id, first_name, last_name, role)
+    INSERT INTO public.user_profiles (id, first_name, last_name, role)
     VALUES (
         NEW.id,
         COALESCE(NEW.raw_user_meta_data->>'first_name', ''),
@@ -363,7 +369,7 @@ BEGIN
     );
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 CREATE TRIGGER on_auth_user_created
 AFTER INSERT ON auth.users
@@ -372,15 +378,18 @@ EXECUTE FUNCTION create_user_profile();
 
 -- Update last login
 CREATE OR REPLACE FUNCTION update_last_login()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = ''
+AS $$
 BEGIN
-    UPDATE user_profiles
+    UPDATE public.user_profiles
     SET last_login_at = NOW(),
         login_count = login_count + 1
     WHERE id = NEW.id;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- Log activity helper
 CREATE OR REPLACE FUNCTION log_activity(
@@ -390,30 +399,36 @@ CREATE OR REPLACE FUNCTION log_activity(
     p_description TEXT DEFAULT NULL,
     p_metadata JSONB DEFAULT NULL
 )
-RETURNS VOID AS $$
+RETURNS VOID
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = ''
+AS $$
 BEGIN
-    INSERT INTO activity_log (user_id, action, entity_type, entity_id, description, metadata)
+    INSERT INTO public.activity_log (user_id, action, entity_type, entity_id, description, metadata)
     VALUES (auth.uid(), p_action, p_entity_type, p_entity_id, p_description, p_metadata);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- Get user's dashboard stats
 CREATE OR REPLACE FUNCTION get_customer_dashboard_stats(p_user_id UUID)
-RETURNS JSON AS $$
+RETURNS JSON
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = ''
+AS $$
 DECLARE
     result JSON;
 BEGIN
     SELECT json_build_object(
-        'total_bookings', (SELECT COUNT(*) FROM advertising_leads WHERE user_id = p_user_id),
-        'active_campaigns', (SELECT COUNT(*) FROM campaigns WHERE user_id = p_user_id AND status = 'active'),
-        'total_spent_pence', (SELECT COALESCE(SUM(total_pence), 0) FROM invoices WHERE user_id = p_user_id AND status = 'paid'),
-        'pending_invoices', (SELECT COUNT(*) FROM invoices WHERE user_id = p_user_id AND status = 'sent'),
-        'last_booking', (SELECT created_at FROM advertising_leads WHERE user_id = p_user_id ORDER BY created_at DESC LIMIT 1)
+        'total_bookings', (SELECT COUNT(*) FROM public.advertising_leads WHERE user_id = p_user_id),
+        'active_campaigns', (SELECT COUNT(*) FROM public.campaigns WHERE user_id = p_user_id AND status = 'active'),
+        'total_spent_pence', (SELECT COALESCE(SUM(total_pence), 0) FROM public.invoices WHERE user_id = p_user_id AND status = 'paid'),
+        'pending_invoices', (SELECT COUNT(*) FROM public.invoices WHERE user_id = p_user_id AND status = 'sent'),
+        'last_booking', (SELECT created_at FROM public.advertising_leads WHERE user_id = p_user_id ORDER BY created_at DESC LIMIT 1)
     ) INTO result;
     
     RETURN result;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- =====================================================
 -- SETUP COMPLETE

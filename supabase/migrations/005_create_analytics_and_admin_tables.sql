@@ -116,15 +116,27 @@ ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE email_log ENABLE ROW LEVEL SECURITY;
 
--- Allow authenticated users to insert their own page views
+-- Allow page view inserts — authenticated users must match their own user_id
 CREATE POLICY "allow_insert_pageviews" ON page_views
     FOR INSERT TO anon, authenticated
-    WITH CHECK (true);
+    WITH CHECK (
+        CASE
+            WHEN current_setting('request.jwt.claims', true)::json->>'role' = 'anon'
+                THEN user_id IS NULL
+            ELSE (user_id IS NULL OR user_id = auth.uid())
+        END
+    );
 
--- Allow authenticated users to insert/update their own sessions
+-- Allow session inserts — authenticated users must own their session
 CREATE POLICY "allow_insert_sessions" ON sessions
     FOR INSERT TO anon, authenticated
-    WITH CHECK (true);
+    WITH CHECK (
+        CASE
+            WHEN current_setting('request.jwt.claims', true)::json->>'role' = 'anon'
+                THEN user_id IS NULL
+            ELSE (user_id IS NULL OR user_id = auth.uid())
+        END
+    );
 
 CREATE POLICY "allow_update_own_sessions" ON sessions
     FOR UPDATE TO authenticated
