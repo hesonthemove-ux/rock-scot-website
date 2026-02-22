@@ -79,6 +79,7 @@ DROP TABLE IF EXISTS activity_log            CASCADE;
 DROP TABLE IF EXISTS payment_transactions    CASCADE;
 DROP TABLE IF EXISTS invoices               CASCADE;
 DROP TABLE IF EXISTS campaigns              CASCADE;
+DROP TABLE IF EXISTS broadcast_constants    CASCADE;
 DROP TABLE IF EXISTS wire_news              CASCADE;
 DROP TABLE IF EXISTS page_views             CASCADE;
 DROP TABLE IF EXISTS sessions               CASCADE;
