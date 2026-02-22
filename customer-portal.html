@@ -262,10 +262,11 @@
         </div>
     </div>
 
+    <script src="js/supabase-config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co'
-        const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY'
+        const SUPABASE_URL = window.SUPABASE_URL || 'https://pwzeapvopeeoahpyicdm.supabase.co'
+        const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || ''
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
         
@@ -446,17 +447,30 @@
         
         async function payInvoice(invoiceId) {
             try {
-                const response = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout`, {
+                const { data: { session } } = await supabase.auth.getSession()
+                const bearerToken = session?.access_token || SUPABASE_ANON_KEY
+
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/create-revolut-link`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'apikey': SUPABASE_ANON_KEY
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${bearerToken}`
                     },
                     body: JSON.stringify({ invoice_id: invoiceId })
                 })
                 
-                const { checkout_url } = await response.json()
-                window.location.href = checkout_url
+                const result = await response.json()
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to create payment link')
+                }
+
+                if (result.revolut_payment_link) {
+                    window.location.href = result.revolut_payment_link
+                    return
+                }
+
+                alert('Invoice updated. A bank transfer instruction email has been sent.')
                 
             } catch (error) {
                 alert('Failed to create payment session: ' + error.message)

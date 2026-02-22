@@ -19,52 +19,80 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { booking_id } = await req.json()
-    if (!booking_id) throw new Error('booking_id required')
-
-    // Get booking
-    const { data: booking, error: bErr } = await supabase
-      .from('advertising_leads')
-      .select('*')
-      .eq('id', booking_id)
-      .single()
-    if (bErr || !booking) throw new Error('Booking not found')
-
-    // Calculate VAT
-    const subtotal  = booking.final_price_pence || booking.product_net_pence
-    const vat       = Math.round(subtotal * 0.20)
-    const total     = subtotal + vat
-    const dueDate   = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
-                        .toISOString().split('T')[0]
-
-    // Check if invoice already exists
-    const { data: existing } = await supabase
-      .from('invoices')
-      .select('*')
-      .eq('booking_id', booking_id)
-      .single()
-
-    let invoice = existing
-
-    if (!invoice) {
-      // Create invoice
-      const { data: newInv, error: invErr } = await supabase
-        .from('invoices')
-        .insert([{
-          booking_id:      booking.id,
-          user_id:         booking.user_id,
-          subtotal_pence:  subtotal,
-          vat_pence:       vat,
-          total_pence:     total,
-          due_date:        dueDate,
-          status:          'sent',
-          payment_method:  'revolut',
-        }])
-        .select()
-        .single()
-      if (invErr) throw invErr
-      invoice = newInv
+    const { booking_id, invoice_id } = await req.json()
+    if (!booking_id && !invoice_id) {
+      throw new Error('booking_id or invoice_id required')
     }
+
+    let booking: any = null
+    let invoice: any = null
+
+    // Invoice-first flow (customer portal), with booking fallback.
+    if (invoice_id) {
+      const { data: inv, error: invErr } = await supabase
+        .from('invoices')
+        .select('*, booking:advertising_leads(*)')
+        .eq('id', invoice_id)
+        .single()
+
+      if (invErr || !inv) throw new Error('Invoice not found')
+      invoice = inv
+      booking = inv.booking || null
+    }
+
+    if (!booking) {
+      const bookingId = booking_id || invoice?.booking_id
+      const { data: bookingData, error: bErr } = await supabase
+        .from('advertising_leads')
+        .select('*')
+        .eq('id', bookingId)
+        .single()
+      if (bErr || !bookingData) throw new Error('Booking not found')
+      booking = bookingData
+    }
+
+    // Create invoice if needed.
+    if (!invoice) {
+      const subtotal  = booking.final_price_pence || booking.product_net_pence
+      const vat       = Math.round(subtotal * 0.20)
+      const total     = subtotal + vat
+      const dueDate   = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+                          .toISOString().split('T')[0]
+
+      const { data: existingInvoices, error: existingErr } = await supabase
+        .from('invoices')
+        .select('*')
+        .eq('booking_id', booking.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+
+      if (existingErr) throw existingErr
+      invoice = existingInvoices?.[0] || null
+
+      if (!invoice) {
+        const { data: newInv, error: invErr } = await supabase
+          .from('invoices')
+          .insert([{
+            booking_id:      booking.id,
+            user_id:         booking.user_id,
+            subtotal_pence:  subtotal,
+            vat_pence:       vat,
+            total_pence:     total,
+            due_date:        dueDate,
+            status:          'sent',
+            payment_method:  'revolut',
+          }])
+          .select()
+          .single()
+        if (invErr) throw invErr
+        invoice = newInv
+      }
+    }
+
+    const subtotal = invoice.subtotal_pence
+    const vat = invoice.vat_pence
+    const total = invoice.total_pence
+    const dueDate = invoice.due_date
 
     // Create Revolut payment link via Revolut Business API
     const revolutApiKey = Deno.env.get('REVOLUT_API_KEY')
@@ -95,9 +123,11 @@ serve(async (req) => {
 
         if (revRes.ok) {
           const revData = await revRes.json()
-          revolut_payment_link = revData.checkout_url || revData.public_id
-            ? `https://checkout.revolut.com/payment-link/${revData.public_id}`
-            : null
+          if (revData.checkout_url) {
+            revolut_payment_link = revData.checkout_url
+          } else if (revData.public_id) {
+            revolut_payment_link = `https://checkout.revolut.com/payment-link/${revData.public_id}`
+          }
         } else {
           console.warn('Revolut API error:', await revRes.text())
           // Fall back to manual bank transfer
@@ -106,6 +136,11 @@ serve(async (req) => {
       } catch (revolut_err) {
         console.warn('Revolut API unavailable, using manual transfer:', revolut_err.message)
       }
+    }
+
+    // If no new link was generated, keep any existing saved link.
+    if (!revolut_payment_link) {
+      revolut_payment_link = invoice.revolut_payment_link || null
     }
 
     // If no Revolut API key or it failed — create a manual payment reference

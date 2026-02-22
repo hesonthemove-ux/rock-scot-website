@@ -664,6 +664,20 @@
     const BOLT_ON_PENCE  = 15000;  // £150 production add-on
     const RUSH_PENCE     = 5000;   // £50 rush surcharge
 
+    // ── PACKAGE SHORTCUT BUTTONS ──────────────────────────────────
+    function selectPackage(pkgKey) {
+        if (!PACKAGES[pkgKey]) return;
+
+        const packageSelect = document.getElementById('package');
+        packageSelect.value = pkgKey;
+        onPackageChange();
+
+        const quoteSection = document.getElementById('quote-form');
+        if (quoteSection) {
+            quoteSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
     // ── PACKAGE CHANGE: show/hide mux selector ───────────────────
     function onPackageChange() {
         const pkg = document.getElementById('package').value;
@@ -867,11 +881,15 @@
         // Check capacity one final time before submitting
         const endDate = new Date(startDate);
         endDate.setDate(endDate.getDate() + length);
-        const { data: capData } = await supabase.rpc('check_capacity', {
+        const { data: capData, error: capError } = await supabase.rpc('check_capacity', {
             p_mux_type:   pkg.muxType,
             p_start_date: startDate,
             p_end_date:   endDate.toISOString().split('T')[0],
         });
+        if (capError) {
+            console.warn('Capacity RPC unavailable, continuing submit:', capError.message);
+        }
+
         const cap = typeof capData === 'string' ? JSON.parse(capData) : capData;
         if (cap && !cap.can_approve) {
             alert(`Sorry — ${cap.reason}. Please contact advertise@rock.scot.`);
@@ -904,12 +922,16 @@
         };
 
         try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const bearerToken = session?.access_token || SUPABASE_KEY;
+
             // Use Edge Function (server-side validation + email)
             const resp = await fetch(EDGE_URL, {
                 method:  'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'apikey':        SUPABASE_KEY,
+                    'Authorization': `Bearer ${bearerToken}`,
                 },
                 body: JSON.stringify(payload),
             });

@@ -19,6 +19,8 @@
 -- ================================================================
 
 BEGIN;
+CREATE SCHEMA IF NOT EXISTS extensions;
+SET LOCAL search_path = public, extensions;
 
 -- ============================================================
 -- EXTENSIONS
@@ -28,6 +30,41 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE EXTENSION IF NOT EXISTS "vector";          -- pgvector: AI similarity search
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";          -- Trigram: fast fuzzy text search
 CREATE EXTENSION IF NOT EXISTS "unaccent";         -- Clean text for search
+
+-- Move relocatable extensions out of public to satisfy security lint.
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_extension e
+        JOIN pg_namespace n ON n.oid = e.extnamespace
+        WHERE e.extname = 'vector'
+          AND n.nspname = 'public'
+    ) THEN
+        ALTER EXTENSION vector SET SCHEMA extensions;
+    END IF;
+
+    IF EXISTS (
+        SELECT 1
+        FROM pg_extension e
+        JOIN pg_namespace n ON n.oid = e.extnamespace
+        WHERE e.extname = 'pg_trgm'
+          AND n.nspname = 'public'
+    ) THEN
+        ALTER EXTENSION pg_trgm SET SCHEMA extensions;
+    END IF;
+
+    IF EXISTS (
+        SELECT 1
+        FROM pg_extension e
+        JOIN pg_namespace n ON n.oid = e.extnamespace
+        WHERE e.extname = 'unaccent'
+          AND n.nspname = 'public'
+    ) THEN
+        ALTER EXTENSION unaccent SET SCHEMA extensions;
+    END IF;
+END
+$$;
 
 -- PostGIS for geospatial (coverage maps) — uncomment if enabled on your plan
 -- CREATE EXTENSION IF NOT EXISTS "postgis";
@@ -166,7 +203,8 @@ CREATE TABLE advertising_leads (
 ALTER TABLE advertising_leads ENABLE ROW LEVEL SECURITY;
 
 -- Public: insert only (form submissions)
-CREATE POLICY "public_insert_leads"        ON advertising_leads FOR INSERT TO anon, authenticated WITH CHECK (true);
+CREATE POLICY "public_insert_leads"        ON advertising_leads FOR INSERT TO anon, authenticated
+    WITH CHECK (user_id IS NULL OR user_id = auth.uid());
 -- Authenticated users see their own
 CREATE POLICY "own_leads_select"           ON advertising_leads FOR SELECT TO authenticated USING (user_id = auth.uid());
 -- Admins see all
@@ -488,7 +526,7 @@ RETURNS TABLE (
     capacity_units_used BIGINT,
     capacity_remaining  INTEGER
 )
-LANGUAGE sql STABLE SECURITY DEFINER AS $$
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, extensions AS $$
     WITH active AS (
         SELECT
             mux_type,
@@ -523,7 +561,7 @@ CREATE OR REPLACE FUNCTION check_capacity(
     p_end_date   DATE
 )
 RETURNS JSON
-LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
+LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public, extensions AS $$
 DECLARE
     v_weight          INTEGER;
     v_used            INTEGER;
@@ -580,7 +618,7 @@ $$;
 -- Admin dashboard overview of current and upcoming capacity
 CREATE OR REPLACE FUNCTION capacity_summary()
 RETURNS JSON
-LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
+LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public, extensions AS $$
 DECLARE result JSON;
 BEGIN
     SELECT json_build_object(
@@ -648,8 +686,29 @@ ALTER TABLE wire_news ENABLE ROW LEVEL SECURITY;
 -- Public: read live stories
 CREATE POLICY "public_read_wire"          ON wire_news FOR SELECT TO anon, authenticated USING (is_live = TRUE);
 -- Authenticated (backend/admin): insert & update
-CREATE POLICY "authenticated_insert_wire" ON wire_news FOR INSERT TO authenticated WITH CHECK (TRUE);
-CREATE POLICY "authenticated_update_wire" ON wire_news FOR UPDATE TO authenticated USING (TRUE);
+CREATE POLICY "authenticated_insert_wire" ON wire_news FOR INSERT TO authenticated
+    WITH CHECK (
+        EXISTS (
+            SELECT 1
+            FROM user_profiles p
+            WHERE p.id = auth.uid() AND p.role IN ('admin', 'super_admin')
+        )
+    );
+CREATE POLICY "authenticated_update_wire" ON wire_news FOR UPDATE TO authenticated
+    USING (
+        EXISTS (
+            SELECT 1
+            FROM user_profiles p
+            WHERE p.id = auth.uid() AND p.role IN ('admin', 'super_admin')
+        )
+    )
+    WITH CHECK (
+        EXISTS (
+            SELECT 1
+            FROM user_profiles p
+            WHERE p.id = auth.uid() AND p.role IN ('admin', 'super_admin')
+        )
+    );
 
 CREATE INDEX idx_wire_created   ON wire_news(created_at DESC);
 CREATE INDEX idx_wire_genre     ON wire_news(genre);
@@ -682,7 +741,20 @@ CREATE TABLE page_views (
 
 ALTER TABLE page_views ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "public_insert_pageviews"    ON page_views FOR INSERT TO anon, authenticated WITH CHECK (TRUE);
+CREATE POLICY "public_insert_pageviews" ON page_views FOR INSERT TO anon, authenticated
+    WITH CHECK (
+        (
+            auth.uid() IS NOT NULL
+            AND (user_id IS NULL OR user_id = auth.uid())
+        )
+        OR (
+            auth.uid() IS NULL
+            AND session_id::text = COALESCE(
+                NULLIF(current_setting('request.headers', true), '')::jsonb ->> 'x-session-id',
+                ''
+            )
+        )
+    );
 CREATE POLICY "admin_all_pageviews"        ON page_views FOR SELECT TO authenticated
     USING (EXISTS (SELECT 1 FROM user_profiles p WHERE p.id = auth.uid() AND p.role IN ('admin','super_admin')));
 
@@ -714,8 +786,47 @@ CREATE TABLE sessions (
 
 ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "public_insert_sessions"   ON sessions FOR INSERT TO anon, authenticated WITH CHECK (TRUE);
-CREATE POLICY "public_update_sessions"   ON sessions FOR UPDATE TO anon, authenticated USING (TRUE);
+CREATE POLICY "public_insert_sessions" ON sessions FOR INSERT TO anon, authenticated
+    WITH CHECK (
+        (
+            auth.uid() IS NOT NULL
+            AND (user_id IS NULL OR user_id = auth.uid())
+        )
+        OR (
+            auth.uid() IS NULL
+            AND id::text = COALESCE(
+                NULLIF(current_setting('request.headers', true), '')::jsonb ->> 'x-session-id',
+                ''
+            )
+        )
+    );
+CREATE POLICY "public_update_sessions" ON sessions FOR UPDATE TO anon, authenticated
+    USING (
+        (
+            auth.uid() IS NOT NULL
+            AND user_id = auth.uid()
+        )
+        OR (
+            auth.uid() IS NULL
+            AND id::text = COALESCE(
+                NULLIF(current_setting('request.headers', true), '')::jsonb ->> 'x-session-id',
+                ''
+            )
+        )
+    )
+    WITH CHECK (
+        (
+            auth.uid() IS NOT NULL
+            AND user_id = auth.uid()
+        )
+        OR (
+            auth.uid() IS NULL
+            AND id::text = COALESCE(
+                NULLIF(current_setting('request.headers', true), '')::jsonb ->> 'x-session-id',
+                ''
+            )
+        )
+    );
 CREATE POLICY "admin_all_sessions"       ON sessions FOR SELECT TO authenticated
     USING (EXISTS (SELECT 1 FROM user_profiles p WHERE p.id = auth.uid() AND p.role IN ('admin','super_admin')));
 
@@ -774,7 +885,7 @@ CREATE TRIGGER on_auth_user_created
 
 -- B) Auto-number invoices (INV-YY-NNNNN)
 CREATE OR REPLACE FUNCTION generate_invoice_number()
-RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, extensions AS $$
 DECLARE
     yr TEXT;
     nxt INTEGER;
@@ -797,7 +908,7 @@ CREATE TRIGGER trg_invoice_number
 
 -- C) Auto-purge Wire news older than 30 days (keeps THE WIRE searchable for 30 days)
 CREATE OR REPLACE FUNCTION purge_old_wire_news()
-RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, extensions AS $$
 BEGIN
     DELETE FROM wire_news
     WHERE created_at < NOW() - INTERVAL '30 days';
@@ -817,7 +928,7 @@ CREATE OR REPLACE FUNCTION log_activity(
     p_description TEXT    DEFAULT NULL,
     p_metadata    JSONB   DEFAULT NULL
 )
-RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, extensions AS $$
 BEGIN
     INSERT INTO activity_log (user_id, action, entity_type, entity_id, description, metadata)
     VALUES (auth.uid(), p_action, p_entity_type, p_entity_id, p_description, p_metadata);
@@ -833,7 +944,7 @@ RETURNS TABLE (
     percent_off INTEGER,
     is_valid    BOOLEAN
 )
-LANGUAGE sql SECURITY DEFINER AS $$
+LANGUAGE sql SECURITY DEFINER SET search_path = public, extensions AS $$
     SELECT
         id, code, amount_pence, percent_off,
         (
@@ -854,7 +965,7 @@ CREATE OR REPLACE FUNCTION create_discount_code(
     p_created_by    UUID    DEFAULT NULL,
     p_note          TEXT    DEFAULT NULL
 )
-RETURNS UUID LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS UUID LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, extensions AS $$
 DECLARE v_id UUID;
 BEGIN
     INSERT INTO discounts (code, amount_pence, percent_off, created_by, note)
@@ -870,7 +981,7 @@ CREATE OR REPLACE FUNCTION approve_discount(
     p_approved_by UUID,
     p_note        TEXT DEFAULT NULL
 )
-RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, extensions AS $$
 BEGIN
     -- Cannot approve own discount
     IF (SELECT created_by FROM discounts WHERE id = p_discount_id) = p_approved_by THEN
@@ -896,7 +1007,7 @@ RETURNS TABLE (
     created_at   TIMESTAMPTZ,
     note         TEXT
 )
-LANGUAGE sql SECURITY DEFINER AS $$
+LANGUAGE sql SECURITY DEFINER SET search_path = public, extensions AS $$
     SELECT id, code, amount_pence, percent_off, created_at, note
     FROM discounts
     WHERE approved_at IS NULL
@@ -905,7 +1016,7 @@ $$;
 
 -- I) Customer dashboard stats
 CREATE OR REPLACE FUNCTION get_customer_dashboard_stats(p_user_id UUID)
-RETURNS JSON LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS JSON LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, extensions AS $$
 DECLARE result JSON;
 BEGIN
     SELECT json_build_object(
@@ -930,7 +1041,7 @@ RETURNS TABLE (
     company     TEXT,
     similarity  FLOAT
 )
-LANGUAGE sql STABLE AS $$
+LANGUAGE sql STABLE SET search_path = public, extensions AS $$
     SELECT
         p.id,
         p.company_name,
@@ -951,7 +1062,7 @@ RETURNS TABLE (
     genre    TEXT,
     rank     FLOAT
 )
-LANGUAGE sql STABLE AS $$
+LANGUAGE sql STABLE SET search_path = public, extensions AS $$
     SELECT
         id, title, summary, genre,
         ts_rank(search_vector, plainto_tsquery('english', query)) AS rank
@@ -973,6 +1084,14 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- Storage RLS
+DROP POLICY IF EXISTS "public_read_documents" ON storage.objects;
+DROP POLICY IF EXISTS "auth_upload_documents" ON storage.objects;
+DROP POLICY IF EXISTS "auth_upload_assets" ON storage.objects;
+DROP POLICY IF EXISTS "own_assets_select" ON storage.objects;
+DROP POLICY IF EXISTS "admin_all_assets" ON storage.objects;
+DROP POLICY IF EXISTS "auth_upload_avatar" ON storage.objects;
+DROP POLICY IF EXISTS "public_read_avatars" ON storage.objects;
+
 CREATE POLICY "public_read_documents"
 ON storage.objects FOR SELECT TO public
 USING (bucket_id = 'documents');

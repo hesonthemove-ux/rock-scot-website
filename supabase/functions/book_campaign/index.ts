@@ -121,6 +121,9 @@ serve(async (req) => {
     // ==========================================
     // 4. INSERT BOOKING TO DATABASE
     // ==========================================
+    const forwardedFor = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || ''
+    const clientIp = forwardedFor.split(',')[0].trim() || null
+
     const bookingData = {
       first_name: formData.first_name,
       last_name: formData.last_name,
@@ -151,7 +154,7 @@ serve(async (req) => {
       discount_amount_pence: discountAmount,
 
       user_agent: req.headers.get('user-agent'),
-      ip_address: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip'),
+      ip_address: clientIp,
       submitted_via: formData.submitted_via || 'edge_function',
 
       meta: {

@@ -1143,7 +1143,11 @@ Capacity used: ${cap.capacity_used}/120`);
     async function generateInvoice(bookingId) {
         const res = await fetch(`${SUPABASE_URL}/functions/v1/create-revolut-link`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_SERVICE_ROLE },
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_SERVICE_ROLE,
+                'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE}`,
+            },
             body: JSON.stringify({ booking_id: bookingId }),
         });
         const result = await res.json();
