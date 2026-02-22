@@ -268,8 +268,43 @@
     <script>
         const SUPABASE_URL = window.SUPABASE_URL || 'https://pwzeapvopeeoahpyicdm.supabase.co'
         const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || ''
+        const ADMIN_ROLES = new Set(['admin', 'super_admin'])
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+        async function getRoleContext(user) {
+            if (!user?.id) {
+                return { role: 'customer', isActive: true }
+            }
+
+            const { data, error } = await supabase
+                .from('user_profiles')
+                .select('role, is_active')
+                .eq('id', user.id)
+                .maybeSingle()
+
+            if (error) {
+                console.warn('Role lookup failed, falling back to app metadata:', error.message)
+            }
+
+            return {
+                role: data?.role || user?.app_metadata?.role || 'customer',
+                isActive: data?.is_active ?? true
+            }
+        }
+
+        async function routeAfterAuth(user) {
+            const { role, isActive } = await getRoleContext(user)
+
+            if (!isActive) {
+                await supabase.auth.signOut()
+                showMessage('Your account is inactive. Contact support.', 'error')
+                return
+            }
+
+            const target = ADMIN_ROLES.has(role) ? '/admin-dashboard.html' : '/customer-portal.html'
+            window.location.replace(target)
+        }
         
         function showTab(tab) {
             // Hide all forms
@@ -307,7 +342,7 @@
                 if (error) throw error
                 
                 showMessage('Login successful! Redirecting...', 'success')
-                setTimeout(() => window.location.href = '/customer-portal.html', 1000)
+                await routeAfterAuth(data.user)
                 
             } catch (error) {
                 showMessage(error.message, 'error')
@@ -355,7 +390,7 @@
                 const { error } = await supabase.auth.signInWithOtp({
                     email,
                     options: {
-                        emailRedirectTo: window.location.origin + '/customer-portal.html'
+                        emailRedirectTo: window.location.origin + '/login.html'
                     }
                 })
                 
@@ -398,10 +433,17 @@
             }, 5000)
         }
         
-        // Check if already logged in
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session) {
-                window.location.href = '/customer-portal.html'
+        // Route by role if user signs in while on this page.
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session?.user) {
+                routeAfterAuth(session.user)
+            }
+        })
+
+        // Check if already logged in.
+        supabase.auth.getSession().then(async ({ data: { session } }) => {
+            if (session?.user) {
+                await routeAfterAuth(session.user)
             }
         })
     </script>
