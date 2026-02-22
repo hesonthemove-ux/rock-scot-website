@@ -3,6 +3,7 @@
 // ========== HEADER SCROLL EFFECT ==========
 window.addEventListener('scroll', () => {
     const header = document.querySelector('header');
+    if (!header) return;
     if (window.scrollY > 100) {
         header.classList.add('scrolled');
     } else {
@@ -32,12 +33,14 @@ let isPlaying = false;
 let player;
 
 // Show player bar on Listen Live button click
-listenBtn.addEventListener('click', () => {
-    playerBar.classList.add('active');
-    if (!isPlaying) {
-        togglePlay();
-    }
-});
+if (listenBtn) {
+    listenBtn.addEventListener('click', () => {
+        if (playerBar) playerBar.classList.add('active');
+        if (!isPlaying) {
+            togglePlay();
+        }
+    });
+}
 
 // Play/Pause functionality
 function togglePlay() {
@@ -51,23 +54,27 @@ function togglePlay() {
     }
     
     isPlaying = !isPlaying;
-    playBtn.textContent = isPlaying ? '⏸' : '▶';
+    if (playBtn) playBtn.textContent = isPlaying ? '⏸' : '▶';
     
     // Update track info
+    const trackNameEl = document.getElementById('track-name');
+    const trackArtistEl = document.getElementById('track-artist');
     if (isPlaying) {
-        document.getElementById('track-name').textContent = 'ROCK.SCOT LIVE';
-        document.getElementById('track-artist').textContent = 'Broadcasting Now on DAB+';
+        if (trackNameEl) trackNameEl.textContent = 'ROCK.SCOT LIVE';
+        if (trackArtistEl) trackArtistEl.textContent = 'Broadcasting Now on DAB+';
     } else {
-        document.getElementById('track-name').textContent = 'ROCK.SCOT';
-        document.getElementById('track-artist').textContent = "Scotland's Rock Station";
+        if (trackNameEl) trackNameEl.textContent = 'ROCK.SCOT';
+        if (trackArtistEl) trackArtistEl.textContent = "Scotland's Rock Station";
     }
 }
 
-playBtn.addEventListener('click', togglePlay');
+if (playBtn) {
+    playBtn.addEventListener('click', togglePlay);
+}
 
 // Auto-show player bar after page load
 setTimeout(() => {
-    playerBar.classList.add('active');
+    if (playerBar) playerBar.classList.add('active');
 }, 3000);
 
 // ========== SCROLL ANIMATIONS ==========
@@ -127,13 +134,13 @@ console.log('%cReach: 410,000+ | Ofcom Licensed: SC646223', 'font-size: 11px; co
 // ========== KEYBOARD SHORTCUTS ==========
 document.addEventListener('keydown', (e) => {
     // Space bar to play/pause
-    if (e.code === 'Space' && playerBar.classList.contains('active')) {
+    if (e.code === 'Space' && playerBar && playerBar.classList.contains('active')) {
         e.preventDefault();
         togglePlay();
     }
     
     // 'L' key to toggle player
-    if (e.code === 'KeyL') {
+    if (e.code === 'KeyL' && playerBar) {
         playerBar.classList.toggle('active');
     }
 });
@@ -153,8 +160,10 @@ let trackIndex = 0;
 function updateTrackInfo() {
     if (isPlaying) {
         const track = sampleTracks[trackIndex];
-        document.getElementById('track-name').textContent = track.name;
-        document.getElementById('track-artist').textContent = track.artist;
+        const trackNameEl = document.getElementById('track-name');
+        const trackArtistEl = document.getElementById('track-artist');
+        if (trackNameEl) trackNameEl.textContent = track.name;
+        if (trackArtistEl) trackArtistEl.textContent = track.artist;
         
         trackIndex = (trackIndex + 1) % sampleTracks.length;
     }
@@ -223,9 +232,11 @@ function trackEvent(category, action, label) {
 }
 
 // Track Listen Live clicks
-listenBtn.addEventListener('click', () => {
-    trackEvent('Player', 'Click', 'Listen Live Button');
-});
+if (listenBtn) {
+    listenBtn.addEventListener('click', () => {
+        trackEvent('Player', 'Click', 'Listen Live Button');
+    });
+}
 
 // Track genre clicks
 document.querySelectorAll('.genre-badge').forEach(badge => {

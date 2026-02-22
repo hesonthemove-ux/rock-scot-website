@@ -613,7 +613,13 @@
     const SUPABASE_URL  = window.SUPABASE_URL || 'https://pwzeapvopeeoahpyicdm.supabase.co';
     const SUPABASE_KEY  = window.SUPABASE_ANON_KEY || 'YOUR_ANON_KEY';
     const EDGE_URL      = `${SUPABASE_URL}/functions/v1/book_campaign`;
-    const supabase      = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const supabase      = window.supabase?.createClient
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+        : null;
+
+    if (!supabase) {
+        console.warn('Supabase client failed to initialise. Quote UI will still work; live capacity checks may be skipped.');
+    }
 
     // ── BROADCAST CONSTANTS (mirrors broadcast_constants table) ──
     const BC = {
@@ -708,6 +714,10 @@
         const indicator = document.getElementById('capacity-indicator');
         const startDate = document.getElementById('start-date').value;
         if (!pkgKey || !startDate) return;
+        if (!supabase) {
+            indicator.style.display = 'none';
+            return;
+        }
 
         const pkg = PACKAGES[pkgKey];
         if (!pkg) return;
@@ -881,16 +891,20 @@
         // Check capacity one final time before submitting
         const endDate = new Date(startDate);
         endDate.setDate(endDate.getDate() + length);
-        const { data: capData, error: capError } = await supabase.rpc('check_capacity', {
-            p_mux_type:   pkg.muxType,
-            p_start_date: startDate,
-            p_end_date:   endDate.toISOString().split('T')[0],
-        });
-        if (capError) {
-            console.warn('Capacity RPC unavailable, continuing submit:', capError.message);
+        let cap = null;
+        if (supabase) {
+            const { data: capData, error: capError } = await supabase.rpc('check_capacity', {
+                p_mux_type:   pkg.muxType,
+                p_start_date: startDate,
+                p_end_date:   endDate.toISOString().split('T')[0],
+            });
+            if (capError) {
+                console.warn('Capacity RPC unavailable, continuing submit:', capError.message);
+            } else {
+                cap = typeof capData === 'string' ? JSON.parse(capData) : capData;
+            }
         }
 
-        const cap = typeof capData === 'string' ? JSON.parse(capData) : capData;
         if (cap && !cap.can_approve) {
             alert(`Sorry — ${cap.reason}. Please contact advertise@rock.scot.`);
             btn.textContent = 'Submit Booking Request';
@@ -922,7 +936,9 @@
         };
 
         try {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session } } = supabase
+                ? await supabase.auth.getSession()
+                : { data: { session: null } };
             const bearerToken = session?.access_token || SUPABASE_KEY;
 
             // Use Edge Function (server-side validation + email)
@@ -983,6 +999,11 @@ Please email advertise@rock.scot or call 0141 459 ROCK.`);
             btn.disabled = false;
         }
     });
+
+    // Ensure inline onclick handlers always resolve in static hosting.
+    window.selectPackage = selectPackage;
+    window.calculateQuote = calculateQuote;
+    window.onPackageChange = onPackageChange;
 
     // Pre-select package if URL has ?package=... param
     const urlParams = new URLSearchParams(window.location.search);
