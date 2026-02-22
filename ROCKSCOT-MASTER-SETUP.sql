@@ -25,9 +25,11 @@ BEGIN;
 -- ============================================================
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-CREATE EXTENSION IF NOT EXISTS "vector";          -- pgvector: AI similarity search
-CREATE EXTENSION IF NOT EXISTS "pg_trgm";          -- Trigram: fast fuzzy text search
-CREATE EXTENSION IF NOT EXISTS "unaccent";         -- Clean text for search
+
+CREATE SCHEMA IF NOT EXISTS extensions;
+CREATE EXTENSION IF NOT EXISTS "vector"   SCHEMA extensions;  -- pgvector: AI similarity search
+CREATE EXTENSION IF NOT EXISTS "pg_trgm"  SCHEMA extensions;  -- Trigram: fast fuzzy text search
+CREATE EXTENSION IF NOT EXISTS "unaccent" SCHEMA extensions;  -- Clean text for search
 
 -- PostGIS for geospatial (coverage maps) — uncomment if enabled on your plan
 -- CREATE EXTENSION IF NOT EXISTS "postgis";
@@ -94,7 +96,7 @@ CREATE TABLE user_profiles (
     login_count         INTEGER NOT NULL DEFAULT 0,
 
     -- pgvector: embedding for AI ad matching (128-dim)
-    embedding           vector(128),
+    embedding           extensions.vector(128),
 
     metadata            JSONB
 );
@@ -107,7 +109,7 @@ CREATE POLICY "admin_all_profiles"   ON user_profiles FOR ALL TO authenticated
     USING (EXISTS (SELECT 1 FROM user_profiles p WHERE p.id = auth.uid() AND p.role IN ('admin','super_admin')));
 
 CREATE INDEX idx_user_profiles_role      ON user_profiles(role);
-CREATE INDEX idx_user_profiles_embedding ON user_profiles USING ivfflat (embedding vector_cosine_ops)
+CREATE INDEX idx_user_profiles_embedding ON user_profiles USING ivfflat (embedding extensions.vector_cosine_ops)
     WITH (lists = 100);  -- AI similarity index
 
 -- ============================================================
@@ -165,8 +167,15 @@ CREATE TABLE advertising_leads (
 
 ALTER TABLE advertising_leads ENABLE ROW LEVEL SECURITY;
 
--- Public: insert only (form submissions)
-CREATE POLICY "public_insert_leads"        ON advertising_leads FOR INSERT TO anon, authenticated WITH CHECK (true);
+-- Public: insert only (form submissions) — anon must leave user_id null; authenticated must match their own uid
+CREATE POLICY "public_insert_leads"        ON advertising_leads FOR INSERT TO anon, authenticated
+    WITH CHECK (
+        CASE
+            WHEN current_setting('request.jwt.claims', true)::json->>'role' = 'anon'
+                THEN user_id IS NULL
+            ELSE user_id = auth.uid()
+        END
+    );
 -- Authenticated users see their own
 CREATE POLICY "own_leads_select"           ON advertising_leads FOR SELECT TO authenticated USING (user_id = auth.uid());
 -- Admins see all
@@ -488,17 +497,19 @@ RETURNS TABLE (
     capacity_units_used BIGINT,
     capacity_remaining  INTEGER
 )
-LANGUAGE sql STABLE SECURITY DEFINER AS $$
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = ''
+AS $$
     WITH active AS (
         SELECT
-            mux_type,
+            c.mux_type,
             COUNT(*)         AS campaign_count,
-            SUM(mux_weight)  AS weight_used      -- weight per campaign slot (not × plays)
-        FROM campaigns
-        WHERE status IN ('approved','active')
-          AND start_date <= p_end_date
-          AND end_date   >= p_start_date
-        GROUP BY mux_type
+            SUM(c.mux_weight)  AS weight_used
+        FROM public.campaigns c
+        WHERE c.status IN ('approved','active')
+          AND c.start_date <= p_end_date
+          AND c.end_date   >= p_start_date
+        GROUP BY c.mux_type
     ),
     totals AS (
         SELECT
@@ -509,7 +520,7 @@ LANGUAGE sql STABLE SECURITY DEFINER AS $$
         a.mux_type,
         a.campaign_count,
         a.weight_used         AS capacity_units_used,
-        120 - t.total_weight_used AS capacity_remaining
+        (120 - t.total_weight_used)::INTEGER AS capacity_remaining
     FROM active a, totals t
     ORDER BY a.mux_type;
 $$;
@@ -523,7 +534,9 @@ CREATE OR REPLACE FUNCTION check_capacity(
     p_end_date   DATE
 )
 RETURNS JSON
-LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
+LANGUAGE plpgsql STABLE SECURITY DEFINER
+SET search_path = ''
+AS $$
 DECLARE
     v_weight          INTEGER;
     v_used            INTEGER;
@@ -531,26 +544,23 @@ DECLARE
     v_toh_sold        BOOLEAN;
     v_max             INTEGER := 120;
 BEGIN
-    -- Get weight for proposed campaign type
     v_weight := CASE p_mux_type
         WHEN 'single' THEN 1
         WHEN 'multi'  THEN 3
         WHEN 'toh'    THEN 3
     END;
 
-    -- Get current total weight used in this date range
     SELECT COALESCE(SUM(mux_weight), 0)
     INTO v_used
-    FROM campaigns
+    FROM public.campaigns
     WHERE status IN ('approved','active')
       AND start_date <= p_end_date
       AND end_date   >= p_start_date;
 
     v_remaining := v_max - v_used;
 
-    -- Check if TOH is already sold in this period
     SELECT EXISTS (
-        SELECT 1 FROM campaigns
+        SELECT 1 FROM public.campaigns
         WHERE mux_type = 'toh'
           AND status IN ('approved','active')
           AND start_date <= p_end_date
@@ -580,39 +590,31 @@ $$;
 -- Admin dashboard overview of current and upcoming capacity
 CREATE OR REPLACE FUNCTION capacity_summary()
 RETURNS JSON
-LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
+LANGUAGE plpgsql STABLE SECURITY DEFINER
+SET search_path = ''
+AS $$
 DECLARE result JSON;
 BEGIN
     SELECT json_build_object(
         'max_capacity',         120,
-
-        -- Active now
         'active_weight_used',   (
-            SELECT COALESCE(SUM(mux_weight), 0) FROM campaigns
+            SELECT COALESCE(SUM(mux_weight), 0) FROM public.campaigns
             WHERE status = 'active' AND CURRENT_DATE BETWEEN start_date AND end_date
         ),
         'active_campaigns',     (
-            SELECT COUNT(*) FROM campaigns
+            SELECT COUNT(*) FROM public.campaigns
             WHERE status = 'active' AND CURRENT_DATE BETWEEN start_date AND end_date
         ),
-
-        -- By type (active)
-        'active_multi',         (SELECT COUNT(*) FROM campaigns WHERE status='active' AND mux_type='multi'  AND CURRENT_DATE BETWEEN start_date AND end_date),
-        'active_single',        (SELECT COUNT(*) FROM campaigns WHERE status='active' AND mux_type='single' AND CURRENT_DATE BETWEEN start_date AND end_date),
-        'active_toh',           (SELECT COUNT(*) FROM campaigns WHERE status='active' AND mux_type='toh'    AND CURRENT_DATE BETWEEN start_date AND end_date),
-
-        -- Single mux breakdown
-        'active_single_inverclyde',     (SELECT COUNT(*) FROM campaigns WHERE status='active' AND mux_type='single' AND selected_mux='inverclyde'     AND CURRENT_DATE BETWEEN start_date AND end_date),
-        'active_single_north_ayrshire', (SELECT COUNT(*) FROM campaigns WHERE status='active' AND mux_type='single' AND selected_mux='north_ayrshire'  AND CURRENT_DATE BETWEEN start_date AND end_date),
-        'active_single_s_lanarkshire',  (SELECT COUNT(*) FROM campaigns WHERE status='active' AND mux_type='single' AND selected_mux='south_lanarkshire' AND CURRENT_DATE BETWEEN start_date AND end_date),
-
-        -- TOH
-        'toh_sold',             (SELECT EXISTS (SELECT 1 FROM campaigns WHERE status IN ('approved','active') AND mux_type='toh' AND CURRENT_DATE BETWEEN start_date AND end_date)),
-
-        -- Headroom
-        'capacity_remaining',   120 - (SELECT COALESCE(SUM(mux_weight),0) FROM campaigns WHERE status IN ('approved','active') AND CURRENT_DATE BETWEEN start_date AND end_date),
-        'max_additional_multi', (120 - (SELECT COALESCE(SUM(mux_weight),0) FROM campaigns WHERE status IN ('approved','active') AND CURRENT_DATE BETWEEN start_date AND end_date)) / 3,
-        'max_additional_single',(120 - (SELECT COALESCE(SUM(mux_weight),0) FROM campaigns WHERE status IN ('approved','active') AND CURRENT_DATE BETWEEN start_date AND end_date))
+        'active_multi',         (SELECT COUNT(*) FROM public.campaigns WHERE status='active' AND mux_type='multi'  AND CURRENT_DATE BETWEEN start_date AND end_date),
+        'active_single',        (SELECT COUNT(*) FROM public.campaigns WHERE status='active' AND mux_type='single' AND CURRENT_DATE BETWEEN start_date AND end_date),
+        'active_toh',           (SELECT COUNT(*) FROM public.campaigns WHERE status='active' AND mux_type='toh'    AND CURRENT_DATE BETWEEN start_date AND end_date),
+        'active_single_inverclyde',     (SELECT COUNT(*) FROM public.campaigns WHERE status='active' AND mux_type='single' AND selected_mux='inverclyde'     AND CURRENT_DATE BETWEEN start_date AND end_date),
+        'active_single_north_ayrshire', (SELECT COUNT(*) FROM public.campaigns WHERE status='active' AND mux_type='single' AND selected_mux='north_ayrshire'  AND CURRENT_DATE BETWEEN start_date AND end_date),
+        'active_single_s_lanarkshire',  (SELECT COUNT(*) FROM public.campaigns WHERE status='active' AND mux_type='single' AND selected_mux='south_lanarkshire' AND CURRENT_DATE BETWEEN start_date AND end_date),
+        'toh_sold',             (SELECT EXISTS (SELECT 1 FROM public.campaigns WHERE status IN ('approved','active') AND mux_type='toh' AND CURRENT_DATE BETWEEN start_date AND end_date)),
+        'capacity_remaining',   120 - (SELECT COALESCE(SUM(mux_weight),0) FROM public.campaigns WHERE status IN ('approved','active') AND CURRENT_DATE BETWEEN start_date AND end_date),
+        'max_additional_multi', (120 - (SELECT COALESCE(SUM(mux_weight),0) FROM public.campaigns WHERE status IN ('approved','active') AND CURRENT_DATE BETWEEN start_date AND end_date)) / 3,
+        'max_additional_single',(120 - (SELECT COALESCE(SUM(mux_weight),0) FROM public.campaigns WHERE status IN ('approved','active') AND CURRENT_DATE BETWEEN start_date AND end_date))
     ) INTO result;
     RETURN result;
 END;
@@ -635,7 +637,7 @@ CREATE TABLE wire_news (
     dialect_applied BOOLEAN NOT NULL DEFAULT FALSE,
 
     -- pgvector: AI embedding for similarity/dedup (384-dim)
-    embedding       vector(384),
+    embedding       extensions.vector(384),
 
     -- Full-text search
     search_vector   TSVECTOR GENERATED ALWAYS AS (
@@ -647,15 +649,29 @@ ALTER TABLE wire_news ENABLE ROW LEVEL SECURITY;
 
 -- Public: read live stories
 CREATE POLICY "public_read_wire"          ON wire_news FOR SELECT TO anon, authenticated USING (is_live = TRUE);
--- Authenticated (backend/admin): insert & update
-CREATE POLICY "authenticated_insert_wire" ON wire_news FOR INSERT TO authenticated WITH CHECK (TRUE);
-CREATE POLICY "authenticated_update_wire" ON wire_news FOR UPDATE TO authenticated USING (TRUE);
+-- Admin only: insert & update wire news
+CREATE POLICY "authenticated_insert_wire" ON wire_news FOR INSERT TO authenticated
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM user_profiles p
+            WHERE p.id = auth.uid()
+              AND p.role IN ('admin', 'super_admin')
+        )
+    );
+CREATE POLICY "authenticated_update_wire" ON wire_news FOR UPDATE TO authenticated
+    USING (
+        EXISTS (
+            SELECT 1 FROM user_profiles p
+            WHERE p.id = auth.uid()
+              AND p.role IN ('admin', 'super_admin')
+        )
+    );
 
 CREATE INDEX idx_wire_created   ON wire_news(created_at DESC);
 CREATE INDEX idx_wire_genre     ON wire_news(genre);
 CREATE INDEX idx_wire_live      ON wire_news(is_live) WHERE is_live = TRUE;
 CREATE INDEX idx_wire_fts       ON wire_news USING gin(search_vector);  -- Full-text search
-CREATE INDEX idx_wire_embedding ON wire_news USING ivfflat (embedding vector_cosine_ops)
+CREATE INDEX idx_wire_embedding ON wire_news USING ivfflat (embedding extensions.vector_cosine_ops)
     WITH (lists = 50);  -- AI similarity index
 
 -- Enable for Realtime (THE WIRE live ticker)
@@ -682,7 +698,14 @@ CREATE TABLE page_views (
 
 ALTER TABLE page_views ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "public_insert_pageviews"    ON page_views FOR INSERT TO anon, authenticated WITH CHECK (TRUE);
+CREATE POLICY "public_insert_pageviews"    ON page_views FOR INSERT TO anon, authenticated
+    WITH CHECK (
+        CASE
+            WHEN current_setting('request.jwt.claims', true)::json->>'role' = 'anon'
+                THEN user_id IS NULL
+            ELSE (user_id IS NULL OR user_id = auth.uid())
+        END
+    );
 CREATE POLICY "admin_all_pageviews"        ON page_views FOR SELECT TO authenticated
     USING (EXISTS (SELECT 1 FROM user_profiles p WHERE p.id = auth.uid() AND p.role IN ('admin','super_admin')));
 
@@ -714,8 +737,22 @@ CREATE TABLE sessions (
 
 ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "public_insert_sessions"   ON sessions FOR INSERT TO anon, authenticated WITH CHECK (TRUE);
-CREATE POLICY "public_update_sessions"   ON sessions FOR UPDATE TO anon, authenticated USING (TRUE);
+CREATE POLICY "public_insert_sessions"   ON sessions FOR INSERT TO anon, authenticated
+    WITH CHECK (
+        CASE
+            WHEN current_setting('request.jwt.claims', true)::json->>'role' = 'anon'
+                THEN user_id IS NULL
+            ELSE (user_id IS NULL OR user_id = auth.uid())
+        END
+    );
+CREATE POLICY "public_update_sessions"   ON sessions FOR UPDATE TO anon, authenticated
+    USING (
+        CASE
+            WHEN current_setting('request.jwt.claims', true)::json->>'role' = 'anon'
+                THEN user_id IS NULL
+            ELSE (user_id IS NULL OR user_id = auth.uid())
+        END
+    );
 CREATE POLICY "admin_all_sessions"       ON sessions FOR SELECT TO authenticated
     USING (EXISTS (SELECT 1 FROM user_profiles p WHERE p.id = auth.uid() AND p.role IN ('admin','super_admin')));
 
@@ -774,7 +811,9 @@ CREATE TRIGGER on_auth_user_created
 
 -- B) Auto-number invoices (INV-YY-NNNNN)
 CREATE OR REPLACE FUNCTION generate_invoice_number()
-RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = ''
+AS $$
 DECLARE
     yr TEXT;
     nxt INTEGER;
@@ -783,7 +822,7 @@ BEGIN
         yr := TO_CHAR(CURRENT_DATE, 'YY');
         SELECT COALESCE(MAX(CAST(SPLIT_PART(invoice_number, '-', 3) AS INTEGER)), 0) + 1
         INTO nxt
-        FROM invoices
+        FROM public.invoices
         WHERE invoice_number LIKE 'INV-' || yr || '-%';
         NEW.invoice_number := 'INV-' || yr || '-' || LPAD(nxt::TEXT, 5, '0');
     END IF;
@@ -797,9 +836,11 @@ CREATE TRIGGER trg_invoice_number
 
 -- C) Auto-purge Wire news older than 30 days (keeps THE WIRE searchable for 30 days)
 CREATE OR REPLACE FUNCTION purge_old_wire_news()
-RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = ''
+AS $$
 BEGIN
-    DELETE FROM wire_news
+    DELETE FROM public.wire_news
     WHERE created_at < NOW() - INTERVAL '30 days';
     RETURN NULL;
 END;
@@ -817,9 +858,11 @@ CREATE OR REPLACE FUNCTION log_activity(
     p_description TEXT    DEFAULT NULL,
     p_metadata    JSONB   DEFAULT NULL
 )
-RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = ''
+AS $$
 BEGIN
-    INSERT INTO activity_log (user_id, action, entity_type, entity_id, description, metadata)
+    INSERT INTO public.activity_log (user_id, action, entity_type, entity_id, description, metadata)
     VALUES (auth.uid(), p_action, p_entity_type, p_entity_id, p_description, p_metadata);
 END;
 $$;
@@ -833,17 +876,19 @@ RETURNS TABLE (
     percent_off INTEGER,
     is_valid    BOOLEAN
 )
-LANGUAGE sql SECURITY DEFINER AS $$
+LANGUAGE sql SECURITY DEFINER
+SET search_path = ''
+AS $$
     SELECT
-        id, code, amount_pence, percent_off,
+        d.id, d.code, d.amount_pence, d.percent_off,
         (
-            approved_at IS NOT NULL
-            AND is_active = TRUE
-            AND (expires_at IS NULL OR expires_at > NOW())
-            AND (max_uses IS NULL OR use_count < max_uses)
+            d.approved_at IS NOT NULL
+            AND d.is_active = TRUE
+            AND (d.expires_at IS NULL OR d.expires_at > NOW())
+            AND (d.max_uses IS NULL OR d.use_count < d.max_uses)
         ) AS is_valid
-    FROM discounts
-    WHERE UPPER(code) = UPPER(p_code);
+    FROM public.discounts d
+    WHERE UPPER(d.code) = UPPER(p_code);
 $$;
 
 -- F) Create discount code (admin only)
@@ -854,10 +899,12 @@ CREATE OR REPLACE FUNCTION create_discount_code(
     p_created_by    UUID    DEFAULT NULL,
     p_note          TEXT    DEFAULT NULL
 )
-RETURNS UUID LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS UUID LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = ''
+AS $$
 DECLARE v_id UUID;
 BEGIN
-    INSERT INTO discounts (code, amount_pence, percent_off, created_by, note)
+    INSERT INTO public.discounts (code, amount_pence, percent_off, created_by, note)
     VALUES (UPPER(p_code), p_amount_pence, p_percent_off, p_created_by, p_note)
     RETURNING id INTO v_id;
     RETURN v_id;
@@ -870,18 +917,19 @@ CREATE OR REPLACE FUNCTION approve_discount(
     p_approved_by UUID,
     p_note        TEXT DEFAULT NULL
 )
-RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = ''
+AS $$
 BEGIN
-    -- Cannot approve own discount
-    IF (SELECT created_by FROM discounts WHERE id = p_discount_id) = p_approved_by THEN
+    IF (SELECT created_by FROM public.discounts WHERE id = p_discount_id) = p_approved_by THEN
         RAISE EXCEPTION 'Cannot approve your own discount code';
     END IF;
 
-    UPDATE discounts
+    UPDATE public.discounts
     SET approved_at = NOW(), approved_by = p_approved_by
     WHERE id = p_discount_id;
 
-    INSERT INTO discount_approvals (discount_id, approved_by, action, note)
+    INSERT INTO public.discount_approvals (discount_id, approved_by, action, note)
     VALUES (p_discount_id, p_approved_by, 'approved', p_note);
 END;
 $$;
@@ -896,24 +944,28 @@ RETURNS TABLE (
     created_at   TIMESTAMPTZ,
     note         TEXT
 )
-LANGUAGE sql SECURITY DEFINER AS $$
-    SELECT id, code, amount_pence, percent_off, created_at, note
-    FROM discounts
-    WHERE approved_at IS NULL
-    ORDER BY created_at DESC;
+LANGUAGE sql SECURITY DEFINER
+SET search_path = ''
+AS $$
+    SELECT d.id, d.code, d.amount_pence, d.percent_off, d.created_at, d.note
+    FROM public.discounts d
+    WHERE d.approved_at IS NULL
+    ORDER BY d.created_at DESC;
 $$;
 
 -- I) Customer dashboard stats
 CREATE OR REPLACE FUNCTION get_customer_dashboard_stats(p_user_id UUID)
-RETURNS JSON LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS JSON LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = ''
+AS $$
 DECLARE result JSON;
 BEGIN
     SELECT json_build_object(
-        'total_bookings',   (SELECT COUNT(*)   FROM advertising_leads   WHERE user_id = p_user_id),
-        'active_campaigns', (SELECT COUNT(*)   FROM campaigns           WHERE user_id = p_user_id AND status = 'active'),
-        'total_spent_pence',(SELECT COALESCE(SUM(total_pence),0) FROM invoices WHERE user_id = p_user_id AND status = 'paid'),
-        'pending_invoices', (SELECT COUNT(*)   FROM invoices            WHERE user_id = p_user_id AND status IN ('sent','overdue')),
-        'plays_this_month', (SELECT COALESCE(SUM(plays_completed),0) FROM campaigns WHERE user_id = p_user_id AND start_date >= DATE_TRUNC('month', NOW())::DATE)
+        'total_bookings',   (SELECT COUNT(*)   FROM public.advertising_leads   WHERE user_id = p_user_id),
+        'active_campaigns', (SELECT COUNT(*)   FROM public.campaigns           WHERE user_id = p_user_id AND status = 'active'),
+        'total_spent_pence',(SELECT COALESCE(SUM(total_pence),0) FROM public.invoices WHERE user_id = p_user_id AND status = 'paid'),
+        'pending_invoices', (SELECT COUNT(*)   FROM public.invoices            WHERE user_id = p_user_id AND status IN ('sent','overdue')),
+        'plays_this_month', (SELECT COALESCE(SUM(plays_completed),0) FROM public.campaigns WHERE user_id = p_user_id AND start_date >= DATE_TRUNC('month', NOW())::DATE)
     ) INTO result;
     RETURN result;
 END;
@@ -921,7 +973,7 @@ $$;
 
 -- J) AI: Find similar advertisers via pgvector cosine similarity
 CREATE OR REPLACE FUNCTION match_advertisers(
-    query_embedding vector(128),
+    query_embedding extensions.vector(128),
     match_threshold FLOAT   DEFAULT 0.7,
     match_count     INT     DEFAULT 5
 )
@@ -930,14 +982,16 @@ RETURNS TABLE (
     company     TEXT,
     similarity  FLOAT
 )
-LANGUAGE sql STABLE AS $$
+LANGUAGE sql STABLE
+SET search_path = ''
+AS $$
     SELECT
         p.id,
         p.company_name,
-        1 - (p.embedding <=> query_embedding) AS similarity
-    FROM user_profiles p
+        1 - (p.embedding OPERATOR(extensions.<=>) query_embedding) AS similarity
+    FROM public.user_profiles p
     WHERE p.embedding IS NOT NULL
-      AND 1 - (p.embedding <=> query_embedding) > match_threshold
+      AND 1 - (p.embedding OPERATOR(extensions.<=>) query_embedding) > match_threshold
     ORDER BY similarity DESC
     LIMIT match_count;
 $$;
@@ -951,13 +1005,15 @@ RETURNS TABLE (
     genre    TEXT,
     rank     FLOAT
 )
-LANGUAGE sql STABLE AS $$
+LANGUAGE sql STABLE
+SET search_path = ''
+AS $$
     SELECT
-        id, title, summary, genre,
-        ts_rank(search_vector, plainto_tsquery('english', query)) AS rank
-    FROM wire_news
-    WHERE is_live = TRUE
-      AND search_vector @@ plainto_tsquery('english', query)
+        w.id, w.title, w.summary, w.genre,
+        ts_rank(w.search_vector, plainto_tsquery('english', query)) AS rank
+    FROM public.wire_news w
+    WHERE w.is_live = TRUE
+      AND w.search_vector @@ plainto_tsquery('english', query)
     ORDER BY rank DESC
     LIMIT 20;
 $$;
@@ -1011,6 +1067,7 @@ USING (bucket_id = 'avatars');
 -- PERMISSIONS
 -- ============================================================
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT USAGE ON SCHEMA extensions TO anon, authenticated, service_role;
 GRANT SELECT ON wire_news, discounts TO anon;
 GRANT SELECT, INSERT ON advertising_leads, page_views, sessions TO anon;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO authenticated;
