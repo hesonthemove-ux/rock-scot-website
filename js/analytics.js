@@ -66,7 +66,8 @@
                 headers: {
                     'apikey': SUPABASE_ANON_KEY,
                     'Content-Type': 'application/json',
-                    'Prefer': 'return=minimal'
+                    'Prefer': 'return=minimal',
+                    'x-session-id': sessionId
                 },
                 body: JSON.stringify(pageView)
             });
@@ -96,7 +97,8 @@
                 headers: {
                     'apikey': SUPABASE_ANON_KEY,
                     'Content-Type': 'application/json',
-                    'Prefer': 'return=minimal'
+                    'Prefer': 'return=minimal',
+                    'x-session-id': sessionId
                 },
                 body: JSON.stringify(sessionData)
             });
@@ -107,7 +109,8 @@
                 headers: {
                     'apikey': SUPABASE_ANON_KEY,
                     'Content-Type': 'application/json',
-                    'Prefer': 'return=minimal'
+                    'Prefer': 'return=minimal',
+                    'x-session-id': sessionId
                 },
                 body: JSON.stringify({
                     last_activity_at: new Date().toISOString()
@@ -132,7 +135,8 @@
             headers: {
                 'apikey': SUPABASE_ANON_KEY,
                 'Content-Type': 'application/json',
-                'Prefer': 'return=minimal'
+                'Prefer': 'return=minimal',
+                'x-session-id': sessionId
             },
             body: JSON.stringify({
                 duration_seconds: duration,
@@ -156,16 +160,21 @@
         const sessionId = getSessionId();
         const duration = Math.floor((Date.now() - sessionStartTime) / 1000);
         
-        // Use sendBeacon for reliable sending on page unload
-        const data = JSON.stringify({
-            duration_seconds: duration,
-            ended_at: new Date().toISOString()
-        });
-        
-        navigator.sendBeacon(
-            `${SUPABASE_URL}/rest/v1/sessions?id=eq.${sessionId}`,
-            new Blob([data], { type: 'application/json' })
-        );
+        // keepalive lets us send final PATCH during unload with policy headers.
+        fetch(`${SUPABASE_URL}/rest/v1/sessions?id=eq.${sessionId}`, {
+            method: 'PATCH',
+            keepalive: true,
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal',
+                'x-session-id': sessionId
+            },
+            body: JSON.stringify({
+                duration_seconds: duration,
+                ended_at: new Date().toISOString()
+            })
+        }).catch(() => {});
     });
     
     // Initialize tracking
@@ -187,7 +196,8 @@
             headers: {
                 'apikey': SUPABASE_ANON_KEY,
                 'Content-Type': 'application/json',
-                'Prefer': 'return=minimal'
+                'Prefer': 'return=minimal',
+                'x-session-id': sessionId
             },
             body: JSON.stringify({
                 pages_viewed: pageViewCount
