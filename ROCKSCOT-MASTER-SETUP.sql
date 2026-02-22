@@ -101,6 +101,9 @@ DROP FUNCTION IF EXISTS get_pending_discounts()       CASCADE;
 DROP FUNCTION IF EXISTS match_advertisers(vector,FLOAT,INT) CASCADE;
 DROP FUNCTION IF EXISTS search_wire_news(TEXT)        CASCADE;
 
+-- Drop auth trigger explicitly (defensive rerun safety)
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
 -- ============================================================
 -- 1. USER PROFILES (extends Supabase auth.users)
 -- ============================================================
@@ -719,7 +722,23 @@ CREATE INDEX idx_wire_embedding ON wire_news USING ivfflat (embedding vector_cos
     WITH (lists = 50);  -- AI similarity index
 
 -- Enable for Realtime (THE WIRE live ticker)
-ALTER PUBLICATION supabase_realtime ADD TABLE wire_news;
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
+        IF NOT EXISTS (
+            SELECT 1
+            FROM pg_publication_tables
+            WHERE pubname = 'supabase_realtime'
+              AND schemaname = 'public'
+              AND tablename = 'wire_news'
+        ) THEN
+            ALTER PUBLICATION supabase_realtime ADD TABLE wire_news;
+        END IF;
+    ELSE
+        RAISE NOTICE 'Publication supabase_realtime not found; skipping realtime table registration.';
+    END IF;
+END
+$$;
 
 -- ============================================================
 -- 9. PAGE VIEWS (analytics — only with cookie consent)
