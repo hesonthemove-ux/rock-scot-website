@@ -62,6 +62,7 @@ DROP FUNCTION IF EXISTS approve_discount(UUID,UUID,TEXT) CASCADE;
 DROP FUNCTION IF EXISTS get_pending_discounts()       CASCADE;
 DROP FUNCTION IF EXISTS match_advertisers(vector,FLOAT,INT) CASCADE;
 DROP FUNCTION IF EXISTS search_wire_news(TEXT)        CASCADE;
+DROP FUNCTION IF EXISTS public.is_admin_user()        CASCADE;
 
 -- ============================================================
 -- 1. USER PROFILES (extends Supabase auth.users)
@@ -101,10 +102,28 @@ CREATE TABLE user_profiles (
 
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 
+-- SECURITY DEFINER helper avoids recursive RLS checks in policies.
+CREATE OR REPLACE FUNCTION public.is_admin_user()
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+    SELECT EXISTS (
+        SELECT 1
+        FROM public.user_profiles p
+        WHERE p.id = auth.uid()
+          AND p.role IN ('admin','super_admin')
+          AND p.is_active = TRUE
+    );
+$$;
+
 CREATE POLICY "own_profile_select"   ON user_profiles FOR SELECT TO authenticated USING (auth.uid() = id);
 CREATE POLICY "own_profile_update"   ON user_profiles FOR UPDATE TO authenticated USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
 CREATE POLICY "admin_all_profiles"   ON user_profiles FOR ALL TO authenticated
-    USING (EXISTS (SELECT 1 FROM user_profiles p WHERE p.id = auth.uid() AND p.role IN ('admin','super_admin')));
+    USING (public.is_admin_user())
+    WITH CHECK (public.is_admin_user());
 
 CREATE INDEX idx_user_profiles_role      ON user_profiles(role);
 CREATE INDEX idx_user_profiles_embedding ON user_profiles USING ivfflat (embedding vector_cosine_ops)
@@ -171,7 +190,8 @@ CREATE POLICY "public_insert_leads"        ON advertising_leads FOR INSERT TO an
 CREATE POLICY "own_leads_select"           ON advertising_leads FOR SELECT TO authenticated USING (user_id = auth.uid());
 -- Admins see all
 CREATE POLICY "admin_all_leads"            ON advertising_leads FOR ALL TO authenticated
-    USING (EXISTS (SELECT 1 FROM user_profiles p WHERE p.id = auth.uid() AND p.role IN ('admin','super_admin')));
+    USING (public.is_admin_user())
+    WITH CHECK (public.is_admin_user());
 
 CREATE INDEX idx_leads_created   ON advertising_leads(created_at DESC);
 CREATE INDEX idx_leads_email     ON advertising_leads(email);
@@ -222,7 +242,8 @@ CREATE POLICY "public_read_approved_discounts" ON discounts FOR SELECT TO anon, 
     );
 -- Admins: full control
 CREATE POLICY "admin_all_discounts" ON discounts FOR ALL TO authenticated
-    USING (EXISTS (SELECT 1 FROM user_profiles p WHERE p.id = auth.uid() AND p.role IN ('admin','super_admin')));
+    USING (public.is_admin_user())
+    WITH CHECK (public.is_admin_user());
 
 CREATE INDEX idx_discount_code     ON discounts(code);
 CREATE INDEX idx_discount_approved ON discounts(approved_at) WHERE approved_at IS NOT NULL;
@@ -244,7 +265,8 @@ CREATE TABLE discount_approvals (
 ALTER TABLE discount_approvals ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "admin_all_discount_approvals" ON discount_approvals FOR ALL TO authenticated
-    USING (EXISTS (SELECT 1 FROM user_profiles p WHERE p.id = auth.uid() AND p.role IN ('admin','super_admin')));
+    USING (public.is_admin_user())
+    WITH CHECK (public.is_admin_user());
 
 -- ============================================================
 -- 5. INVOICES (auto-numbered, VAT-aware)
@@ -286,7 +308,8 @@ ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "own_invoices_select"  ON invoices FOR SELECT TO authenticated USING (user_id = auth.uid());
 CREATE POLICY "admin_all_invoices"   ON invoices FOR ALL TO authenticated
-    USING (EXISTS (SELECT 1 FROM user_profiles p WHERE p.id = auth.uid() AND p.role IN ('admin','super_admin')));
+    USING (public.is_admin_user())
+    WITH CHECK (public.is_admin_user());
 
 CREATE INDEX idx_invoices_user   ON invoices(user_id);
 CREATE INDEX idx_invoices_status ON invoices(status);
@@ -320,7 +343,8 @@ ALTER TABLE payment_transactions ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "own_transactions_select" ON payment_transactions FOR SELECT TO authenticated USING (user_id = auth.uid());
 CREATE POLICY "admin_all_transactions"  ON payment_transactions FOR ALL TO authenticated
-    USING (EXISTS (SELECT 1 FROM user_profiles p WHERE p.id = auth.uid() AND p.role IN ('admin','super_admin')));
+    USING (public.is_admin_user())
+    WITH CHECK (public.is_admin_user());
 
 CREATE INDEX idx_transactions_invoice ON payment_transactions(invoice_id);
 CREATE INDEX idx_transactions_status  ON payment_transactions(status);
@@ -353,7 +377,7 @@ INSERT INTO broadcast_constants (key, value, note) VALUES
 -- broadcast_constants is read-only: admins read, nobody writes via API
 ALTER TABLE broadcast_constants ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "admin_read_constants" ON broadcast_constants FOR SELECT TO authenticated
-    USING (EXISTS (SELECT 1 FROM user_profiles p WHERE p.id = auth.uid() AND p.role IN ('admin','super_admin')));
+    USING (public.is_admin_user());
 
 -- ============================================================
 -- 8. CAMPAIGNS (broadcast-aware capacity tracking)
@@ -460,7 +484,8 @@ ALTER TABLE campaigns ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "own_campaigns_select" ON campaigns FOR SELECT TO authenticated USING (user_id = auth.uid());
 CREATE POLICY "admin_all_campaigns"  ON campaigns FOR ALL TO authenticated
-    USING (EXISTS (SELECT 1 FROM user_profiles p WHERE p.id = auth.uid() AND p.role IN ('admin','super_admin')));
+    USING (public.is_admin_user())
+    WITH CHECK (public.is_admin_user());
 
 CREATE INDEX idx_campaigns_user      ON campaigns(user_id);
 CREATE INDEX idx_campaigns_status    ON campaigns(status);
@@ -659,7 +684,18 @@ CREATE INDEX idx_wire_embedding ON wire_news USING ivfflat (embedding vector_cos
     WITH (lists = 50);  -- AI similarity index
 
 -- Enable for Realtime (THE WIRE live ticker)
-ALTER PUBLICATION supabase_realtime ADD TABLE wire_news;
+DO $$
+BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE wire_news;
+EXCEPTION
+    WHEN duplicate_object THEN
+        RAISE NOTICE 'wire_news is already in supabase_realtime publication';
+    WHEN undefined_object THEN
+        RAISE NOTICE 'supabase_realtime publication not found; skipping realtime publication step';
+    WHEN insufficient_privilege THEN
+        RAISE NOTICE 'insufficient privilege to alter supabase_realtime publication; skipping';
+END;
+$$;
 
 -- ============================================================
 -- 9. PAGE VIEWS (analytics — only with cookie consent)
@@ -684,7 +720,7 @@ ALTER TABLE page_views ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "public_insert_pageviews"    ON page_views FOR INSERT TO anon, authenticated WITH CHECK (TRUE);
 CREATE POLICY "admin_all_pageviews"        ON page_views FOR SELECT TO authenticated
-    USING (EXISTS (SELECT 1 FROM user_profiles p WHERE p.id = auth.uid() AND p.role IN ('admin','super_admin')));
+    USING (public.is_admin_user());
 
 CREATE INDEX idx_pageviews_created ON page_views(created_at DESC);
 CREATE INDEX idx_pageviews_path    ON page_views(page_path);
@@ -717,7 +753,7 @@ ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "public_insert_sessions"   ON sessions FOR INSERT TO anon, authenticated WITH CHECK (TRUE);
 CREATE POLICY "public_update_sessions"   ON sessions FOR UPDATE TO anon, authenticated USING (TRUE);
 CREATE POLICY "admin_all_sessions"       ON sessions FOR SELECT TO authenticated
-    USING (EXISTS (SELECT 1 FROM user_profiles p WHERE p.id = auth.uid() AND p.role IN ('admin','super_admin')));
+    USING (public.is_admin_user());
 
 CREATE INDEX idx_sessions_visitor ON sessions(visitor_id);
 CREATE INDEX idx_sessions_started ON sessions(started_at DESC);
@@ -742,7 +778,8 @@ CREATE TABLE activity_log (
 ALTER TABLE activity_log ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "admin_all_logs" ON activity_log FOR ALL TO authenticated
-    USING (EXISTS (SELECT 1 FROM user_profiles p WHERE p.id = auth.uid() AND p.role IN ('admin','super_admin')));
+    USING (public.is_admin_user())
+    WITH CHECK (public.is_admin_user());
 
 CREATE INDEX idx_activity_created ON activity_log(created_at DESC);
 CREATE INDEX idx_activity_user    ON activity_log(user_id);
@@ -973,6 +1010,15 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- Storage RLS
+-- Make this block re-runnable on existing projects.
+DROP POLICY IF EXISTS "public_read_documents" ON storage.objects;
+DROP POLICY IF EXISTS "auth_upload_documents" ON storage.objects;
+DROP POLICY IF EXISTS "auth_upload_assets" ON storage.objects;
+DROP POLICY IF EXISTS "own_assets_select" ON storage.objects;
+DROP POLICY IF EXISTS "admin_all_assets" ON storage.objects;
+DROP POLICY IF EXISTS "auth_upload_avatar" ON storage.objects;
+DROP POLICY IF EXISTS "public_read_avatars" ON storage.objects;
+
 CREATE POLICY "public_read_documents"
 ON storage.objects FOR SELECT TO public
 USING (bucket_id = 'documents');
@@ -995,7 +1041,11 @@ CREATE POLICY "admin_all_assets"
 ON storage.objects FOR ALL TO authenticated
 USING (
     bucket_id IN ('campaign-assets','documents')
-    AND EXISTS (SELECT 1 FROM user_profiles p WHERE p.id = auth.uid() AND p.role IN ('admin','super_admin'))
+    AND public.is_admin_user()
+)
+WITH CHECK (
+    bucket_id IN ('campaign-assets','documents')
+    AND public.is_admin_user()
 );
 
 CREATE POLICY "auth_upload_avatar"
@@ -1016,6 +1066,8 @@ GRANT SELECT, INSERT ON advertising_leads, page_views, sessions TO anon;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO authenticated;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO authenticated;
+REVOKE ALL ON FUNCTION public.is_admin_user() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.is_admin_user() TO authenticated;
 GRANT EXECUTE ON FUNCTION validate_discount TO anon;
 GRANT EXECUTE ON FUNCTION search_wire_news  TO anon;
 
