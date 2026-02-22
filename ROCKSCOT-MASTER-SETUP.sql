@@ -269,6 +269,8 @@ CREATE POLICY "admin_all_discounts" ON discounts FOR ALL TO authenticated
 CREATE INDEX idx_discount_code     ON discounts(code);
 CREATE INDEX idx_discount_approved ON discounts(approved_at) WHERE approved_at IS NOT NULL;
 CREATE INDEX idx_discount_expires  ON discounts(expires_at) WHERE expires_at IS NOT NULL;
+CREATE INDEX idx_discounts_created_by ON discounts(created_by);
+CREATE INDEX idx_discounts_approved_by ON discounts(approved_by);
 
 -- ============================================================
 -- 4. DISCOUNT APPROVALS (audit log)
@@ -287,6 +289,8 @@ ALTER TABLE discount_approvals ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "admin_all_discount_approvals" ON discount_approvals FOR ALL TO authenticated
     USING (EXISTS (SELECT 1 FROM user_profiles p WHERE p.id = auth.uid() AND p.role IN ('admin','super_admin')));
+CREATE INDEX idx_discount_approvals_discount_id ON discount_approvals(discount_id);
+CREATE INDEX idx_discount_approvals_approved_by ON discount_approvals(approved_by);
 
 -- ============================================================
 -- 5. INVOICES (auto-numbered, VAT-aware)
@@ -333,6 +337,7 @@ CREATE POLICY "admin_all_invoices"   ON invoices FOR ALL TO authenticated
 CREATE INDEX idx_invoices_user   ON invoices(user_id);
 CREATE INDEX idx_invoices_status ON invoices(status);
 CREATE INDEX idx_invoices_number ON invoices(invoice_number);
+CREATE INDEX idx_invoices_booking ON invoices(booking_id);
 
 -- ============================================================
 -- 6. PAYMENT TRANSACTIONS (Revolut / bank transfer)
@@ -366,6 +371,7 @@ CREATE POLICY "admin_all_transactions"  ON payment_transactions FOR ALL TO authe
 
 CREATE INDEX idx_transactions_invoice ON payment_transactions(invoice_id);
 CREATE INDEX idx_transactions_status  ON payment_transactions(status);
+CREATE INDEX idx_transactions_user    ON payment_transactions(user_id);
 
 -- ============================================================
 -- 7. BROADCAST CONSTANTS
@@ -505,6 +511,7 @@ CREATE POLICY "admin_all_campaigns"  ON campaigns FOR ALL TO authenticated
     USING (EXISTS (SELECT 1 FROM user_profiles p WHERE p.id = auth.uid() AND p.role IN ('admin','super_admin')));
 
 CREATE INDEX idx_campaigns_user      ON campaigns(user_id);
+CREATE INDEX idx_campaigns_booking   ON campaigns(booking_id);
 CREATE INDEX idx_campaigns_status    ON campaigns(status);
 CREATE INDEX idx_campaigns_dates     ON campaigns(start_date, end_date);
 CREATE INDEX idx_campaigns_mux_type  ON campaigns(mux_type);
@@ -781,6 +788,7 @@ CREATE POLICY "admin_all_pageviews"        ON page_views FOR SELECT TO authentic
 CREATE INDEX idx_pageviews_created ON page_views(created_at DESC);
 CREATE INDEX idx_pageviews_path    ON page_views(page_path);
 CREATE INDEX idx_pageviews_session ON page_views(session_id);
+CREATE INDEX idx_pageviews_user    ON page_views(user_id);
 
 -- ============================================================
 -- 10. SESSIONS (analytics)
@@ -851,6 +859,7 @@ CREATE POLICY "admin_all_sessions"       ON sessions FOR SELECT TO authenticated
     USING (EXISTS (SELECT 1 FROM user_profiles p WHERE p.id = auth.uid() AND p.role IN ('admin','super_admin')));
 
 CREATE INDEX idx_sessions_visitor ON sessions(visitor_id);
+CREATE INDEX idx_sessions_user    ON sessions(user_id);
 CREATE INDEX idx_sessions_started ON sessions(started_at DESC);
 
 -- ============================================================
@@ -1091,6 +1100,31 @@ LANGUAGE sql STABLE SET search_path = public, extensions AS $$
       AND search_vector @@ plainto_tsquery('english', query)
     ORDER BY rank DESC
     LIMIT 20;
+$$;
+
+-- Lint hardening for helper functions that may already exist in public.
+DO $$
+DECLARE
+    fn_record record;
+BEGIN
+    FOR fn_record IN
+        SELECT
+            n.nspname AS schema_name,
+            p.proname,
+            pg_get_function_identity_arguments(p.oid) AS identity_args
+        FROM pg_proc p
+        JOIN pg_namespace n ON n.oid = p.pronamespace
+        WHERE n.nspname = 'public'
+          AND p.proname IN ('get_function_definition_owner', 'get_function_definition')
+    LOOP
+        EXECUTE format(
+            'ALTER FUNCTION %I.%I(%s) SET search_path = public, extensions',
+            fn_record.schema_name,
+            fn_record.proname,
+            fn_record.identity_args
+        );
+    END LOOP;
+END
 $$;
 
 -- ============================================================
