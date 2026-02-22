@@ -659,7 +659,18 @@ CREATE INDEX idx_wire_embedding ON wire_news USING ivfflat (embedding vector_cos
     WITH (lists = 50);  -- AI similarity index
 
 -- Enable for Realtime (THE WIRE live ticker)
-ALTER PUBLICATION supabase_realtime ADD TABLE wire_news;
+DO $$
+BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE wire_news;
+EXCEPTION
+    WHEN duplicate_object THEN
+        RAISE NOTICE 'wire_news is already in supabase_realtime publication';
+    WHEN undefined_object THEN
+        RAISE NOTICE 'supabase_realtime publication not found; skipping realtime publication step';
+    WHEN insufficient_privilege THEN
+        RAISE NOTICE 'insufficient privilege to alter supabase_realtime publication; skipping';
+END;
+$$;
 
 -- ============================================================
 -- 9. PAGE VIEWS (analytics — only with cookie consent)
@@ -973,6 +984,15 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- Storage RLS
+-- Make this block re-runnable on existing projects.
+DROP POLICY IF EXISTS "public_read_documents" ON storage.objects;
+DROP POLICY IF EXISTS "auth_upload_documents" ON storage.objects;
+DROP POLICY IF EXISTS "auth_upload_assets" ON storage.objects;
+DROP POLICY IF EXISTS "own_assets_select" ON storage.objects;
+DROP POLICY IF EXISTS "admin_all_assets" ON storage.objects;
+DROP POLICY IF EXISTS "auth_upload_avatar" ON storage.objects;
+DROP POLICY IF EXISTS "public_read_avatars" ON storage.objects;
+
 CREATE POLICY "public_read_documents"
 ON storage.objects FOR SELECT TO public
 USING (bucket_id = 'documents');
