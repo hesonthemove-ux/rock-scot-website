@@ -2,6 +2,9 @@
 # ============================================================
 # ROCK.SCOT — Deploy to GitHub + Raspberry Pi
 # Usage: ./deploy.sh "commit message"
+#
+# Run from your DEV machine (not the Pi).
+# To deploy ON the Pi itself, use: ./deploy-on-pi.sh
 # ============================================================
 
 set -e
@@ -11,8 +14,8 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-PI_USER="ubuntu"
-PI_HOST="82.7.194.110"
+PI_USER="rockscot"
+PI_HOST="192.168.0.200"
 PI_PATH="/var/www/html"
 BRANCH="main"
 
@@ -53,17 +56,17 @@ echo -e "${GREEN}  Pushed to GitHub.${NC}"
 
 # ── STEP 2: DEPLOY TO PI ──
 echo -e "${GREEN}[3/3] Deploying to Raspberry Pi ($PI_HOST)...${NC}"
-echo -e "${ORANGE}  Syncing files...${NC}"
+echo -e "${ORANGE}  Syncing files (preserving Pi-only directories)...${NC}"
 
-rsync -avz --delete \
+rsync -avz \
     --exclude '.git' \
     --exclude '.gitignore' \
     --exclude 'node_modules' \
     --exclude '*.md' \
     --exclude 'deploy.sh' \
     --exclude 'deploy-pi.sh' \
-    --exclude 'supabase/migrations' \
-    --exclude 'supabase/functions' \
+    --exclude 'deploy-on-pi.sh' \
+    --exclude 'supabase/' \
     --exclude 'ROCKSCOT-MASTER-SETUP.sql' \
     --exclude 'SQL-VALIDATION-REPORT.md' \
     ./ "$PI_USER@$PI_HOST:$PI_PATH/"
@@ -75,6 +78,6 @@ echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}  DEPLOYMENT COMPLETE${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo -e "  GitHub:  https://github.com/hesonthemove-ux/rock-scot-website"
-echo -e "  Live:    http://$PI_HOST"
-echo -e "  Wire:    http://$PI_HOST/wire.htm"
+echo -e "  Live:    http://82.7.194.110"
+echo -e "  Wire:    http://82.7.194.110/wire.htm"
 echo ""
