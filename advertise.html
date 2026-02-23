@@ -613,7 +613,7 @@
     const SUPABASE_URL  = window.SUPABASE_URL || 'https://pwzeapvopeeoahpyicdm.supabase.co';
     const SUPABASE_KEY  = window.SUPABASE_ANON_KEY || 'YOUR_ANON_KEY';
     const EDGE_URL      = `${SUPABASE_URL}/functions/v1/book_campaign`;
-    const supabase      = window.supabase?.createClient
+    const supabase      = (window.supabase && typeof window.supabase.createClient === 'function')
         ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
         : null;
 
@@ -670,6 +670,22 @@
     const BOLT_ON_PENCE  = 15000;  // £150 production add-on
     const RUSH_PENCE     = 5000;   // £50 rush surcharge
 
+    function defaultStartDate(daysAhead = 28) {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        d.setDate(d.getDate() + daysAhead);
+        return d.toISOString().split('T')[0];
+    }
+
+    function ensureStartDate() {
+        const startInput = document.getElementById('start-date');
+        if (!startInput) return '';
+        if (!startInput.value) {
+            startInput.value = defaultStartDate();
+        }
+        return startInput.value;
+    }
+
     // ── PACKAGE SHORTCUT BUTTONS ──────────────────────────────────
     function selectPackage(pkgKey) {
         if (!PACKAGES[pkgKey]) return;
@@ -704,6 +720,10 @@
 
         // Reset capacity indicator
         document.getElementById('capacity-indicator').style.display = 'none';
+
+        if (pkg) {
+            ensureStartDate();
+        }
 
         if (pkg) checkCapacityLive(pkg);
         calculateQuote();
@@ -772,7 +792,7 @@
     // ── QUOTE CALCULATOR ─────────────────────────────────────────
     function calculateQuote() {
         const pkgKey    = document.getElementById('package').value;
-        const startDate = document.getElementById('start-date').value;
+        let startDate   = document.getElementById('start-date').value;
         const length    = parseInt(document.getElementById('campaign-length').value) || 28;
         const hasBoltOn = document.getElementById('bolt-on') && document.getElementById('bolt-on').checked;
         const quoteResult = document.getElementById('quote-result');
@@ -780,10 +800,22 @@
         const quoteBreakdown = document.getElementById('quote-breakdown');
         const submitBtn = document.getElementById('submit-btn');
 
-        if (!pkgKey || !startDate) {
+        if (!pkgKey) {
             quoteResult.classList.add('show');
             quoteTotal.textContent = '—';
-            quoteBreakdown.innerHTML = '<p style="color:rgba(255,255,255,0.7);">Select a <strong>package</strong> and <strong>start date</strong> above, then click <strong>Calculate Quote</strong> to see your price.</p>';
+            quoteBreakdown.innerHTML = '<p style="color:rgba(255,255,255,0.7);">Select a <strong>package</strong> above, then click <strong>Calculate Quote</strong> to see your price.</p>';
+            if (submitBtn) submitBtn.style.display = 'none';
+            return;
+        }
+
+        if (!startDate) {
+            startDate = ensureStartDate();
+        }
+
+        if (!startDate) {
+            quoteResult.classList.add('show');
+            quoteTotal.textContent = '—';
+            quoteBreakdown.innerHTML = '<p style="color:rgba(255,255,255,0.7);">Please pick a valid start date.</p>';
             if (submitBtn) submitBtn.style.display = 'none';
             return;
         }
@@ -865,12 +897,23 @@
 
         const pkgKey        = document.getElementById('package').value;
         const pkg           = PACKAGES[pkgKey];
-        const startDate     = document.getElementById('start-date').value;
+        const startDate     = ensureStartDate();
         const length        = parseInt(document.getElementById('campaign-length').value) || 28;
-        const discountCode  = document.getElementById('discount-code')?.value.trim().toUpperCase() || null;
-        const selectedMux   = document.getElementById('selected-mux')?.value || null;
-        const hasBoltOn     = document.getElementById('bolt-on')?.checked || false;
-        const notes         = document.getElementById('notes')?.value || '';
+        const discountInput = document.getElementById('discount-code');
+        const selectedMuxEl = document.getElementById('selected-mux');
+        const boltOnEl      = document.getElementById('bolt-on');
+        const notesEl       = document.getElementById('notes');
+        const discountCode  = discountInput ? discountInput.value.trim().toUpperCase() : null;
+        const selectedMux   = selectedMuxEl ? selectedMuxEl.value : null;
+        const hasBoltOn     = boltOnEl ? boltOnEl.checked : false;
+        const notes         = notesEl ? notesEl.value : '';
+
+        if (!pkg) {
+            alert('Please select a campaign package.');
+            btn.textContent = 'Submit Booking Request';
+            btn.disabled = false;
+            return;
+        }
 
         const today   = new Date();
         const start   = new Date(startDate);
@@ -939,7 +982,7 @@
             const { data: { session } } = supabase
                 ? await supabase.auth.getSession()
                 : { data: { session: null } };
-            const bearerToken = session?.access_token || SUPABASE_KEY;
+            const bearerToken = (session && session.access_token) ? session.access_token : SUPABASE_KEY;
 
             // Use Edge Function (server-side validation + email)
             const resp = await fetch(EDGE_URL, {
@@ -1004,6 +1047,9 @@ Please email advertise@rock.scot or call 0141 459 ROCK.`);
     window.selectPackage = selectPackage;
     window.calculateQuote = calculateQuote;
     window.onPackageChange = onPackageChange;
+
+    // Ensure users can calculate immediately after choosing a package.
+    ensureStartDate();
 
     // Pre-select package if URL has ?package=... param
     const urlParams = new URLSearchParams(window.location.search);
