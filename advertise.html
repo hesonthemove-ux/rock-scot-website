@@ -350,19 +350,22 @@
     <!-- HEADER -->
     <header>
         <div class="header-container">
-            <a href="index.html"><img src="assets/images/logo.png" alt="ROCK.SCOT" class="logo"></a>
-            <nav>
-                <a href="index.html">Home</a>
-                <a href="index.html#genres">Genres</a>
-                <a href="index.html#schedule">Schedule</a>
-                <a href="advertise.html">Advertise</a>
+            <a href="/"><img src="assets/images/logo.png" alt="ROCK.SCOT" class="logo"></a>
+            <button class="mobile-toggle" id="mobile-toggle" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+            <nav id="main-nav">
+                <a href="/">Home</a>
+                <a href="/#story">Our Story</a>
+                <a href="wire.htm">The Wire</a>
+                <a href="/#coverage">Coverage</a>
+                <button class="btn-listen-live" data-action="listen">Listen Live</button>
             </nav>
-            <button class="btn-listen-live">Listen Live</button>
         </div>
     </header>
     
     <!-- HERO -->
-    <section style="padding: 10rem 2rem 4rem; text-align: center; background: linear-gradient(180deg, var(--black), var(--navy));">
+    <section style="padding: 10rem 2rem 4rem; text-align: center; background: linear-gradient(180deg, #000, #0a0a0a);">
         <div style="max-width: 900px; margin: 0 auto;">
             <h1 style="font-family: 'Bebas Neue'; font-size: 4rem; color: var(--orange); margin-bottom: 1.5rem; letter-spacing: 0.1em;">Advertise with ROCK.SCOT</h1>
             <p style="font-size: 1.3rem; color: rgba(255,255,255,0.8); margin-bottom: 2rem;">Reach 410,000+ rock fans across West Scotland on DAB+</p>
@@ -588,22 +591,41 @@
             <div class="footer-section">
                 <h4>Advertising</h4>
                 <p>Regional: £299<br>Multi-Regional: £449<br>Top of Hour: £2,500</p>
+                <p style="margin-top:0.5rem;"><a href="mailto:advertise@rock.scot" style="color:#FF6600;">advertise@rock.scot</a></p>
             </div>
             <div class="footer-section">
-                <h4>Coverage</h4>
-                <p>Inverclyde<br>North Ayrshire<br>South Lanarkshire<br><br>410,000+ Reach</p>
+                <h4>Explore</h4>
+                <p><a href="/">Home</a></p>
+                <p><a href="wire.htm">The Wire — Rock News</a></p>
+                <p><a href="/#coverage">Coverage Areas</a></p>
+                <p><a href="login.html">Customer Login</a></p>
             </div>
             <div class="footer-section">
-                <h4>Contact Us</h4>
-                <p><a href="tel:01414597625" style="color:#FF6600; font-weight:700;">📞 0141 459 ROCK</a></p>
-                <p><a href="mailto:studio@rock.scot" style="color:#FF6600;">studio@rock.scot</a></p>
+                <h4>Legal &amp; Contact</h4>
+                <p><a href="privacy.html">Privacy Policy</a></p>
+                <p><a href="terms.html">Terms of Service</a></p>
+                <p><a href="cookies.html">Cookie Policy</a></p>
+                <p style="margin-top:0.5rem;"><a href="tel:01414597625" style="color:#FF6600;">0141 459 ROCK</a></p>
                 <p><a href="mailto:studio@rock.scot" style="color:#FF6600;">studio@rock.scot</a></p>
             </div>
         </div>
-        <div class="copyright">© 2026 ROCK.SCOT | Ofcom Licensed | SC646223</div>
+        <div class="copyright">&copy; 2026 ROCK.SCOT &bull; Caledonia TX Ltd &bull; SC646223 &bull; VAT 491589639 &bull; Ofcom Licensed Broadcaster</div>
     </footer>
     
-    <script src="js/main.js"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/cookie-consent.js"></script>
+    <script src="js/persistent-player.js"></script>
+    <script>
+    // Mobile menu toggle
+    (function() {
+        var toggle = document.getElementById('mobile-toggle');
+        var nav = document.getElementById('main-nav');
+        if (toggle && nav) {
+            toggle.addEventListener('click', function() { nav.classList.toggle('open'); });
+        }
+    })();
+    </script>
     <script>
     // ================================================================
     // ROCK.SCOT ADVERTISE PAGE — ENTERPRISE BOOKING SYSTEM
