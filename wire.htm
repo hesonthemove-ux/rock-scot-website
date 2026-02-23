@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE WIRE | ROCK.SCOT — Scottish Rock News</title>
+    <meta name="description" content="THE WIRE — Real-time Scottish rock music news from ROCK.SCOT. Breaking stories, gig announcements, album reviews and more from Scotland's only dedicated rock station.">
+
+    <link rel="canonical" href="https://rock.scot/wire.htm">
+    <meta property="og:title" content="THE WIRE — Scottish Rock News | ROCK.SCOT">
+    <meta property="og:description" content="Real-time rock news from Scotland's rock station. Breaking stories updated live.">
+    <meta property="og:image" content="https://rock.scot/assets/images/hero-graffiti-main.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo.png">
+    <link rel="apple-touch-icon" href="assets/images/logo.png">
+    <meta name="theme-color" content="#FF6600">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@300;400;700;900&family=Special+Elite&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --orange: #FF6600;
+            --gold: #FFD700;
+            --black: #000;
+            --dark: #0a0a0a;
+            --white: #FFF;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--black);
+            color: var(--white);
+            overflow-x: hidden;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.4;
+        }
+
+        /* ─── HEADER ─── */
+        header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(20px);
+            padding: 0.75rem 2rem;
+            border-bottom: 3px solid var(--orange);
+        }
+
+        .header-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo { height: 50px; }
+
+        nav { display: flex; gap: 1.8rem; align-items: center; }
+
+        nav a {
+            color: var(--white);
+            text-decoration: none;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1rem;
+            letter-spacing: 0.15em;
+            transition: color 0.3s;
+        }
+
+        nav a:hover { color: var(--orange); }
+
+        .btn-listen {
+            background: linear-gradient(135deg, var(--orange), #e85d00);
+            color: var(--white) !important;
+            padding: 0.6rem 1.8rem;
+            border-radius: 50px;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.15rem;
+            letter-spacing: 0.12em;
+            box-shadow: 0 0 20px rgba(255,102,0,0.4);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-listen:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 35px rgba(255,102,0,0.7);
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .mobile-toggle span {
+            display: block;
+            width: 28px;
+            height: 3px;
+            background: var(--orange);
+            margin: 5px 0;
+            border-radius: 2px;
+        }
+
+        /* ─── WIRE HERO ─── */
+        .wire-hero {
+            position: relative;
+            height: 350px;
+            margin-top: 72px;
+            overflow: hidden;
+        }
+
+        .wire-hero img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            filter: saturate(0.5) contrast(1.3);
+        }
+
+        .wire-hero::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background:
+                linear-gradient(180deg,
+                    rgba(0,0,0,0.3) 0%,
+                    rgba(0,0,0,0.5) 50%,
+                    rgba(0,0,0,0.95) 100%);
+        }
+
+        .wire-hero-content {
+            position: absolute;
+            bottom: 2rem; left: 0; right: 0;
+            text-align: center;
+            z-index: 2;
+        }
+
+        .wire-hero-content h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 4.5rem;
+            letter-spacing: 0.2em;
+            color: var(--orange);
+            text-shadow: 0 0 30px rgba(255,102,0,0.5);
+        }
+
+        .wire-hero-content p {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.7);
+            margin-top: 0.5rem;
+        }
+
+        /* ─── WIRE CONTROLS ─── */
+        .wire-controls {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .wire-search {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.75rem 1.2rem;
+            background: rgba(255,255,255,0.06);
+            border: 2px solid rgba(255,102,0,0.2);
+            border-radius: 4px;
+            color: var(--white);
+            font-size: 1rem;
+            font-family: 'Roboto', sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        .wire-search:focus {
+            outline: none;
+            border-color: var(--orange);
+        }
+
+        .wire-search::placeholder {
+            color: rgba(255,255,255,0.35);
+        }
+
+        .wire-genre-filter {
+            padding: 0.75rem 1.2rem;
+            background: rgba(255,255,255,0.06);
+            border: 2px solid rgba(255,102,0,0.2);
+            border-radius: 4px;
+            color: var(--white);
+            font-size: 1rem;
+            font-family: 'Roboto', sans-serif;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23FF6600' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 2.5rem;
+        }
+
+        .wire-genre-filter option {
+            background: #1a1a1a;
+            color: var(--white);
+        }
+
+        .wire-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--orange);
+            color: var(--white);
+            border: none;
+            border-radius: 4px;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1rem;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .wire-btn:hover {
+            background: #e85d00;
+            transform: translateY(-2px);
+        }
+
+        .wire-count {
+            width: 100%;
+            text-align: center;
+            padding: 0.5rem;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.9rem;
+        }
+
+        /* ─── WIRE STORIES ─── */
+        .wire-feed {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .wire-story {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,102,0,0.12);
+            border-radius: 6px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .wire-story:hover {
+            border-color: rgba(255,102,0,0.4);
+            background: rgba(255,255,255,0.05);
+            transform: translateX(4px);
+        }
+
+        .wire-story::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 3px;
+            background: var(--orange);
+            border-radius: 3px 0 0 3px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .wire-story:hover::before { opacity: 1; }
+
+        .wire-story-meta {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .wire-genre-tag {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.12em;
+            padding: 0.2rem 0.7rem;
+            border-radius: 3px;
+            background: rgba(255,102,0,0.15);
+            color: var(--orange);
+            border: 1px solid rgba(255,102,0,0.3);
+        }
+
+        .wire-story-date {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.4);
+        }
+
+        .wire-source {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.4);
+            margin-left: auto;
+        }
+
+        .wire-story h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .wire-story p {
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.65);
+            line-height: 1.6;
+        }
+
+        .wire-story-links {
+            margin-top: 0.75rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .wire-story-links a {
+            font-size: 0.85rem;
+            color: var(--orange);
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.3s;
+        }
+
+        .wire-story-links a:hover { color: var(--gold); }
+
+        .wire-loading {
+            text-align: center;
+            padding: 3rem;
+            color: rgba(255,255,255,0.4);
+        }
+
+        .wire-empty {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: rgba(255,255,255,0.4);
+        }
+
+        .wire-empty h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            color: var(--orange);
+            margin-bottom: 1rem;
+        }
+
+        /* ─── FOOTER ─── */
+        footer {
+            padding: 3rem 2rem 1.5rem;
+            background: var(--black);
+            border-top: 3px solid var(--orange);
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links a {
+            color: rgba(255,255,255,0.5);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover { color: var(--orange); }
+
+        .copyright {
+            color: rgba(255,255,255,0.3);
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 768px) {
+            nav { display: none; }
+            .mobile-toggle { display: block; }
+            nav.open {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 100%; left: 0; right: 0;
+                background: rgba(0,0,0,0.98);
+                padding: 2rem;
+                gap: 1.5rem;
+                border-bottom: 3px solid var(--orange);
+            }
+            .wire-hero { height: 250px; }
+            .wire-hero-content h1 { font-size: 3rem; }
+            .wire-controls { flex-direction: column; }
+            .wire-story { padding: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="header-container">
+            <a href="/">
+                <img src="assets/images/logo.png" alt="ROCK.SCOT" class="logo">
+            </a>
+            <button class="mobile-toggle" id="mobile-toggle" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+            <nav id="main-nav">
+                <a href="/">Home</a>
+                <a href="/#story">Our Story</a>
+                <a href="/#tom">Tom Russell</a>
+                <a href="advertise.html">Advertise</a>
+                <button class="btn-listen" data-action="listen">LISTEN LIVE</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- WIRE HERO -->
+    <div class="wire-hero">
+        <img src="assets/images/banner-4-skull-flames-castles.png" alt="THE WIRE — Scottish Rock News">
+        <div class="wire-hero-content">
+            <h1>THE WIRE</h1>
+            <p>Real-time Scottish rock news &mdash; powered by ROCK.SCOT</p>
+        </div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="wire-controls">
+        <input type="text" class="wire-search" id="wire-search" placeholder="Search headline, source or text">
+        <select class="wire-genre-filter" id="wire-genre">
+            <option value="">All genres</option>
+            <option value="Rock">Rock</option>
+            <option value="Metal">Metal</option>
+            <option value="Punk">Punk</option>
+            <option value="Indie">Indie</option>
+            <option value="Alternative">Alternative</option>
+        </select>
+        <button class="wire-btn" id="wire-refresh">Refresh</button>
+        <div class="wire-count" id="wire-count"></div>
+    </div>
+
+    <!-- STORIES -->
+    <div class="wire-feed" id="wire-feed">
+        <div class="wire-loading" id="wire-loading">Loading stories&hellip;</div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-links">
+            <a href="/">Home</a>
+            <a href="advertise.html">Advertise</a>
+            <a href="privacy.html">Privacy Policy</a>
+            <a href="terms.html">Terms of Service</a>
+            <a href="cookies.html">Cookie Policy</a>
+        </div>
+        <div class="copyright">
+            &copy; 2026 ROCK.SCOT &bull; Caledonia TX Ltd &bull; SC646223 &bull; VAT 491589639 &bull; Ofcom Licensed Broadcaster
+        </div>
+    </footer>
+
+    <script src="js/supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/cookie-consent.js"></script>
+    <script src="js/persistent-player.js"></script>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // Mobile menu
+        var toggle = document.getElementById('mobile-toggle');
+        var nav = document.getElementById('main-nav');
+        if (toggle) {
+            toggle.addEventListener('click', function() { nav.classList.toggle('open'); });
+        }
+
+        // Supabase client
+        var SUPABASE_URL = window.SUPABASE_URL || 'https://pwzeapvopeeoahpyicdm.supabase.co';
+        var SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+
+        if (!window.supabase) {
+            document.getElementById('wire-loading').textContent = 'Unable to connect to news feed.';
+            return;
+        }
+
+        var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            realtime: { params: { eventsPerSecond: 10 } }
+        });
+
+        var allStories = [];
+        var feed = document.getElementById('wire-feed');
+        var countEl = document.getElementById('wire-count');
+        var searchInput = document.getElementById('wire-search');
+        var genreSelect = document.getElementById('wire-genre');
+        var refreshBtn = document.getElementById('wire-refresh');
+        var loadingEl = document.getElementById('wire-loading');
+
+        function timeAgo(dateStr) {
+            var now = new Date();
+            var then = new Date(dateStr);
+            var diff = Math.floor((now - then) / 1000);
+            if (diff < 60) return 'just now';
+            if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+            if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+            var days = Math.floor(diff / 86400);
+            if (days === 1) return 'yesterday';
+            if (days < 30) return days + 'd ago';
+            return then.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function renderStories(stories) {
+            if (loadingEl) loadingEl.style.display = 'none';
+
+            var existing = feed.querySelectorAll('.wire-story, .wire-empty');
+            existing.forEach(function(el) { el.remove(); });
+
+            if (!stories || stories.length === 0) {
+                feed.innerHTML += '<div class="wire-empty"><h3>No Stories Found</h3><p>Check back soon for the latest Scottish rock news.</p></div>';
+                countEl.textContent = '0 stories';
+                return;
+            }
+
+            countEl.textContent = stories.length + ' ' + (stories.length === 1 ? 'story' : 'stories');
+
+            stories.forEach(function(s) {
+                var div = document.createElement('div');
+                div.className = 'wire-story';
+
+                var genreTag = s.genre ? '<span class="wire-genre-tag">' + s.genre.toUpperCase() + '</span>' : '';
+                var summary = s.summary ? '<p>' + s.summary + '</p>' : '';
+                var source = s.source_name ? '<span class="wire-source">' + s.source_name + '</span>' : '';
+                var sourceLink = s.source_url && !s.source_url.startsWith('seed-')
+                    ? '<a href="' + s.source_url + '" target="_blank" rel="noopener">Original</a>'
+                    : '';
+
+                div.innerHTML =
+                    '<div class="wire-story-meta">' +
+                        genreTag +
+                        '<span class="wire-story-date">' + timeAgo(s.created_at) + '</span>' +
+                        source +
+                    '</div>' +
+                    '<h3>' + s.title + '</h3>' +
+                    summary +
+                    (sourceLink ? '<div class="wire-story-links">' + sourceLink + '</div>' : '');
+
+                feed.appendChild(div);
+            });
+        }
+
+        function filterStories() {
+            var query = searchInput.value.toLowerCase().trim();
+            var genre = genreSelect.value;
+
+            var filtered = allStories.filter(function(s) {
+                var matchesGenre = !genre || s.genre === genre;
+                var matchesSearch = !query ||
+                    (s.title && s.title.toLowerCase().indexOf(query) !== -1) ||
+                    (s.summary && s.summary.toLowerCase().indexOf(query) !== -1) ||
+                    (s.source_name && s.source_name.toLowerCase().indexOf(query) !== -1);
+                return matchesGenre && matchesSearch;
+            });
+
+            renderStories(filtered);
+        }
+
+        function loadStories() {
+            if (loadingEl) {
+                loadingEl.style.display = 'block';
+                loadingEl.textContent = 'Loading stories\u2026';
+            }
+
+            sb.from('wire_news')
+                .select('id, title, summary, genre, source_url, source_name, created_at')
+                .eq('is_live', true)
+                .order('created_at', { ascending: false })
+                .limit(100)
+                .then(function(res) {
+                    if (res.error) throw res.error;
+                    allStories = res.data || [];
+                    filterStories();
+                })
+                .catch(function(err) {
+                    console.error('Wire load error:', err);
+                    if (loadingEl) loadingEl.textContent = 'Unable to load stories. Please try again.';
+                });
+        }
+
+        searchInput.addEventListener('input', filterStories);
+        genreSelect.addEventListener('change', filterStories);
+        refreshBtn.addEventListener('click', loadStories);
+
+        // Realtime: new stories appear instantly
+        sb.channel('wire-page')
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'wire_news',
+                filter: 'is_live=eq.true'
+            }, function(payload) {
+                if (payload.new && payload.new.title) {
+                    allStories.unshift(payload.new);
+                    filterStories();
+                }
+            })
+            .subscribe();
+
+        loadStories();
+
+        // Listen buttons
+        document.querySelectorAll('[data-action="listen"]').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (window.rockScotPlayer) window.rockScotPlayer.show();
+            });
+        });
+    })();
+    </script>
+</body>
+</html>
