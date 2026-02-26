@@ -652,8 +652,22 @@
                 <a href="#advertise">Advertise</a>
                 <a href="#coverage">Coverage</a>
             </nav>
+            <button class="hamburger" aria-label="Open navigation" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
         </div>
     </header>
+
+    <!-- MOBILE NAV -->
+    <nav class="mobile-nav" role="navigation" aria-label="Mobile navigation">
+        <button class="mobile-nav-close" aria-label="Close navigation">✕</button>
+        <a href="#story" onclick="closeMobileNav()">Story</a>
+        <a href="#tom" onclick="closeMobileNav()">Tom Russell</a>
+        <a href="#advertise" onclick="closeMobileNav()">Advertise</a>
+        <a href="#coverage" onclick="closeMobileNav()">Coverage</a>
+        <a href="wire.html" onclick="closeMobileNav()">The Wire</a>
+        <a href="advertise.html" onclick="closeMobileNav()">Book Ad</a>
+    </nav>
     
     <!-- THE WIRE TICKER -->
     <div id="wire-ticker">
@@ -1100,4 +1114,49 @@
         const sessionId = sessionStorage.getItem('rs-session') || crypto.randomUUID();
         const visitorId = localStorage.getItem('rs-visitor') || crypto.randomUUID();
         sessionStorage.setItem('rs-session', sessionId);
-        localStorage.setItem('rs-vis
+        localStorage.setItem('rs-vis        sessionStorage.setItem('rs-visitor', visitorId);
+    }
+    trackPageView();
+
+    // ── HAMBURGER NAV ─────────────────────────────────────────────
+    const hamburger = document.querySelector('.hamburger');
+    const mobileNav = document.querySelector('.mobile-nav');
+    const closeBtn  = document.querySelector('.mobile-nav-close');
+
+    function openMobileNav() {
+        if (!hamburger || !mobileNav) return;
+        hamburger.classList.add('open');
+        mobileNav.classList.add('open');
+        hamburger.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeMobileNav() {
+        if (!hamburger || !mobileNav) return;
+        hamburger.classList.remove('open');
+        mobileNav.classList.remove('open');
+        hamburger.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+    }
+
+    if (hamburger) hamburger.addEventListener('click', () =>
+        hamburger.classList.contains('open') ? closeMobileNav() : openMobileNav());
+    if (closeBtn) closeBtn.addEventListener('click', closeMobileNav);
+
+    document.addEventListener('click', (e) => {
+        if (mobileNav && mobileNav.classList.contains('open') &&
+            !mobileNav.contains(e.target) && !hamburger.contains(e.target)) {
+            closeMobileNav();
+        }
+    });
+
+    // Escape key — also keep existing modal close behaviour
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeMobileNav();
+    });
+
+    window.closeMobileNav = closeMobileNav;
+
+    </script>
+</body>
+</html>
