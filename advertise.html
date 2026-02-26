@@ -85,7 +85,7 @@
           {
             "@type": "Offer",
             "name": "Professional Radio Advert Production",
-            "price": "195",
+            "price": "150",
             "priceCurrency": "GBP",
             "description": "Professional 30-second radio-ready advert including 3 redrafts. Available with any advertising package."
           }
@@ -350,28 +350,45 @@
     <!-- HEADER -->
     <header>
         <div class="header-container">
-            <a href="/"><img src="assets/images/logo.png" alt="ROCK.SCOT" class="logo"></a>
-            <button class="mobile-toggle" id="mobile-toggle" aria-label="Menu">
+            <a href="index.html"><img src="assets/images/logo.png" alt="ROCK.SCOT" class="logo"></a>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="index.html#genres">Genres</a>
+                <a href="index.html#schedule">Schedule</a>
+                <a href="wire.html">The Wire</a>
+                <a href="advertise.html">Advertise</a>
+            </nav>
+            <button class="btn-listen-live">Listen Live</button>
+            <button class="hamburger" aria-label="Open navigation" aria-expanded="false">
                 <span></span><span></span><span></span>
             </button>
-            <nav id="main-nav">
-                <a href="/">Home</a>
-                <a href="/#story">Our Story</a>
-                <a href="wire.htm">The Wire</a>
-                <a href="/#coverage">Coverage</a>
-                <button class="btn-listen-live" data-action="listen">Listen Live</button>
-            </nav>
         </div>
     </header>
+
+    <!-- MOBILE NAV -->
+    <nav class="mobile-nav" role="navigation" aria-label="Mobile navigation">
+        <button class="mobile-nav-close" aria-label="Close navigation">✕</button>
+        <a href="index.html" onclick="closeMobileNav()">Home</a>
+        <a href="index.html#genres" onclick="closeMobileNav()">Genres</a>
+        <a href="index.html#schedule" onclick="closeMobileNav()">Schedule</a>
+        <a href="wire.html" onclick="closeMobileNav()">The Wire</a>
+        <a href="advertise.html" onclick="closeMobileNav()">Advertise</a>
+        <button class="btn-listen-live" onclick="closeMobileNav()">Listen Live</button>
+    </nav>
     
     <!-- HERO -->
-    <section style="padding: 10rem 2rem 4rem; text-align: center; background: linear-gradient(180deg, #000, #0a0a0a);">
+    <section style="padding: 10rem 2rem 4rem; text-align: center; background: linear-gradient(180deg, var(--black), var(--navy));">
         <div style="max-width: 900px; margin: 0 auto;">
             <h1 style="font-family: 'Bebas Neue'; font-size: 4rem; color: var(--orange); margin-bottom: 1.5rem; letter-spacing: 0.1em;">Advertise with ROCK.SCOT</h1>
             <p style="font-size: 1.3rem; color: rgba(255,255,255,0.8); margin-bottom: 2rem;">Reach 410,000+ rock fans across West Scotland on DAB+</p>
         </div>
     </section>
     
+    <!-- BURST BANNER -->
+    <div class="banner-burst">
+        <img src="assets/images/burst.png" alt="ROCK.SCOT — Pure Scottish Rock Radio" loading="lazy">
+    </div>
+
     <!-- PACKAGES -->
     <section style="padding: 4rem 2rem;">
         <div style="max-width: 1400px; margin: 0 auto;">
@@ -524,7 +541,7 @@
                     
                     <button type="button" class="btn-calculate" onclick="calculateQuote()">Calculate Quote</button>
                     
-                    <div class="quote-result show" id="quote-result">
+                    <div class="quote-result" id="quote-result">
                         <h3 style="font-family: 'Bebas Neue'; font-size: 2rem; margin-bottom: 1rem; letter-spacing: 0.1em;">Your Quote</h3>
                         <div class="quote-total" id="quote-total">—</div>
                         <div class="quote-breakdown" id="quote-breakdown"><p style="color:rgba(255,255,255,0.7);">Select a <strong>package</strong> and <strong>start date</strong> above, then click <strong>Calculate Quote</strong> to see your price.</p></div>
@@ -591,41 +608,22 @@
             <div class="footer-section">
                 <h4>Advertising</h4>
                 <p>Regional: £299<br>Multi-Regional: £449<br>Top of Hour: £2,500</p>
-                <p style="margin-top:0.5rem;"><a href="mailto:advertise@rock.scot" style="color:#FF6600;">advertise@rock.scot</a></p>
             </div>
             <div class="footer-section">
-                <h4>Explore</h4>
-                <p><a href="/">Home</a></p>
-                <p><a href="wire.htm">The Wire — Rock News</a></p>
-                <p><a href="/#coverage">Coverage Areas</a></p>
-                <p><a href="login.html">Customer Login</a></p>
+                <h4>Coverage</h4>
+                <p>Inverclyde<br>North Ayrshire<br>South Lanarkshire<br><br>410,000+ Reach</p>
             </div>
             <div class="footer-section">
-                <h4>Legal &amp; Contact</h4>
-                <p><a href="privacy.html">Privacy Policy</a></p>
-                <p><a href="terms.html">Terms of Service</a></p>
-                <p><a href="cookies.html">Cookie Policy</a></p>
-                <p style="margin-top:0.5rem;"><a href="tel:01414597625" style="color:#FF6600;">0141 459 ROCK</a></p>
+                <h4>Contact Us</h4>
+                <p><a href="tel:01414597625" style="color:#FF6600; font-weight:700;">📞 0141 459 ROCK</a></p>
+                <p><a href="mailto:studio@rock.scot" style="color:#FF6600;">studio@rock.scot</a></p>
                 <p><a href="mailto:studio@rock.scot" style="color:#FF6600;">studio@rock.scot</a></p>
             </div>
         </div>
-        <div class="copyright">&copy; 2026 ROCK.SCOT &bull; Caledonia TX Ltd &bull; SC646223 &bull; VAT 491589639 &bull; Ofcom Licensed Broadcaster</div>
+        <div class="copyright">© 2026 ROCK.SCOT | Ofcom Licensed | SC646223</div>
     </footer>
     
-    <script src="js/supabase-config.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/cookie-consent.js"></script>
-    <script src="js/persistent-player.js"></script>
-    <script>
-    // Mobile menu toggle
-    (function() {
-        var toggle = document.getElementById('mobile-toggle');
-        var nav = document.getElementById('main-nav');
-        if (toggle && nav) {
-            toggle.addEventListener('click', function() { nav.classList.toggle('open'); });
-        }
-    })();
-    </script>
+    <script src="js/main.js"></script>
     <script>
     // ================================================================
     // ROCK.SCOT ADVERTISE PAGE — ENTERPRISE BOOKING SYSTEM
@@ -635,7 +633,13 @@
     const SUPABASE_URL  = window.SUPABASE_URL || 'https://pwzeapvopeeoahpyicdm.supabase.co';
     const SUPABASE_KEY  = window.SUPABASE_ANON_KEY || 'YOUR_ANON_KEY';
     const EDGE_URL      = `${SUPABASE_URL}/functions/v1/book_campaign`;
-    const supabase      = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const supabase      = (window.supabase && typeof window.supabase.createClient === 'function')
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+        : null;
+
+    if (!supabase) {
+        console.warn('Supabase client failed to initialise. Quote UI will still work; live capacity checks may be skipped.');
+    }
 
     // ── BROADCAST CONSTANTS (mirrors broadcast_constants table) ──
     const BC = {
@@ -686,6 +690,36 @@
     const BOLT_ON_PENCE  = 15000;  // £150 production add-on
     const RUSH_PENCE     = 5000;   // £50 rush surcharge
 
+    function defaultStartDate(daysAhead = 28) {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        d.setDate(d.getDate() + daysAhead);
+        return d.toISOString().split('T')[0];
+    }
+
+    function ensureStartDate() {
+        const startInput = document.getElementById('start-date');
+        if (!startInput) return '';
+        if (!startInput.value) {
+            startInput.value = defaultStartDate();
+        }
+        return startInput.value;
+    }
+
+    // ── PACKAGE SHORTCUT BUTTONS ──────────────────────────────────
+    function selectPackage(pkgKey) {
+        if (!PACKAGES[pkgKey]) return;
+
+        const packageSelect = document.getElementById('package');
+        packageSelect.value = pkgKey;
+        onPackageChange();
+
+        const quoteSection = document.getElementById('quote-form');
+        if (quoteSection) {
+            quoteSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
     // ── PACKAGE CHANGE: show/hide mux selector ───────────────────
     function onPackageChange() {
         const pkg = document.getElementById('package').value;
@@ -707,6 +741,10 @@
         // Reset capacity indicator
         document.getElementById('capacity-indicator').style.display = 'none';
 
+        if (pkg) {
+            ensureStartDate();
+        }
+
         if (pkg) checkCapacityLive(pkg);
         calculateQuote();
     }
@@ -716,6 +754,10 @@
         const indicator = document.getElementById('capacity-indicator');
         const startDate = document.getElementById('start-date').value;
         if (!pkgKey || !startDate) return;
+        if (!supabase) {
+            indicator.style.display = 'none';
+            return;
+        }
 
         const pkg = PACKAGES[pkgKey];
         if (!pkg) return;
@@ -770,7 +812,7 @@
     // ── QUOTE CALCULATOR ─────────────────────────────────────────
     function calculateQuote() {
         const pkgKey    = document.getElementById('package').value;
-        const startDate = document.getElementById('start-date').value;
+        let startDate   = document.getElementById('start-date').value;
         const length    = parseInt(document.getElementById('campaign-length').value) || 28;
         const hasBoltOn = document.getElementById('bolt-on') && document.getElementById('bolt-on').checked;
         const quoteResult = document.getElementById('quote-result');
@@ -778,10 +820,22 @@
         const quoteBreakdown = document.getElementById('quote-breakdown');
         const submitBtn = document.getElementById('submit-btn');
 
-        if (!pkgKey || !startDate) {
+        if (!pkgKey) {
             quoteResult.classList.add('show');
             quoteTotal.textContent = '—';
-            quoteBreakdown.innerHTML = '<p style="color:rgba(255,255,255,0.7);">Select a <strong>package</strong> and <strong>start date</strong> above, then click <strong>Calculate Quote</strong> to see your price.</p>';
+            quoteBreakdown.innerHTML = '<p style="color:rgba(255,255,255,0.7);">Select a <strong>package</strong> above, then click <strong>Calculate Quote</strong> to see your price.</p>';
+            if (submitBtn) submitBtn.style.display = 'none';
+            return;
+        }
+
+        if (!startDate) {
+            startDate = ensureStartDate();
+        }
+
+        if (!startDate) {
+            quoteResult.classList.add('show');
+            quoteTotal.textContent = '—';
+            quoteBreakdown.innerHTML = '<p style="color:rgba(255,255,255,0.7);">Please pick a valid start date.</p>';
             if (submitBtn) submitBtn.style.display = 'none';
             return;
         }
@@ -863,12 +917,23 @@
 
         const pkgKey        = document.getElementById('package').value;
         const pkg           = PACKAGES[pkgKey];
-        const startDate     = document.getElementById('start-date').value;
+        const startDate     = ensureStartDate();
         const length        = parseInt(document.getElementById('campaign-length').value) || 28;
-        const discountCode  = document.getElementById('discount-code')?.value.trim().toUpperCase() || null;
-        const selectedMux   = document.getElementById('selected-mux')?.value || null;
-        const hasBoltOn     = document.getElementById('bolt-on')?.checked || false;
-        const notes         = document.getElementById('notes')?.value || '';
+        const discountInput = document.getElementById('discount-code');
+        const selectedMuxEl = document.getElementById('selected-mux');
+        const boltOnEl      = document.getElementById('bolt-on');
+        const notesEl       = document.getElementById('notes');
+        const discountCode  = discountInput ? discountInput.value.trim().toUpperCase() : null;
+        const selectedMux   = selectedMuxEl ? selectedMuxEl.value : null;
+        const hasBoltOn     = boltOnEl ? boltOnEl.checked : false;
+        const notes         = notesEl ? notesEl.value : '';
+
+        if (!pkg) {
+            alert('Please select a campaign package.');
+            btn.textContent = 'Submit Booking Request';
+            btn.disabled = false;
+            return;
+        }
 
         const today   = new Date();
         const start   = new Date(startDate);
@@ -889,12 +954,20 @@
         // Check capacity one final time before submitting
         const endDate = new Date(startDate);
         endDate.setDate(endDate.getDate() + length);
-        const { data: capData } = await supabase.rpc('check_capacity', {
-            p_mux_type:   pkg.muxType,
-            p_start_date: startDate,
-            p_end_date:   endDate.toISOString().split('T')[0],
-        });
-        const cap = typeof capData === 'string' ? JSON.parse(capData) : capData;
+        let cap = null;
+        if (supabase) {
+            const { data: capData, error: capError } = await supabase.rpc('check_capacity', {
+                p_mux_type:   pkg.muxType,
+                p_start_date: startDate,
+                p_end_date:   endDate.toISOString().split('T')[0],
+            });
+            if (capError) {
+                console.warn('Capacity RPC unavailable, continuing submit:', capError.message);
+            } else {
+                cap = typeof capData === 'string' ? JSON.parse(capData) : capData;
+            }
+        }
+
         if (cap && !cap.can_approve) {
             alert(`Sorry — ${cap.reason}. Please contact advertise@rock.scot.`);
             btn.textContent = 'Submit Booking Request';
@@ -926,12 +999,18 @@
         };
 
         try {
+            const { data: { session } } = supabase
+                ? await supabase.auth.getSession()
+                : { data: { session: null } };
+            const bearerToken = (session && session.access_token) ? session.access_token : SUPABASE_KEY;
+
             // Use Edge Function (server-side validation + email)
             const resp = await fetch(EDGE_URL, {
                 method:  'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'apikey':        SUPABASE_KEY,
+                    'Authorization': `Bearer ${bearerToken}`,
                 },
                 body: JSON.stringify(payload),
             });
@@ -984,6 +1063,14 @@ Please email advertise@rock.scot or call 0141 459 ROCK.`);
         }
     });
 
+    // Ensure inline onclick handlers always resolve in static hosting.
+    window.selectPackage = selectPackage;
+    window.calculateQuote = calculateQuote;
+    window.onPackageChange = onPackageChange;
+
+    // Ensure users can calculate immediately after choosing a package.
+    ensureStartDate();
+
     // Pre-select package if URL has ?package=... param
     const urlParams = new URLSearchParams(window.location.search);
     const preselect = urlParams.get('package');
@@ -992,6 +1079,44 @@ Please email advertise@rock.scot or call 0141 459 ROCK.`);
         onPackageChange();
         document.getElementById('quote-form').scrollIntoView({ behavior: 'smooth' });
     }
+
+    // ── HAMBURGER NAV ─────────────────────────────────────────────
+    const hamburger  = document.querySelector('.hamburger');
+    const mobileNav  = document.querySelector('.mobile-nav');
+    const closeBtn   = document.querySelector('.mobile-nav-close');
+
+    function openMobileNav() {
+        if (!hamburger || !mobileNav) return;
+        hamburger.classList.add('open');
+        mobileNav.classList.add('open');
+        hamburger.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeMobileNav() {
+        if (!hamburger || !mobileNav) return;
+        hamburger.classList.remove('open');
+        mobileNav.classList.remove('open');
+        hamburger.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+    }
+
+    if (hamburger) hamburger.addEventListener('click', () =>
+        hamburger.classList.contains('open') ? closeMobileNav() : openMobileNav());
+    if (closeBtn) closeBtn.addEventListener('click', closeMobileNav);
+
+    document.addEventListener('click', (e) => {
+        if (mobileNav && mobileNav.classList.contains('open') &&
+            !mobileNav.contains(e.target) && !hamburger.contains(e.target)) {
+            closeMobileNav();
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeMobileNav();
+    });
+
+    window.closeMobileNav = closeMobileNav;
 
     </script>
 </body>
