@@ -291,12 +291,23 @@
             padding-left: 100px;
             font-weight: 900;
             font-size: 1.1rem;
-            animation: marquee 60s linear infinite;
+            animation: marquee 250s linear infinite;
         }
         
         @keyframes marquee {
             0% { transform: translateX(100%); }
             100% { transform: translateX(-100%); }
+        }
+
+        /* HERO ENTRANCE ANIMATIONS */
+        @keyframes heroFadeUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes heroFadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
         }
         
         /* HERO */
@@ -309,6 +320,7 @@
             justify-content: center;
             text-align: center;
             padding: 8rem 2rem 4rem;
+            animation: heroFadeIn 1.8s ease-out both;
         }
         
         #hero::before {
@@ -334,6 +346,7 @@
             letter-spacing: 0.3em;
             margin-bottom: 1rem;
             text-transform: uppercase;
+            animation: heroFadeUp 1.0s ease-out 0.3s both;
         }
         
         .hero-title {
@@ -343,6 +356,7 @@
             margin-bottom: 2rem;
             text-shadow: 0 4px 20px rgba(0,0,0,0.9);
             letter-spacing: 0.05em;
+            animation: heroFadeUp 1.2s ease-out 0.6s both;
         }
         
         .hero-subtitle {
@@ -351,6 +365,7 @@
             color: rgba(255,255,255,0.95);
             line-height: 1.4;
             font-weight: 300;
+            animation: heroFadeUp 1.0s ease-out 1.0s both;
         }
         
         .hero-subtitle strong {
@@ -367,6 +382,7 @@
             font-family: 'Bebas Neue', sans-serif;
             font-size: 1.5rem;
             letter-spacing: 0.1em;
+            animation: heroFadeUp 1.0s ease-out 1.4s both;
         }
         
         /* STORY SECTION */
@@ -947,7 +963,7 @@
         // Restart animation so new items scroll from the right
         ticker.style.animation = 'none';
         ticker.offsetHeight; // force reflow
-        ticker.style.animation = '';
+        ticker.style.animation = 'marquee 250s linear infinite';
     }
 
     async function loadWireNews() {
