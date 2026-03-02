@@ -423,7 +423,7 @@
     <div class="area-card live">
         <span class="area-badge badge-live">🔴 Live Now</span>
         <div class="area-name">Inverclyde</div>
-        <p class="area-desc">Port Glasgow to Dunoon, across to Fastlane, Helensburgh, Clydebank and up Loch Lomond. Operated by Coast DAB on Block 8B.</p>
+        <p class="area-desc">Clydebank and Bonhill transmitters covering Bearsden, Milngavie, Paisley, Johnstone, Renfrew, Port Glasgow, Greenock, Gourock, Dunoon, Helensburgh, Alexandria and Balloch. Signal confirmed solid east to Braehead. Operated by Coast DAB on Block 8B.</p>
         <p class="area-stat">▶ ROCK.SCOT is live on this multiplex</p>
     </div>
     <div class="area-card live">
@@ -496,36 +496,71 @@ function popup(title, badge, badgeClass, stats) {
 }
 
 // ── INVERCLYDE ───────────────────────────────────────────────────
-// Source: Ofcom Block 8B licence area, Coast DAB Ltd
-// Covers: Port Glasgow → Greenock → Gourock → Dunoon
-//         → Helensburgh → Clydebank → up Loch Lomond shore
+// Transmitters: Clydebank + Bonhill (Alexandria/Balloch)
+// Coverage: Clydebank TX gets signal east to Braehead (G51 4BP),
+//           north to Bearsden/Milngavie, south to Paisley/Johnstone
+//           Bonhill TX extends north to Balloch/Loch Lomond shore
+//           West: Gourock, Greenock, Dunoon, Helensburgh
 const inverclydePolygon = [
-    [55.955, -4.695],  // Clydebank / Erskine area
-    [55.975, -4.760],  // Old Kilpatrick
-    [55.980, -4.820],  // Bowling / Dumbarton
-    [55.960, -4.890],  // Cardross
-    [55.985, -4.960],  // Helensburgh
-    [56.010, -5.010],  // Rhu
-    [56.050, -4.980],  // Garelochhead
-    [56.090, -4.930],  // Arrochar / Loch Long entrance
-    [56.070, -4.840],  // Loch Lomond shore
-    [56.010, -4.760],  // Luss area
-    [55.990, -4.740],  // Alexandria
-    [55.960, -4.720],  // Dumbarton
-    [55.940, -5.020],  // Gourock
-    [55.920, -5.050],  // Greenock / Inverkip
-    [55.880, -4.970],  // Wemyss Bay
-    [55.870, -4.900],  // Skelmorlie
-    [55.820, -5.080],  // Dunoon
-    [55.790, -5.140],  // South Dunoon
-    [55.820, -5.200],  // Toward
-    [55.870, -5.110],  // Hunter's Quay
-    [55.910, -5.020],  // Sandbank
-    [55.930, -5.000],  // Kilmun
-    [55.960, -4.940],  // McInroy's Point
-    [55.940, -4.840],  // Gourock railway
-    [55.950, -4.780],  // Port Glasgow
-    [55.955, -4.695]   // close
+    // Start east — Braehead / G51 4BP (confirmed eastern limit)
+    [55.876, -4.365],
+    // NE — Bearsden
+    [55.920, -4.330],
+    // Milngavie
+    [55.940, -4.315],
+    // Bearsden / Drumchapel
+    [55.935, -4.370],
+    // Knightswood / Yoker
+    [55.915, -4.380],
+    // Clydebank (transmitter site)
+    [55.900, -4.408],
+    // Old Kilpatrick
+    [55.920, -4.470],
+    // Bowling
+    [55.925, -4.530],
+    // Cardross
+    [55.940, -4.620],
+    // Helensburgh
+    [55.985, -4.730],
+    // Rhu
+    [56.010, -4.760],
+    // Garelochhead
+    [56.050, -4.820],
+    // Arrochar
+    [56.200, -4.730],
+    // Bonhill / Alexandria (transmitter site)
+    [55.980, -4.580],
+    // Balloch / Loch Lomond shore (Bonhill TX reach)
+    [56.000, -4.580],
+    [56.020, -4.560],
+    // Back down Loch Lomond west shore
+    [55.990, -4.530],
+    [55.960, -4.500],
+    // Dumbarton
+    [55.945, -4.560],
+    // Gourock / Greenock
+    [55.940, -4.820],
+    [55.920, -4.880],
+    // Inverkip / Wemyss Bay
+    [55.900, -4.880],
+    // Dunoon area
+    [55.820, -4.920],
+    [55.790, -5.000],
+    // Toward / South Dunoon
+    [55.780, -5.050],
+    // Back across Firth
+    [55.830, -4.960],
+    // Gourock
+    [55.870, -4.840],
+    // Port Glasgow
+    [55.930, -4.690],
+    // Paisley / Johnstone (south coverage)
+    [55.845, -4.480],
+    [55.835, -4.430],
+    // Renfrew
+    [55.877, -4.400],
+    // Braehead close
+    [55.876, -4.365]
 ];
 
 const inverclydeLayer = L.polygon(inverclydePolygon, liveStyle).addTo(map);
@@ -535,10 +570,10 @@ inverclydeLayer.bindPopup(popup(
     'badge-live',
     [
         '<strong>Block:</strong> 8B | Operator: Coast DAB',
-        '<strong>Covers:</strong> Port Glasgow, Greenock, Gourock, Helensburgh, Clydebank, Dunoon',
+        '<strong>Transmitters:</strong> Clydebank + Bonhill (Alexandria)',
+        '<strong>Covers:</strong> Clydebank, Bearsden, Milngavie, Paisley, Johnstone, Renfrew, Port Glasgow, Greenock, Gourock, Dunoon, Helensburgh, Alexandria, Balloch',
         '<strong>ROCK.SCOT:</strong> Live on this multiplex',
-        '<strong>RAJAR:</strong> 77% of all UK listening is now digital — Scotland leads DAB adoption',
-        '<strong>DAB reach:</strong> 77% of UK listening is now digital'
+        '<strong>RAJAR:</strong> 77% of all UK listening is now digital — Scotland leads DAB adoption'
     ]
 ), { maxWidth: 280 });
 
@@ -722,9 +757,13 @@ const txIconGold = L.divIcon({
     iconAnchor: [5, 5]
 });
 
-// Inverclyde transmitter (approximate — Greenock hilltop site)
-L.marker([55.940, -4.780], {icon: txIcon}).addTo(map)
-    .bindTooltip('Inverclyde TX Site', {className: 'tx-tooltip'});
+// Inverclyde Tx 1 — Clydebank
+L.marker([55.900, -4.408], {icon: txIcon}).addTo(map)
+    .bindTooltip('Clydebank Transmitter', {className: 'tx-tooltip'});
+
+// Inverclyde Tx 2 — Bonhill, Alexandria
+L.marker([55.978, -4.578], {icon: txIcon}).addTo(map)
+    .bindTooltip('Bonhill Transmitter (Alexandria)', {className: 'tx-tooltip'});
 
 // North Ayrshire Tx 1 — Routenburn Golf Club, Largs
 L.marker([55.795, -4.855], {icon: txIcon}).addTo(map)
