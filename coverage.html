@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAB Coverage — ROCK.SCOT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --black:   #0a0a0a;
+            --dark:    #111111;
+            --panel:   #1a1a1a;
+            --orange:  #ff6600;
+            --gold:    #ffd700;
+            --red:     #cc2200;
+            --white:   #f0f0f0;
+            --muted:   rgba(240,240,240,0.55);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--black);
+            color: var(--white);
+            font-family: 'Barlow', sans-serif;
+            min-height: 100vh;
+        }
+
+        /* ── HEADER ─────────────────────────────────────────── */
+        header {
+            background: var(--dark);
+            border-bottom: 2px solid var(--orange);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 0.1em;
+            color: var(--white);
+            text-decoration: none;
+        }
+
+        .header-logo span { color: var(--orange); }
+
+        .header-nav a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-left: 2rem;
+            transition: color 0.2s;
+        }
+
+        .header-nav a:hover { color: var(--orange); }
+
+        /* ── HERO BAND ───────────────────────────────────────── */
+        .hero-band {
+            background: linear-gradient(135deg, #1a0800 0%, #0a0a0a 50%, #001a08 100%);
+            border-bottom: 1px solid rgba(255,102,0,0.2);
+            padding: 3rem 2rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-band::before {
+            content: 'COVERAGE';
+            position: absolute;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 18rem;
+            color: rgba(255,102,0,0.04);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            white-space: nowrap;
+            pointer-events: none;
+            letter-spacing: 0.05em;
+        }
+
+        .hero-eyebrow {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--orange);
+            margin-bottom: 0.75rem;
+        }
+
+        .hero-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            letter-spacing: 0.05em;
+            line-height: 1;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title span { color: var(--orange); }
+
+        .hero-sub {
+            color: var(--muted);
+            font-size: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        /* ── LEGEND ──────────────────────────────────────────── */
+        .legend-strip {
+            background: var(--panel);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2.5rem;
+            padding: 0.9rem 2rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .legend-swatch {
+            width: 28px;
+            height: 14px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        .swatch-live    { background: var(--orange); opacity: 0.85; }
+        .swatch-coming  { background: var(--gold);   opacity: 0.7;  border: 2px dashed rgba(255,215,0,0.9); }
+
+        /* ── MAP WRAPPER ────────────────────────────────────── */
+        .map-wrapper {
+            position: relative;
+        }
+
+        #map {
+            height: 580px;
+            width: 100%;
+            background: #111;
+        }
+
+        /* ── STATS GRID ──────────────────────────────────────── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1px;
+            background: rgba(255,255,255,0.06);
+            border-top: 2px solid var(--orange);
+        }
+
+        .stat-card {
+            background: var(--panel);
+            padding: 1.8rem 2rem;
+            text-align: center;
+            transition: background 0.2s;
+        }
+
+        .stat-card:hover { background: #202020; }
+
+        .stat-value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 3rem;
+            line-height: 1;
+            color: var(--orange);
+            letter-spacing: 0.05em;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-top: 0.4rem;
+        }
+
+        /* ── RAJAR CALLOUT ───────────────────────────────────── */
+        .rajar-band {
+            background: linear-gradient(90deg, #0f0600 0%, #1a0a00 50%, #0f0600 100%);
+            border-top: 1px solid rgba(255,102,0,0.15);
+            border-bottom: 1px solid rgba(255,102,0,0.15);
+            padding: 2.5rem 2rem;
+            text-align: center;
+        }
+
+        .rajar-eyebrow {
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--orange);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .rajar-headline {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+
+        .rajar-body {
+            color: var(--muted);
+            font-size: 0.9rem;
+            max-width: 720px;
+            margin: 0 auto;
+            line-height: 1.7;
+            font-weight: 300;
+        }
+
+        .rajar-body strong { color: var(--white); font-weight: 600; }
+
+        .rajar-source {
+            margin-top: 1rem;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            color: rgba(240,240,240,0.3);
+        }
+
+        /* ── AREA CARDS ──────────────────────────────────────── */
+        .area-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1px;
+            background: rgba(255,255,255,0.06);
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .area-card {
+            background: var(--panel);
+            padding: 2rem;
+            border-top: 3px solid transparent;
+            transition: background 0.2s;
+        }
+
+        .area-card:hover { background: #1e1e1e; }
+        .area-card.live  { border-top-color: var(--orange); }
+        .area-card.soon  { border-top-color: var(--gold); }
+
+        .area-badge {
+            display: inline-block;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            padding: 0.25rem 0.6rem;
+            border-radius: 2px;
+            margin-bottom: 0.75rem;
+        }
+
+        .badge-live { background: var(--orange); color: #000; }
+        .badge-soon { background: var(--gold);   color: #000; }
+        .badge-q34  { background: #2a2000; color: var(--gold); border: 1px solid var(--gold); }
+
+        .area-name {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.6rem;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .area-desc {
+            font-size: 0.85rem;
+            color: var(--muted);
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        .area-stat {
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--orange);
+        }
+
+        /* ── FOOTER ──────────────────────────────────────────── */
+        footer {
+            background: var(--dark);
+            border-top: 2px solid rgba(255,102,0,0.2);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: rgba(240,240,240,0.3);
+            letter-spacing: 0.05em;
+        }
+
+        footer a { color: var(--orange); text-decoration: none; }
+
+        /* ── LEAFLET POPUP OVERRIDES ─────────────────────────── */
+        .leaflet-popup-content-wrapper {
+            background: #1a1a1a !important;
+            color: #f0f0f0 !important;
+            border: 1px solid rgba(255,102,0,0.4) !important;
+            border-radius: 4px !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.8) !important;
+        }
+
+        .leaflet-popup-tip { background: #1a1a1a !important; }
+        .leaflet-popup-close-button { color: #ff6600 !important; }
+
+        .popup-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.4rem;
+            letter-spacing: 0.05em;
+            color: #ff6600;
+            margin-bottom: 0.4rem;
+        }
+
+        .popup-badge {
+            display: inline-block;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            padding: 0.2rem 0.5rem;
+            border-radius: 2px;
+            margin-bottom: 0.6rem;
+        }
+
+        .popup-stat {
+            font-size: 0.8rem;
+            color: rgba(240,240,240,0.7);
+            margin-bottom: 0.3rem;
+            line-height: 1.5;
+        }
+
+        .popup-stat strong { color: #f0f0f0; }
+
+        @media (max-width: 600px) {
+            header { flex-direction: column; gap: 0.75rem; text-align: center; }
+            .header-nav a { margin: 0 0.75rem; }
+            #map { height: 420px; }
+            .legend-strip { gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <a href="/" class="header-logo">ROCK<span>.</span>SCOT</a>
+    <nav class="header-nav">
+        <a href="/">Home</a>
+        <a href="/advertise.html">Advertise</a>
+        <a href="/wire.html">The Wire</a>
+        <a href="/coverage.html" style="color:var(--orange)">Coverage</a>
+    </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero-band">
+    <p class="hero-eyebrow">📻 DAB+ Digital Radio</p>
+    <h1 class="hero-title">Where You Can <span>Hear Us</span></h1>
+    <p class="hero-sub">ROCK.SCOT is live on DAB+ across Inverclyde and North Ayrshire — and expanding fast. South Lanarkshire and Oban are licensed and coming in 2025/26.</p>
+</section>
+
+<!-- LEGEND -->
+<div class="legend-strip">
+    <div class="legend-item">
+        <div class="legend-swatch swatch-live"></div>
+        <span>Live on DAB+</span>
+    </div>
+    <div class="legend-item">
+        <div class="legend-swatch swatch-coming"></div>
+        <span>Licensed — Coming Soon</span>
+    </div>
+</div>
+
+<!-- MAP -->
+<div class="map-wrapper">
+    <div id="map"></div>
+</div>
+
+<!-- STATS -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value">2</div>
+        <div class="stat-label">Live Multiplexes</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">4</div>
+        <div class="stat-label">Licensed Areas</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">77%</div>
+        <div class="stat-label">UK Listening Now Digital</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">66%</div>
+        <div class="stat-label">Homes Own a DAB Radio</div>
+    </div>
+</div>
+
+<!-- RAJAR CALLOUT -->
+<div class="rajar-band">
+    <p class="rajar-eyebrow">RAJAR Q3 2025 — Latest Industry Data</p>
+    <h2 class="rajar-headline">DAB is Scotland's Radio Platform of Choice</h2>
+    <p class="rajar-body">
+        <strong>77% of all UK radio listening hours are now digital</strong>, with DAB the dominant platform across Scotland. Nationally, <strong>50 million adults listen to radio every week</strong>, and <strong>66% of households own at least one DAB radio</strong>. For advertisers, DAB audiences are highly engaged and loyal — listeners average over <strong>14 hours per week</strong> on commercial radio. Scotland has one of the highest rates of DAB adoption in the UK, making ROCK.SCOT's coverage areas exceptionally well-placed for digital growth.
+    </p>
+    <p class="rajar-source">Source: RAJAR Q3 2025 Data Release</p>
+</div>
+
+<!-- AREA CARDS -->
+<div class="area-cards">
+    <div class="area-card live">
+        <span class="area-badge badge-live">🔴 Live Now</span>
+        <div class="area-name">Inverclyde</div>
+        <p class="area-desc">Port Glasgow to Dunoon, across to Fastlane, Helensburgh, Clydebank and up Loch Lomond. Operated by Coast DAB on Block 8B.</p>
+        <p class="area-stat">▶ ROCK.SCOT is live on this multiplex</p>
+    </div>
+    <div class="area-card live">
+        <span class="area-badge badge-live">🔴 Live Now</span>
+        <div class="area-name">North Ayrshire</div>
+        <p class="area-desc">Largs, Irvine, Stevenston, Saltcoats and inland toward Paisley. Transmitters at Routenburn Golf Club, Largs and near Dalry. Operated by Caledonia TX.</p>
+        <p class="area-stat">▶ ROCK.SCOT is testing ahead of full launch</p>
+    </div>
+    <div class="area-card soon">
+        <span class="area-badge badge-soon">⏳ Coming Soon</span>
+        <div class="area-name">South Lanarkshire</div>
+        <p class="area-desc">Hamilton, East Kilbride and the Lanarkshire heartland. Licence awarded to Lanarkshire DAB Ltd — joint venture between Caledonia TX and C.I. Broadcasting.</p>
+        <p class="area-stat">▶ Launch target: 2025/26</p>
+    </div>
+    <div class="area-card soon">
+        <span class="area-badge badge-q34">📅 Q3/Q4 2026</span>
+        <div class="area-name">Oban</div>
+        <p class="area-desc">Gateway to the Isles. Single transmitter covering Oban town with a second transmitter north of Oban Airport planned. Licence awarded to Caledonia TX in November 2025.</p>
+        <p class="area-stat">▶ Launch target: Q3/Q4 2026</p>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p>Coverage polygons are indicative based on Ofcom licence data. Actual reception may vary with terrain and equipment. &nbsp;|&nbsp; <a href="https://www.ofcom.org.uk/tv-radio-and-on-demand/digital-radio" target="_blank">Ofcom Small-Scale DAB</a> &nbsp;|&nbsp; <a href="https://www.rajar.co.uk" target="_blank">RAJAR Data</a> &nbsp;|&nbsp; <a href="/">← Back to ROCK.SCOT</a></p>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ── MAP INIT ─────────────────────────────────────────────────────
+const map = L.map('map', {
+    center: [55.85, -4.70],
+    zoom: 9,
+    zoomControl: true,
+    scrollWheelZoom: false
+});
+
+// OpenStreetMap tiles — reliable, no key needed
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19
+}).addTo(map);
+
+// ── STYLES ───────────────────────────────────────────────────────
+const liveStyle = {
+    color: '#ff6600',
+    weight: 2,
+    opacity: 0.9,
+    fillColor: '#ff6600',
+    fillOpacity: 0.22
+};
+
+const comingStyle = {
+    color: '#ffd700',
+    weight: 2,
+    opacity: 0.8,
+    fillColor: '#ffd700',
+    fillOpacity: 0.12,
+    dashArray: '8 5'
+};
+
+// ── POPUP BUILDER ────────────────────────────────────────────────
+function popup(title, badge, badgeClass, stats) {
+    return `
+        <div class="popup-title">${title}</div>
+        <span class="popup-badge ${badgeClass}">${badge}</span>
+        <br>
+        ${stats.map(s => `<div class="popup-stat">${s}</div>`).join('')}
+    `;
+}
+
+// ── INVERCLYDE ───────────────────────────────────────────────────
+// Source: Ofcom Block 8B licence area, Coast DAB Ltd
+// Covers: Port Glasgow → Greenock → Gourock → Dunoon
+//         → Helensburgh → Clydebank → up Loch Lomond shore
+const inverclydePolygon = [
+    [55.955, -4.695],  // Clydebank / Erskine area
+    [55.975, -4.760],  // Old Kilpatrick
+    [55.980, -4.820],  // Bowling / Dumbarton
+    [55.960, -4.890],  // Cardross
+    [55.985, -4.960],  // Helensburgh
+    [56.010, -5.010],  // Rhu
+    [56.050, -4.980],  // Garelochhead
+    [56.090, -4.930],  // Arrochar / Loch Long entrance
+    [56.070, -4.840],  // Loch Lomond shore
+    [56.010, -4.760],  // Luss area
+    [55.990, -4.740],  // Alexandria
+    [55.960, -4.720],  // Dumbarton
+    [55.940, -5.020],  // Gourock
+    [55.920, -5.050],  // Greenock / Inverkip
+    [55.880, -4.970],  // Wemyss Bay
+    [55.870, -4.900],  // Skelmorlie
+    [55.820, -5.080],  // Dunoon
+    [55.790, -5.140],  // South Dunoon
+    [55.820, -5.200],  // Toward
+    [55.870, -5.110],  // Hunter's Quay
+    [55.910, -5.020],  // Sandbank
+    [55.930, -5.000],  // Kilmun
+    [55.960, -4.940],  // McInroy's Point
+    [55.940, -4.840],  // Gourock railway
+    [55.950, -4.780],  // Port Glasgow
+    [55.955, -4.695]   // close
+];
+
+const inverclydeLayer = L.polygon(inverclydePolygon, liveStyle).addTo(map);
+inverclydeLayer.bindPopup(popup(
+    'Inverclyde',
+    '🔴 LIVE ON DAB+',
+    'badge-live',
+    [
+        '<strong>Block:</strong> 8B | Operator: Coast DAB',
+        '<strong>Covers:</strong> Port Glasgow, Greenock, Gourock, Helensburgh, Clydebank, Dunoon',
+        '<strong>ROCK.SCOT:</strong> Live on this multiplex',
+        '<strong>RAJAR:</strong> 77% of all UK listening is now digital — Scotland leads DAB adoption',
+        '<strong>DAB reach:</strong> 77% of UK listening is now digital'
+    ]
+), { maxWidth: 280 });
+
+// ── NORTH AYRSHIRE ───────────────────────────────────────────────
+// Source: Ofcom licence, North Ayrshire Broadcasting Ltd
+// Transmitters: Routenburn Golf Club (Largs) + Dalry site
+// Covers: Largs coast → Irvine → Stevenston → Saltcoats → inland toward Paisley
+// Also includes Rothesay (cross-Clyde via Toward peninsula transmitter)
+const northAyrshirePolygon = [
+    [55.870, -4.900],  // Skelmorlie / Wemyss Bay border
+    [55.840, -4.880],  // Skelmorlie
+    [55.810, -4.870],  // Largs area
+    [55.790, -4.860],  // Largs (Routenburn transmitter nearby)
+    [55.760, -4.860],  // South Largs
+    [55.730, -4.870],  // Fairlie
+    [55.710, -4.860],  // West Kilbride
+    [55.690, -4.850],  // Seamill
+    [55.670, -4.840],  // Ardrossan
+    [55.650, -4.810],  // Saltcoats
+    [55.630, -4.790],  // Stevenston
+    [55.620, -4.750],  // Kilwinning
+    [55.610, -4.700],  // Irvine (south)
+    [55.620, -4.630],  // Irvine east
+    [55.640, -4.590],  // Dreghorn
+    [55.660, -4.540],  // Dalry (second transmitter site)
+    [55.700, -4.520],  // Beith area
+    [55.730, -4.550],  // Glengarnock
+    [55.760, -4.600],  // Dalry surrounds
+    [55.800, -4.640],  // Lochwinnoch direction
+    [55.830, -4.680],  // Johnstone / Paisley outskirts
+    [55.850, -4.730],  // Paisley fringe (extended coverage)
+    [55.870, -4.800],  // Back toward Greenock
+    [55.870, -4.900]   // close
+];
+
+const northAyrshireLayer = L.polygon(northAyrshirePolygon, liveStyle).addTo(map);
+northAyrshireLayer.bindPopup(popup(
+    'North Ayrshire',
+    '🔴 LIVE ON DAB+',
+    'badge-live',
+    [
+        '<strong>Operator:</strong> Caledonia TX / North Ayrshire Broadcasting Ltd',
+        '<strong>Transmitters:</strong> Routenburn Golf Club (Largs) + Dalry',
+        '<strong>Covers:</strong> Largs, Irvine, Stevenston, Saltcoats — reaching south to Irvine, inland to Paisley',
+        '<strong>ROCK.SCOT:</strong> Testing ahead of full-time launch',
+        '<strong>Population:</strong> ~41% of the licence area adults covered'
+    ]
+), { maxWidth: 280 });
+
+// Rothesay / Bute (bonus coverage via Toward peninsula transmitter)
+const rothesayPolygon = [
+    [55.870, -5.080],  // North Bute
+    [55.860, -5.080],
+    [55.850, -5.030],  // Rothesay
+    [55.840, -5.020],
+    [55.820, -5.050],
+    [55.830, -5.100],
+    [55.850, -5.120],
+    [55.870, -5.080]
+];
+
+L.polygon(rothesayPolygon, {
+    ...liveStyle,
+    fillOpacity: 0.15,
+    dashArray: '4 4'
+}).addTo(map).bindPopup(popup(
+    'Rothesay / Bute',
+    '🔴 EXTENDED COVERAGE',
+    'badge-live',
+    [
+        '<strong>Note:</strong> Bonus coverage via Toward peninsula transmitter',
+        'Rothesay is outside the Ofcom licence area but is served by the cross-Clyde signal'
+    ]
+), { maxWidth: 260 });
+
+// ── SOUTH LANARKSHIRE ────────────────────────────────────────────
+// Source: Ofcom Round 6, Lanarkshire DAB Ltd
+// Covers: Hamilton, East Kilbride, Motherwell, Wishaw, Lanark
+const southLanarkshirePolygon = [
+    [55.810, -4.050],  // Shotts area (NE corner)
+    [55.820, -4.100],
+    [55.830, -4.000],
+    [55.800, -3.950],  // Wishaw east
+    [55.780, -3.920],  // Motherwell east
+    [55.760, -3.990],  // Motherwell south
+    [55.740, -4.040],
+    [55.720, -4.100],  // Hamilton
+    [55.710, -4.050],
+    [55.700, -4.000],
+    [55.680, -4.010],  // Larkhall
+    [55.660, -4.050],
+    [55.630, -4.120],  // Stonehouse
+    [55.620, -4.200],
+    [55.640, -4.300],  // Lanark area
+    [55.660, -4.350],
+    [55.680, -4.300],
+    [55.700, -4.250],  // Carluke
+    [55.720, -4.200],
+    [55.720, -4.150],  // East Kilbride fringe
+    [55.740, -4.150],
+    [55.760, -4.130],  // East Kilbride
+    [55.780, -4.120],
+    [55.800, -4.100],
+    [55.810, -4.050]   // close
+];
+
+const southLanarkshireLayer = L.polygon(southLanarkshirePolygon, comingStyle).addTo(map);
+southLanarkshireLayer.bindPopup(popup(
+    'South Lanarkshire',
+    '⏳ LICENSED — COMING SOON',
+    'badge-soon',
+    [
+        '<strong>Licensee:</strong> Lanarkshire DAB Ltd (Caledonia TX + C.I. Broadcasting)',
+        '<strong>Covers:</strong> Hamilton, East Kilbride, Motherwell, Wishaw, Lanark',
+        '<strong>Launch target:</strong> 2025/26',
+        '<strong>Key stations planned:</strong> EKlipse Radio, Breeze Radio, Shire Radio, Celtic Music Radio',
+        '<strong>ROCK.SCOT:</strong> Will broadcast on this multiplex at launch'
+    ]
+), { maxWidth: 280 });
+
+// ── OBAN ─────────────────────────────────────────────────────────
+// Source: Ofcom Round 7 award statement, Caledonia TX Ltd — Nov 2025
+// Single transmitter initially covering Oban town
+// Second transmitter north of Oban Airport planned
+const obanPolygon = [
+    [56.430, -5.560],  // Connel / north Loch Etive
+    [56.430, -5.500],
+    [56.420, -5.440],
+    [56.415, -5.420],  // Airport area (future transmitter)
+    [56.410, -5.430],
+    [56.420, -5.480],
+    [56.430, -5.500],
+    [56.440, -5.510],
+    [56.440, -5.550],
+    [56.450, -5.560],  // North Oban
+    [56.460, -5.540],
+    [56.470, -5.510],
+    [56.460, -5.470],
+    [56.450, -5.430],
+    [56.440, -5.420],
+    [56.430, -5.440],
+    [56.420, -5.480],
+    [56.410, -5.510],  // Oban town
+    [56.400, -5.530],
+    [56.390, -5.540],
+    [56.390, -5.580],
+    [56.400, -5.600],
+    [56.410, -5.620],
+    [56.420, -5.620],
+    [56.430, -5.600],
+    [56.430, -5.560]   // close
+];
+
+const obanLayer = L.polygon(obanPolygon, comingStyle).addTo(map);
+obanLayer.bindPopup(popup(
+    'Oban',
+    '📅 LICENSED — Q3/Q4 2026',
+    'badge-q34',
+    [
+        '<strong>Licensee:</strong> Caledonia TX Limited',
+        '<strong>Licence awarded:</strong> November 2025',
+        '<strong>Initial coverage:</strong> Oban town centre — single transmitter',
+        '<strong>Phase 2:</strong> Second transmitter north of Oban Airport',
+        '<strong>ROCK.SCOT:</strong> Will broadcast on this multiplex',
+        '<strong>Note:</strong> Gateway to the Isles — transient tourist audience year-round'
+    ]
+), { maxWidth: 280 });
+
+// ── TRANSMITTER MARKERS ──────────────────────────────────────────
+const txIcon = L.divIcon({
+    html: '<div style="width:10px;height:10px;background:#ff6600;border:2px solid #fff;border-radius:50%;box-shadow:0 0 8px rgba(255,102,0,0.8)"></div>',
+    className: '',
+    iconSize: [10, 10],
+    iconAnchor: [5, 5]
+});
+
+const txIconGold = L.divIcon({
+    html: '<div style="width:10px;height:10px;background:#ffd700;border:2px solid #fff;border-radius:50%;box-shadow:0 0 8px rgba(255,215,0,0.6)"></div>',
+    className: '',
+    iconSize: [10, 10],
+    iconAnchor: [5, 5]
+});
+
+// Inverclyde transmitter (approximate — Greenock hilltop site)
+L.marker([55.940, -4.780], {icon: txIcon}).addTo(map)
+    .bindTooltip('Inverclyde TX Site', {className: 'tx-tooltip'});
+
+// North Ayrshire Tx 1 — Routenburn Golf Club, Largs
+L.marker([55.795, -4.855], {icon: txIcon}).addTo(map)
+    .bindTooltip('Routenburn Golf Club, Largs (Tx1)', {className: 'tx-tooltip'});
+
+// North Ayrshire Tx 2 — near Dalry
+L.marker([55.658, -4.542], {icon: txIcon}).addTo(map)
+    .bindTooltip('Dalry Site (Tx2)', {className: 'tx-tooltip'});
+
+// Oban (planned transmitter)
+L.marker([56.413, -5.432], {icon: txIconGold}).addTo(map)
+    .bindTooltip('Oban TX (planned)', {className: 'tx-tooltip'});
+
+// ── FIT BOUNDS ───────────────────────────────────────────────────
+const allPolygons = [
+    ...inverclydePolygon,
+    ...northAyrshirePolygon,
+    ...southLanarkshirePolygon
+];
+map.fitBounds(L.latLngBounds(allPolygons).pad(0.1));
+</script>
+
+</body>
+</html>
