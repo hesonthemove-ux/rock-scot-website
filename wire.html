@@ -29,13 +29,13 @@
         <a href="index.html"><img src="assets/images/logo.png" alt="ROCK.SCOT" class="logo"></a>
         <nav aria-label="Main navigation">
             <a href="index.html">Home</a>
-            <a href="index.html#story">Our Story</a>
+            <a href="index.html#genres">Genres</a>
             <a href="index.html#tom">Tom Russell</a>
-            <a href="advertise.html">Advertise</a>
-            <a href="wire.html" aria-current="page">The Wire</a>
-            <a href="index.html#coverage">Coverage</a>
+            <a href="coverage.html">Coverage</a>
+            <a href="wire.html" aria-current="page" class="active">The Wire</a>
+            <a href="advertise.html" class="nav-cta">Advertise</a>
         </nav>
-        <button class="btn-listen-live" onclick="openPlayer()" aria-label="Listen Live">LISTEN LIVE</button>
+        <button class="btn-listen" onclick="openPlayer()" aria-label="Listen Live">▶ Listen Live</button>
         <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
             <span></span><span></span><span></span>
         </button>
@@ -44,13 +44,14 @@
 
 <!-- MOBILE NAV -->
 <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
+    <button class="mobile-nav-close" id="mobile-nav-close" aria-label="Close menu">✕</button>
     <a href="index.html" onclick="closeMobileNav()">Home</a>
-    <a href="index.html#story" onclick="closeMobileNav()">Our Story</a>
+    <a href="index.html#genres" onclick="closeMobileNav()">Genres</a>
     <a href="index.html#tom" onclick="closeMobileNav()">Tom Russell</a>
-    <a href="advertise.html" onclick="closeMobileNav()">Advertise</a>
+    <a href="coverage.html" onclick="closeMobileNav()">Coverage</a>
     <a href="wire.html" onclick="closeMobileNav()">The Wire</a>
-    <a href="index.html#coverage" onclick="closeMobileNav()">Coverage</a>
-    <button class="btn-listen-live" onclick="closeMobileNav(); openPlayer();">LISTEN LIVE</button>
+    <a href="advertise.html" onclick="closeMobileNav()" class="mobile-cta">Advertise</a>
+    <button class="mobile-listen-btn" onclick="closeMobileNav(); openPlayer();">▶ Listen Live</button>
 </nav>
 
 <!-- WIRE HERO -->
