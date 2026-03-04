@@ -105,12 +105,9 @@
     <link rel="dns-prefetch" href="https://pwzeapvopeeoahpyicdm.supabase.co">
 
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=3"><style>html,body{background:#080808!important;color:#f2f2f2!important;}</style>
+    <link rel="stylesheet" href="css/style.css?v=4">
+    <style>html,body{background:#080808!important;color:#f2f2f2!important;margin:0;padding:0;}</style>
 
-    <!-- Supabase config (set SUPABASE_ANON_KEY in js/supabase-config.js) -->
-    <script src="js/supabase-config.js"></script>
-    <!-- Supabase Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         /* Additional styles for advertise page */
@@ -344,37 +341,16 @@
             }
         }
     </style>
+  <script src="js/supabase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+  <script src="js/header.js"></script>
 </head>
 <body>
     
-    <!-- HEADER -->
-    <header>
-        <div class="header-container">
-            <a href="index.html"><img src="assets/images/logo.png" alt="ROCK.SCOT" class="logo"></a>
-            <nav>
-                <a href="index.html">Home</a>
-                <a href="wire.html">The Wire</a>
-                <a href="coverage.html">Coverage</a>
-                <a href="advertise.html" class="nav-cta active">Advertise</a>
-            </nav>
-            <button class="btn-listen" id="header-listen-btn">▶ Listen Live</button>
-            <button class="hamburger" aria-label="Open navigation" aria-expanded="false">
-                <span></span><span></span><span></span>
-            </button>
-        </div>
-    </header>
-
-    <!-- MOBILE NAV -->
-    <nav class="mobile-nav" role="navigation" aria-label="Mobile navigation">
-        <button class="mobile-nav-close" aria-label="Close navigation">✕</button>
-        <a href="index.html" onclick="closeMobileNav()">Home</a>
-        <a href="wire.html" onclick="closeMobileNav()">The Wire</a>
-        <a href="coverage.html" onclick="closeMobileNav()">Coverage</a>
-        <a href="advertise.html" onclick="closeMobileNav()" class="mobile-cta">Advertise</a>
-    </nav>
+    <!-- header.js injects header, mobile nav, ticker and player -->
     
     <!-- HERO -->
-    <section style="padding: 10rem 2rem 4rem; text-align: center; background: linear-gradient(180deg, var(--black), var(--navy));">
+    <section style="padding: 10rem 2rem 4rem; margin-top: 98px; text-align: center; background: linear-gradient(180deg, var(--black), var(--navy));">
         <div style="max-width: 900px; margin: 0 auto;">
             <h1 style="font-family: 'Bebas Neue'; font-size: 4rem; color: var(--orange); margin-bottom: 1.5rem; letter-spacing: 0.1em;">Advertise with ROCK.SCOT</h1>
             <p style="font-size: 1.3rem; color: rgba(255,255,255,0.8); margin-bottom: 2rem;">Reach 410,000+ rock fans across West Scotland on DAB+</p>
@@ -425,7 +401,7 @@
                 
                 <div class="package-card">
                     <div class="package-name">Top of Hour</div>
-                    <div class="package-price">£2,500</div>
+                    <div class="package-price">£2,495</div>
                     <div class="package-plays">Exclusive positioning</div>
                     <ul class="package-features">
                         <li>Premium :00 slot placement</li>
@@ -483,7 +459,7 @@
                                 <option value="">Select package...</option>
                                 <option value="regional">Regional — Single Mux (£299)</option>
                                 <option value="multi-regional">Multi-Regional — All 3 Mux (£449)</option>
-                                <option value="top-of-hour">Top of Hour — Station Ident (£2,500)</option>
+                                <option value="top-of-hour">Top of Hour — Station Ident (£2,495)</option>
                             </select>
                         </div>
                     </div>
@@ -604,7 +580,7 @@
             </div>
             <div class="footer-section">
                 <h4>Advertising</h4>
-                <p>Regional: £299<br>Multi-Regional: £449<br>Top of Hour: £2,500</p>
+                <p>Regional: £299<br>Multi-Regional: £449<br>Top of Hour: £2,495</p>
             </div>
             <div class="footer-section">
                 <h4>Coverage</h4>
@@ -628,7 +604,7 @@
     // ================================================================
 
     const SUPABASE_URL  = window.SUPABASE_URL || 'https://pwzeapvopeeoahpyicdm.supabase.co';
-    const SUPABASE_KEY  = window.SUPABASE_ANON_KEY || 'YOUR_ANON_KEY';
+    const SUPABASE_KEY  = window.SUPABASE_ANON_KEY || '';
     const EDGE_URL      = `${SUPABASE_URL}/functions/v1/book_campaign`;
     const supabase      = (window.supabase && typeof window.supabase.createClient === 'function')
         ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)

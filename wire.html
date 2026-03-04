@@ -17,45 +17,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=3"><style>html,body{background:#080808!important;color:#f2f2f2!important;}</style>
+    <link rel="stylesheet" href="css/style.css?v=4">
+    <style>html,body{background:#080808!important;color:#f2f2f2!important;margin:0;padding:0;}</style>
     <script src="js/supabase-config.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+            crossorigin="anonymous"
+            onerror="window._supabaseFailed=true"></script>
+  <script src="js/header.js"></script>
 </head>
 <body>
 
-<!-- HEADER -->
-<header id="site-header">
-    <div class="header-container">
-        <a href="index.html"><img src="assets/images/logo.png" alt="ROCK.SCOT" class="logo"></a>
-        <nav aria-label="Main navigation">
-            <a href="index.html">Home</a>
-            <a href="index.html#genres">Genres</a>
-            <a href="index.html#tom">Tom Russell</a>
-            <a href="coverage.html">Coverage</a>
-            <a href="wire.html" aria-current="page" class="active">The Wire</a>
-            <a href="advertise.html" class="nav-cta">Advertise</a>
-        </nav>
-        <button class="btn-listen" onclick="openPlayer()" aria-label="Listen Live">▶ Listen Live</button>
-        <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
-            <span></span><span></span><span></span>
-        </button>
-    </div>
-</header>
-
-<!-- MOBILE NAV -->
-<nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
-    <button class="mobile-nav-close" id="mobile-nav-close" aria-label="Close menu">✕</button>
-    <a href="index.html" onclick="closeMobileNav()">Home</a>
-    <a href="index.html#genres" onclick="closeMobileNav()">Genres</a>
-    <a href="index.html#tom" onclick="closeMobileNav()">Tom Russell</a>
-    <a href="coverage.html" onclick="closeMobileNav()">Coverage</a>
-    <a href="wire.html" onclick="closeMobileNav()">The Wire</a>
-    <a href="advertise.html" onclick="closeMobileNav()" class="mobile-cta">Advertise</a>
-    <button class="mobile-listen-btn" onclick="closeMobileNav(); openPlayer();">▶ Listen Live</button>
-</nav>
+<!-- header.js injects persistent header, mobile nav, ticker and player -->
 
 <!-- WIRE HERO -->
-<div class="wire-hero" style="margin-top: 72px;">
+<div class="wire-hero" style="margin-top: 98px;">
     <div style="width: 100%; overflow: hidden; line-height: 0;">
         <img src="assets/images/burst.png"
              alt="ROCK.SCOT — Scotland's DAB+ Rock Station"
@@ -177,13 +152,19 @@ const SUPABASE_URL = window.SUPABASE_URL || 'https://pwzeapvopeeoahpyicdm.supaba
 const SUPABASE_KEY = window.SUPABASE_ANON_KEY || '';
 
 let supabaseClient = null;
-try {
-    if (window.supabase && SUPABASE_KEY) {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-            realtime: { params: { eventsPerSecond: 10 } }
-        });
-    }
-} catch(e) { console.warn('Supabase init failed:', e); }
+
+function initWireSupabase() {
+    try {
+        if (window.supabase && window.supabase.createClient && SUPABASE_KEY) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                realtime: { params: { eventsPerSecond: 10 } }
+            });
+            return true;
+        }
+    } catch(e) { console.warn('Supabase init failed:', e); }
+    return false;
+}
+initWireSupabase();
 
 let allStories  = [];
 let filteredStories = [];
@@ -474,9 +455,25 @@ function escAttr(str) {
 }
 
 // ── INIT ──────────────────────────────────────────────────
+// Attempt immediate load — works if SDK already loaded (cached)
 loadStories();
-subscribeRealtime();
-setInterval(() => loadStories(), 15 * 60 * 1000); // refresh every 15 min
+setInterval(() => loadStories(), 15 * 60 * 1000);
+
+// Also retry SDK init for browsers that load it slowly
+if (!supabaseClient) {
+    let attempts = 0;
+    const retry = setInterval(() => {
+        attempts++;
+        if (initWireSupabase()) {
+            clearInterval(retry);
+            loadStories();
+            subscribeRealtime();
+        }
+        if (attempts > 20) clearInterval(retry);
+    }, 300);
+} else {
+    subscribeRealtime();
+}
 </script>
 </body>
 </html>

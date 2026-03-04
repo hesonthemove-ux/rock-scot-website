@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DAB Coverage — ROCK.SCOT</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=4">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
@@ -351,59 +352,13 @@
             .legend-strip { gap: 1rem; }
         }
     </style>
+  <script src="js/supabase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+  <script src="js/header.js"></script>
 </head>
 <body>
 
-<!-- HEADER -->
-<header id="site-header" style="position:fixed;top:0;left:0;right:0;height:64px;background:rgba(8,8,8,0.96);backdrop-filter:blur(12px);border-bottom:1px solid #242424;z-index:1000;transition:border-color 0.3s;">
-  <div style="max-width:1300px;margin:0 auto;padding:0 1.5rem;height:100%;display:flex;align-items:center;gap:1.5rem;">
-    <a href="index.html"><img src="assets/images/logo.png" alt="ROCK.SCOT" style="height:44px;width:auto;object-fit:contain;"></a>
-    <nav id="desktop-nav" style="display:flex;align-items:center;gap:0.25rem;margin-left:auto;">
-      <a href="index.html" style="font-family:'Barlow Condensed',sans-serif;font-size:0.95rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(242,242,242,0.5);padding:0.4rem 0.75rem;border-radius:3px;transition:color 0.15s;text-decoration:none;">Home</a>
-      <a href="index.html#genres" style="font-family:'Barlow Condensed',sans-serif;font-size:0.95rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(242,242,242,0.5);padding:0.4rem 0.75rem;border-radius:3px;transition:color 0.15s;text-decoration:none;">Genres</a>
-      <a href="wire.html" style="font-family:'Barlow Condensed',sans-serif;font-size:0.95rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(242,242,242,0.5);padding:0.4rem 0.75rem;border-radius:3px;transition:color 0.15s;text-decoration:none;">The Wire</a>
-      <a href="coverage.html" style="font-family:'Barlow Condensed',sans-serif;font-size:0.95rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#ff5500;padding:0.4rem 0.75rem;border-radius:3px;text-decoration:none;">Coverage</a>
-      <a href="advertise.html" style="font-family:'Barlow Condensed',sans-serif;font-size:0.95rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#ff5500;border:1px solid #ff5500;padding:0.35rem 0.9rem;border-radius:3px;text-decoration:none;">Advertise</a>
-    </nav>
-    <button id="cov-hamburger" aria-label="Open menu" style="display:none;flex-direction:column;justify-content:center;gap:5px;width:40px;height:40px;padding:8px;margin-left:auto;background:none;border:none;cursor:pointer;">
-      <span style="display:block;height:2px;background:#f2f2f2;border-radius:2px;transition:all 0.25s;"></span>
-      <span style="display:block;height:2px;background:#f2f2f2;border-radius:2px;transition:all 0.25s;"></span>
-      <span style="display:block;height:2px;background:#f2f2f2;border-radius:2px;transition:all 0.25s;"></span>
-    </button>
-  </div>
-</header>
-
-<!-- MOBILE NAV -->
-<nav id="cov-mobile-nav" style="position:fixed;inset:0;background:rgba(8,8,8,0.98);backdrop-filter:blur(20px);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;opacity:0;pointer-events:none;transition:opacity 0.25s;">
-  <button id="cov-mobile-close" style="position:absolute;top:1.5rem;right:1.5rem;font-size:1.5rem;color:rgba(242,242,242,0.5);width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;">✕</button>
-  <a href="index.html" style="font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:0.05em;color:#f2f2f2;text-decoration:none;">Home</a>
-  <a href="wire.html" style="font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:0.05em;color:#f2f2f2;text-decoration:none;">The Wire</a>
-  <a href="coverage.html" style="font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:0.05em;color:#ff5500;text-decoration:none;">Coverage</a>
-  <a href="advertise.html" style="font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:0.05em;color:#ff5500;text-decoration:none;">Advertise</a>
-</nav>
-
-<script>
-(function() {
-  var ham = document.getElementById('cov-hamburger');
-  var nav = document.getElementById('cov-mobile-nav');
-  var cls = document.getElementById('cov-mobile-close');
-  var desk = document.getElementById('desktop-nav');
-  function checkBreak() {
-    if (window.innerWidth <= 768) {
-      ham.style.display = 'flex';
-      desk.style.display = 'none';
-    } else {
-      ham.style.display = 'none';
-      desk.style.display = 'flex';
-    }
-  }
-  checkBreak();
-  window.addEventListener('resize', checkBreak);
-  ham.addEventListener('click', function() { nav.style.opacity='1'; nav.style.pointerEvents='all'; document.body.style.overflow='hidden'; });
-  cls.addEventListener('click', function() { nav.style.opacity='0'; nav.style.pointerEvents='none'; document.body.style.overflow=''; });
-  nav.querySelectorAll('a').forEach(function(a) { a.addEventListener('click', function() { nav.style.opacity='0'; nav.style.pointerEvents='none'; document.body.style.overflow=''; }); });
-})();
-</script>
+<!-- header.js injects persistent header -->
 
 <!-- HERO -->
 <section class="hero-band">

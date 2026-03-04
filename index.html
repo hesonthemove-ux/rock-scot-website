@@ -19,52 +19,18 @@
   <meta name="twitter:image" content="https://rock.scot/assets/images/hero-graffiti-main.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="dns-prefetch" href="https://pwzeapvopeeoahpyicdm.supabase.co">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=3">
-  <style>html,body{background:#080808!important;color:#f2f2f2!important;margin:0;padding:0;}</style>
+  <link rel="dns-prefetch" href="https://pwzeapvopeeoahpyicdm.supabase.co">
+  <link rel="stylesheet" href="css/style.css?v=4">
+  <style>
+    /* Critical inline — ensures dark background renders before CSS loads */
+    html, body { background: #080808 !important; color: #f2f2f2 !important; margin: 0; padding: 0; }
+  </style>
   <script src="js/supabase-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+  <script src="js/header.js"></script>
 </head>
 <body>
-
-<!-- HEADER -->
-<header id="site-header">
-  <div class="header-container">
-    <a href="index.html"><img src="assets/images/logo.png" alt="ROCK.SCOT" class="logo"></a>
-    <nav>
-      <a href="#genres">Genres</a>
-      <a href="wire.html">The Wire</a>
-      <a href="#tom">Tom Russell</a>
-      <a href="#schedule">Schedule</a>
-      <a href="coverage.html">Coverage</a>
-      <a href="advertise.html" class="nav-cta">Advertise</a>
-    </nav>
-    <button class="btn-listen" id="header-listen-btn">▶ Listen Live</button>
-    <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
-</header>
-
-<!-- MOBILE NAV -->
-<nav class="mobile-nav" id="mobile-nav" role="navigation" aria-label="Mobile navigation">
-  <button class="mobile-nav-close" id="mobile-nav-close" aria-label="Close menu">✕</button>
-  <a href="#genres" class="mobile-link">Genres</a>
-  <a href="wire.html" class="mobile-link">The Wire</a>
-  <a href="#tom" class="mobile-link">Tom Russell</a>
-  <a href="#schedule" class="mobile-link">Schedule</a>
-  <a href="coverage.html" class="mobile-link">Coverage</a>
-  <a href="advertise.html" class="mobile-link mobile-cta">Advertise</a>
-  <button class="mobile-listen-btn" id="mobile-listen-btn">▶ Listen Live</button>
-</nav>
-
-<!-- WIRE TICKER -->
-<div id="wire-ticker">
-  <div class="wire-label">⚡ THE WIRE</div>
-  <div id="ticker-content">CONNECTING TO SCOTTISH ROCK NEWS...</div>
-  <a href="wire.html" class="wire-link">MORE →</a>
-</div>
 
 <!-- HERO -->
 <section id="hero" class="page-offset">
@@ -318,21 +284,21 @@
       <div class="advertise-card">
         <div class="advertise-card-label">Regional</div>
         <div class="advertise-card-name">Local Impact</div>
-        <div class="advertise-card-price">£595<span> +VAT</span></div>
+        <div class="advertise-card-price">£299<span> +VAT</span></div>
         <p class="advertise-card-desc">134 plays over 28 days on your chosen mux area. Peak time coverage. Professional delivery.</p>
         <a href="advertise.html" class="advertise-card-cta">Get Started →</a>
       </div>
       <div class="advertise-card featured">
         <div class="advertise-card-label">Most Popular</div>
         <div class="advertise-card-name">Multi-Regional</div>
-        <div class="advertise-card-price">£1,295<span> +VAT</span></div>
+        <div class="advertise-card-price">£449<span> +VAT</span></div>
         <p class="advertise-card-desc">134 plays over 28 days across all broadcast areas. Maximum reach across Scotland's rock audience.</p>
         <a href="advertise.html" class="advertise-card-cta">Get Started →</a>
       </div>
       <div class="advertise-card">
         <div class="advertise-card-label">Premium</div>
         <div class="advertise-card-name">Top of Hour</div>
-        <div class="advertise-card-price">£1,895<span> +VAT</span></div>
+        <div class="advertise-card-price">£2,495<span> +VAT</span></div>
         <p class="advertise-card-desc">Premium positioning at the top of every hour. Maximum impact. Ultimate listener engagement.</p>
         <a href="advertise.html" class="advertise-card-cta">Get Started →</a>
       </div>
@@ -382,262 +348,33 @@
   </div>
 </footer>
 
-<!-- PLAYER BAR -->
-<div id="player-bar">
-  <div class="player-inner">
-    <button class="player-btn" id="play-btn" aria-label="Play / Pause">▶</button>
-    <div class="player-track">
-      <div class="player-now">Now Playing</div>
-      <div class="player-title" id="track-name">ROCK.SCOT</div>
-      <div class="player-sub" id="track-artist">Scotland's Rock Station</div>
-    </div>
-    <div class="player-live"><div class="np-dot"></div> Live DAB+</div>
-    <button class="player-close" id="player-close-btn" aria-label="Close player">✕</button>
-  </div>
-</div>
-
 <script>
-// ================================================================
-// ROCK.SCOT — Main JS
-// ================================================================
-
-// ── SUPABASE ─────────────────────────────────────────────────────
-const SUPABASE_URL      = window.SUPABASE_URL      || 'https://pwzeapvopeeoahpyicdm.supabase.co';
-const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
-let supabase = null;
-try {
-  if (window.supabase && SUPABASE_ANON_KEY) {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      realtime: { params: { eventsPerSecond: 10 } }
-    });
-  }
-} catch(e) { console.warn('Supabase init failed:', e.message); }
-
-// ── HEADER SCROLL ────────────────────────────────────────────────
-const header = document.getElementById('site-header');
-window.addEventListener('scroll', () => {
-  header.classList.toggle('scrolled', window.scrollY > 80);
-}, { passive: true });
-
-// ── HAMBURGER ────────────────────────────────────────────────────
-const hamburger   = document.getElementById('hamburger');
-const mobileNav   = document.getElementById('mobile-nav');
-const mobileClose = document.getElementById('mobile-nav-close');
-
-function openMobileNav() {
-  mobileNav.classList.add('open');
-  hamburger.classList.add('open');
-  hamburger.setAttribute('aria-expanded', 'true');
-  document.body.style.overflow = 'hidden';
-}
-function closeMobileNav() {
-  mobileNav.classList.remove('open');
-  hamburger.classList.remove('open');
-  hamburger.setAttribute('aria-expanded', 'false');
-  document.body.style.overflow = '';
-}
-
-hamburger.addEventListener('click', () => {
-  mobileNav.classList.contains('open') ? closeMobileNav() : openMobileNav();
-});
-mobileClose.addEventListener('click', closeMobileNav);
-mobileNav.addEventListener('click', (e) => {
-  if (e.target === mobileNav) closeMobileNav();
-});
-document.querySelectorAll('.mobile-link').forEach(a => {
-  a.addEventListener('click', closeMobileNav);
-});
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeMobileNav();
-});
-
-// ── PLAYER ───────────────────────────────────────────────────────
-const playerBar  = document.getElementById('player-bar');
-const playBtn    = document.getElementById('play-btn');
-const npPlayBtn  = document.getElementById('np-play-btn');
-const closeBtn   = document.getElementById('player-close-btn');
-let isPlaying    = false;
-let playerFrame  = null;
-
-function showPlayer() {
-  playerBar.classList.add('active');
-}
-function togglePlay() {
-  if (!playerFrame) {
-    playerFrame = document.createElement('iframe');
-    playerFrame.src = 'https://player.broadcast.radio/caledonia-tx-ltd';
-    playerFrame.style.cssText = 'position:absolute;width:0;height:0;border:none;opacity:0;pointer-events:none;';
-    playerFrame.allow = 'autoplay';
-    document.body.appendChild(playerFrame);
-  }
-  isPlaying = !isPlaying;
-  const icon = isPlaying ? '⏸' : '▶';
-  if (playBtn)   playBtn.textContent   = icon;
-  if (npPlayBtn) npPlayBtn.textContent = icon;
-  const trackName   = document.getElementById('track-name');
-  const trackArtist = document.getElementById('track-artist');
-  const npTrack     = document.getElementById('np-track');
-  const npArtist    = document.getElementById('np-artist');
-  if (isPlaying) {
-    if (trackName)   trackName.textContent   = 'ROCK.SCOT LIVE';
-    if (trackArtist) trackArtist.textContent = 'Broadcasting Now on DAB+';
-    if (npTrack)     npTrack.textContent     = 'ROCK.SCOT LIVE';
-    if (npArtist)    npArtist.textContent    = 'Broadcasting Now on DAB+';
-  } else {
-    if (trackName)   trackName.textContent   = 'ROCK.SCOT';
-    if (trackArtist) trackArtist.textContent = "Scotland's Rock Station";
-    if (npTrack)     npTrack.textContent     = 'ROCK.SCOT';
-    if (npArtist)    npArtist.textContent    = "Scotland's Rock Station — DAB+ Digital Radio";
-  }
-}
-
-[
-  document.getElementById('hero-listen-btn'),
-  document.getElementById('header-listen-btn'),
-  document.getElementById('mobile-listen-btn')
-].forEach(btn => {
-  if (btn) btn.addEventListener('click', (e) => {
-    e.preventDefault();
-    showPlayer();
-    if (!isPlaying) togglePlay();
-  });
-});
-if (playBtn)   playBtn.addEventListener('click', togglePlay);
-if (npPlayBtn) npPlayBtn.addEventListener('click', () => { showPlayer(); togglePlay(); });
-if (closeBtn)  closeBtn.addEventListener('click', () => playerBar.classList.remove('active'));
-
-// Auto-show player after 4s
-setTimeout(showPlayer, 4000);
-
-// ── WIRE TICKER ──────────────────────────────────────────────────
-const ticker = document.getElementById('ticker-content');
-let wireHeadlines = [];
-
-function renderTicker(items) {
-  if (!items || items.length === 0) return;
-  wireHeadlines = items;
-  const text = items.map(i => '⚡ ' + i.title.toUpperCase()).join('   ◆   ');
-  ticker.textContent = text + '   ◆   ';
-  ticker.style.animation = 'none';
-  ticker.offsetHeight;
-  ticker.style.animation = 'marquee 250s linear infinite';
-}
-
-async function loadWireNews() {
-  try {
-    if (!supabase) throw new Error('No Supabase');
-    const { data, error } = await supabase
-      .from('wire_news')
-      .select('title, genre, created_at')
-      .eq('is_live', true)
-      .order('created_at', { ascending: false })
-      .limit(25);
-    if (error) throw error;
-    if (data && data.length > 0) {
-      renderTicker(data);
-      loadHomepageWire(data);
-    } else {
-      setDefaultTicker();
-    }
-  } catch(err) {
-    console.warn('Wire error:', err.message);
-    setDefaultTicker();
-  }
-}
-
-function setDefaultTicker() {
-  ticker.textContent = '⚡ ROCK.SCOT — SCOTLAND\'S ROCK STATION — DAB+ DIGITAL RADIO — TUNE IN NOW   ◆   METAL • ALT • PUNK • CLASSIC ROCK   ◆   SEARCH "ROCK.SCOT" ON DAB+   ◆   ';
-}
-
-function loadHomepageWire(data) {
-  const grid = document.getElementById('homepage-wire');
-  if (!grid || !data || data.length === 0) return;
-  const top3 = data.slice(0, 3);
-  grid.innerHTML = top3.map(story => {
-    const ago = timeAgo(new Date(story.created_at));
-    return `<div class="wire-card">
-      <div class="wire-card-genre">${escHtml(story.genre || 'Rock')}</div>
-      <div class="wire-card-title">${escHtml(story.title)}</div>
-      <div class="wire-card-meta">${ago}</div>
-    </div>`;
-  }).join('');
-}
-
-function timeAgo(date) {
-  const s = Math.floor((Date.now() - date) / 1000);
-  if (s < 3600) return Math.floor(s/60) + 'm ago';
-  if (s < 86400) return Math.floor(s/3600) + 'h ago';
-  return Math.floor(s/86400) + 'd ago';
-}
-
-function escHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// Realtime subscription
-if (supabase) {
-  supabase.channel('wire-live')
-    .on('postgres_changes', {
-      event: 'INSERT', schema: 'public', table: 'wire_news', filter: 'is_live=eq.true'
-    }, (payload) => {
-      if (payload.new && payload.new.title) {
-        wireHeadlines.unshift(payload.new);
-        if (wireHeadlines.length > 25) wireHeadlines.pop();
-        renderTicker(wireHeadlines);
-        // Flash wire label
-        const label = document.querySelector('.wire-label');
-        if (label) {
-          label.style.cssText = 'background:#fff;color:var(--orange)';
-          setTimeout(() => label.style.cssText = '', 800);
-        }
-      }
-    }).subscribe();
-}
-
-loadWireNews();
-setInterval(loadWireNews, 5 * 60 * 1000);
-
-// ── SMOOTH SCROLL (anchor links) ─────────────────────────────────
-document.querySelectorAll('a[href^="#"]').forEach(a => {
-  a.addEventListener('click', (e) => {
-    const id = a.getAttribute('href').slice(1);
-    const target = document.getElementById(id);
-    if (target) {
-      e.preventDefault();
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  });
-});
-
-// ── KEYBOARD SHORTCUTS ───────────────────────────────────────────
-document.addEventListener('keydown', (e) => {
-  if (e.code === 'Space' && playerBar.classList.contains('active') && document.activeElement === document.body) {
-    e.preventDefault();
-    togglePlay();
-  }
-});
-
-// ── SCHEDULE: highlight current slot ─────────────────────────────
+// Schedule: highlight current slot
 (function() {
-  const h = new Date().getHours();
-  const slots = document.querySelectorAll('.schedule-row');
-  const ranges = [[6,10],[10,14],[14,18],[18,22],[22,30]];
-  slots.forEach((row, i) => {
-    const badge = row.querySelector('.schedule-badge');
+  var h = new Date().getHours();
+  var slots = document.querySelectorAll('.schedule-row');
+  var ranges = [[6,10],[10,14],[14,18],[18,22],[22,30]];
+  slots.forEach(function(row, i) {
+    var badge = row.querySelector('.schedule-badge');
     if (!badge) return;
-    const [start, end] = ranges[i] || [];
-    const active = h >= start && h < (end > 24 ? end - 24 : end);
-    if (active) {
+    var start = ranges[i] ? ranges[i][0] : 0;
+    var end   = ranges[i] ? ranges[i][1] : 0;
+    if (h >= start && h < (end > 24 ? end - 24 : end)) {
       badge.textContent = '🔴 On Air Now';
       badge.classList.add('live');
-    } else {
-      badge.classList.remove('live');
     }
   });
 })();
 
-console.log('%c🎸 ROCK.SCOT', 'font-size:24px;font-weight:bold;color:#ff5500;');
-console.log('%cScotland\'s Rock Station on DAB+', 'color:#ffd700;');
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    var id = a.getAttribute('href').slice(1);
+    var target = document.getElementById(id);
+    if (target) { e.preventDefault(); target.scrollIntoView({behavior:'smooth', block:'start'}); }
+  });
+});
 </script>
+
 </body>
 </html>
