@@ -17,7 +17,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=7">
+    <link rel="stylesheet" href="css/style.css?v=8">
     <style>html,body{background:#080808!important;color:#f2f2f2!important;margin:0;padding:0;}  .wire-source-link { color: var(--orange); text-decoration: none; transition: opacity 0.15s; }
   .wire-source-link:hover { opacity: 0.75; text-decoration: underline; }
 </style>
@@ -154,11 +154,6 @@
 </footer>
 
 <!-- PLAYER BAR -->
-<div id="player-bar">
-    <div class="player-container">
-        <button class="play-pause-btn" id="play-btn" aria-label="Play/Pause">▶</button>
-        <div class="track-info">
-            <div class="now-playing-label">Now Playing</div>
             <div class="track-name" id="track-name">ROCK.SCOT</div>
             <div class="track-artist" id="track-artist">Scotland's Rock Station</div>
         </div>
@@ -202,12 +197,13 @@ let isLoading   = false;
 
 // ── HEADER SCROLL ─────────────────────────────────────────
 window.addEventListener('scroll', () => {
-    document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 80);
+    const sh = document.getElementById('rs-header') || document.getElementById('site-header');
+    if (sh) sh.classList.toggle('scrolled', window.scrollY > 80);
 }, { passive: true });
 
 // ── HAMBURGER ─────────────────────────────────────────────
 const hamburger = document.getElementById('hamburger');
-const mobileNav = document.getElementById('mobile-nav');
+const mobileNav = null; /* handled by header.js */
 
 hamburger.addEventListener('click', () => {
     const isOpen = mobileNav.classList.toggle('open');
@@ -235,7 +231,7 @@ let isPlaying = false;
 let playerIframe;
 
 function openPlayer() {
-    document.getElementById('player-bar').classList.add('active');
+    /* player handled by header.js */
 }
 
 document.getElementById('play-btn').addEventListener('click', () => {
