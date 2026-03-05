@@ -93,7 +93,9 @@ function injectHeader() {
     +'<button id="rs-pb-play">&#9654;</button>'
     +'<div id="rs-pb-track"><div id="rs-pb-label">Now Playing</div>'
     +'<div id="rs-pb-title">ROCK.SCOT</div>'
-    +'<div id="rs-pb-sub">Scotland\'s Rock Station &mdash; DAB+</div></div>'
+    +'<div id="rs-pb-sub">Scotland\'s Rock Station &mdash; DAB+</div>'
+    +'<div id="rs-pb-iframe-wrap" style="display:none;margin-top:4px;width:100%;"></div>'
+    +'</div>'
     +'<div id="rs-pb-live"><div id="rs-pb-dot"></div>Live</div>'
     +'<button id="rs-pb-close">&#x2715;</button>'
     +'</div></div>';
@@ -144,15 +146,26 @@ function injectHeader() {
     if(p&&!playerOpen){ p.classList.add('open'); playerOpen=true; }
   }
   function togglePlay(){
+    var pb=document.getElementById('rs-pb-play');
+    var tit=document.getElementById('rs-pb-title');
+    var sub=document.getElementById('rs-pb-sub');
+    var container=document.getElementById('rs-pb-iframe-wrap');
     if(!playerFrame){
+      // Create visible iframe in player bar - required for autoplay policy compliance
       playerFrame=document.createElement('iframe');
       playerFrame.src='https://player.broadcast.radio/caledonia-tx-ltd';
-      playerFrame.allow='autoplay';
-      playerFrame.style.cssText='position:absolute;width:0;height:0;border:none;opacity:0;pointer-events:none;';
-      document.body.appendChild(playerFrame);
+      playerFrame.allow='autoplay; encrypted-media';
+      playerFrame.allowFullscreen=false;
+      playerFrame.scrolling='no';
+      playerFrame.style.cssText='width:100%;height:52px;border:none;display:block;border-radius:3px;overflow:hidden;';
+      if(container){ container.innerHTML=''; container.appendChild(playerFrame); }
+      else { document.body.appendChild(playerFrame); }
+      isPlaying=true;
+    } else {
+      isPlaying=!isPlaying;
+      // Toggle iframe visibility
+      if(container) container.style.display=isPlaying?'block':'none';
     }
-    isPlaying=!isPlaying;
-    var pb=document.getElementById('rs-pb-play'),tit=document.getElementById('rs-pb-title'),sub=document.getElementById('rs-pb-sub');
     if(pb) pb.innerHTML=isPlaying?'&#9646;&#9646;':'&#9654;';
     if(tit) tit.textContent=isPlaying?'ROCK.SCOT — Live on DAB+':'ROCK.SCOT';
     if(sub) sub.textContent=isPlaying?'Broadcasting Now':"Scotland's Rock Station — DAB+";
@@ -226,19 +239,26 @@ function injectHeader() {
     var grid=document.getElementById('homepage-wire');
     if(!grid) return;
     if(!items||!items.length){ return; }
-    // Store data for modal access
-    window.__hwWireData = items.slice(0,3);
-    grid.innerHTML=window.__hwWireData.map(function(s,idx){
+    window.__hwWireData=items.slice(0,3);
+    grid.innerHTML=window.__hwWireData.map(function(s,i){
       var src=s.source_name?escH(s.source_name):'ROCK.SCOT';
-      var genre=(s.genre||'Rock').toLowerCase();
-      return '<div class="wire-card" style="cursor:pointer;" role="button" tabindex="0"'
-        +' onclick="hwOpenModal('+idx+')"'
-        +' onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();hwOpenModal('+idx+');}">'
+      return '<div class="wire-card" style="cursor:pointer;" role="button" tabindex="0" data-hwi="'+i+'">'
         +'<div class="wire-card-genre">'+escH(s.genre||'Rock')+'</div>'
         +'<div class="wire-card-title">'+escH(s.title||'')+'</div>'
         +'<div class="wire-card-meta">'+escH(src)+' &bull; '+timeAgo(s.created_at)+'</div>'
         +'</div>';
     }).join('');
+    // Delegated handler - no inline JS, no quote escaping issues
+    grid.onclick=function(e){
+      var card=e.target.closest('[data-hwi]');
+      if(card&&typeof window.hwOpenModal==='function') window.hwOpenModal(+card.getAttribute('data-hwi'));
+    };
+    grid.onkeydown=function(e){
+      if(e.key==='Enter'||e.key===' '){
+        var card=e.target.closest('[data-hwi]');
+        if(card&&typeof window.hwOpenModal==='function'){ e.preventDefault(); window.hwOpenModal(+card.getAttribute('data-hwi')); }
+      }
+    };
   }
 
   setInterval(fetchWireREST, 5*60*1000);

@@ -17,7 +17,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=11">
+    <link rel="stylesheet" href="css/style.css?v=12">
     
       
     <!-- AEO: NewsMediaOrganization + BreadcrumbList -->
@@ -113,36 +113,34 @@
 
 <!-- FOOTER -->
 <footer>
-    <div class="footer-content">
-        <div class="footer-section">
-            <h4>ROCK.SCOT</h4>
-            <p>Scotland's Rock Station</p>
-            <p>Broadcasting 24/7 on DAB+ Digital Radio</p>
-            <p style="margin-top:0.75rem;">Ofcom Licensed Broadcaster<br>SC646223 | VAT 491589639</p>
-        </div>
-        <div class="footer-section">
-            <h4>The Wire</h4>
-            <p>Real-time Scottish rock news</p>
-            <p>Updated every 15 minutes</p>
-            <p>Powered by 40+ Scottish music sources</p>
-        </div>
-        <div class="footer-section">
-            <h4>Navigate</h4>
-            <a href="index.html">Home</a>
-            <a href="advertise.html">Advertise With Us</a>
-            <a href="privacy.html">Privacy Policy</a>
-            <a href="terms.html">Terms of Service</a>
-            <a href="cookies.html">Cookie Policy</a>
-        </div>
-        <div class="footer-section">
-            <h4>Contact Us</h4>
-            <a href="tel:01414597625" style="color:var(--orange); font-weight:700;">📞 0141 459 ROCK</a>
-            <a href="mailto:studio@rock.scot" style="color:var(--orange);">studio@rock.scot</a>
-            <a href="mailto:advertise@rock.scot" style="color:rgba(255,255,255,0.55);">advertise@rock.scot</a>
-            <a href="https://bsky.app/profile/rockscot.bsky.social" target="_blank" rel="noopener" style="margin-top:0.75rem;">Bluesky ↗</a>
-        </div>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <img src="assets/images/logo.png" alt="ROCK.SCOT" style="height:44px;width:auto;">
+      <p>Scotland's rock station on DAB+ digital radio. Broadcasting Metal, Alt, Punk and Classic Rock 24/7 across West Scotland.</p>
+      <p style="margin-top:0.75rem;">Ofcom Licensed · SC646223 · VAT 491589639</p>
     </div>
-    <div class="copyright">© 2026 ROCK.SCOT • Scotland's Rock Station • Caledonia TX Ltd • SC646223 • VAT 491589639 • Ofcom Licensed Broadcaster</div>
+    <div class="footer-col">
+      <h4>The Wire</h4>
+      <p>Real-time Scottish rock news</p>
+      <p>Updated continuously</p>
+      <a href="wire.html">Read The Wire →</a>
+    </div>
+    <div class="footer-col">
+      <h4>Navigate</h4>
+      <a href="index.html">Home</a>
+      <a href="wire.html">The Wire</a>
+      <a href="coverage.html">Coverage</a>
+      <a href="advertise.html" class="orange">Advertise</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="tel:01414597625" class="orange">0141 459 ROCK</a>
+      <a href="mailto:studio@rock.scot">studio@rock.scot</a>
+      <a href="mailto:advertise@rock.scot">advertise@rock.scot</a>
+      <a href="https://bsky.app/profile/rockscot.bsky.social" target="_blank" rel="noopener">Bluesky ↗</a>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 ROCK.SCOT · Scotland's Rock Station · Caledonia TX Ltd · SC646223 · VAT 491589639 · Ofcom Licensed</div>
 </footer>
 
 <script>
@@ -168,6 +166,21 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal()
 /* Player handled by header.js */
 
 // ── TIME FORMATTER ─────────────────────────────────────────
+// Extract first paragraph from summary text
+function getFirstParagraph(text) {
+    if (!text || text.length < 5) return '';
+    // Split on double newline, or take first ~200 chars ending at sentence
+    const parts = text.split(/
+
++/);
+    if (parts.length > 1) return parts[0].trim();
+    // Single block - take up to first sentence break around 200 chars
+    if (text.length <= 220) return text;
+    const cutoff = text.substring(0, 220);
+    const lastDot = Math.max(cutoff.lastIndexOf('. '), cutoff.lastIndexOf('! '), cutoff.lastIndexOf('? '));
+    return lastDot > 80 ? text.substring(0, lastDot + 1) : cutoff.trim() + '…';
+}
+
 function timeAgo(dateStr) {
     if (!dateStr) return '';
     const date  = new Date(dateStr);
@@ -258,14 +271,18 @@ function buildRow(story, i) {
     row.onclick = () => openModal(i);
     row.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(i); } };
 
-    const hasSummary = story.summary && story.summary.length > 10;
+    // Show first paragraph only on the row
+    const firstPara = getFirstParagraph(story.summary);
     row.innerHTML = `
-        <span class="wire-genre-tag ${genreClass(story.genre)}">${escHtml(story.genre || 'Rock')}</span>
+        <div class="wire-row-top">
+            <span class="wire-genre-tag ${genreClass(story.genre)}">${escHtml(story.genre || 'Rock')}</span>
+            <span class="wire-card-time">${timeAgo(story.created_at)}</span>
+        </div>
         <h2 class="wire-card-title">${escHtml(story.title || '')}</h2>
-        ${hasSummary ? `<p class="wire-card-summary">${escHtml(story.summary)}</p>` : ''}
+        ${firstPara ? `<p class="wire-card-para">${escHtml(firstPara)}</p>` : ''}
         <div class="wire-card-meta">
             <span class="wire-card-source">📰 ${escHtml(story.source_name || 'ROCK.SCOT')}</span>
-            <span class="wire-card-time">${timeAgo(story.created_at)}</span>
+            <span class="wire-read-more">Read more ↓</span>
         </div>`;
     return row;
 }
@@ -299,6 +316,11 @@ function openModal(index) {
     const linkEl = document.getElementById('modal-link');
     const hasLink = story.source_url && story.source_url.startsWith('http');
     if (hasLink) {
+        linkEl.onclick = (e) => {
+            e.preventDefault();
+            window.open(story.source_url, 'rockscot_source',
+                'width=1100,height=700,scrollbars=yes,resizable=yes,toolbar=no,menubar=no');
+        };
         linkEl.href = story.source_url;
         linkEl.textContent = `Read Full Story at ${escHtml(story.source_name || 'Source')} ↗`;
         linkEl.classList.remove('hidden');

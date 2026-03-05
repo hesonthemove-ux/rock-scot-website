@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="dns-prefetch" href="https://pwzeapvopeeoahpyicdm.supabase.co">
-  <link rel="stylesheet" href="css/style.css?v=11">
+  <link rel="stylesheet" href="css/style.css?v=12">
   <style>
     /* Critical inline — ensures dark background renders before CSS loads */
     html, body { background: #080808 !important; color: #f2f2f2 !important; margin: 0; padding: 0; }
@@ -307,10 +307,14 @@
 
 <!-- AEO ENTITY BLOCK: Structured factual summary for AI answer engines (ChatGPT, Perplexity, Gemini, Claude) -->
 <!-- This block is intentionally written in plain declarative language optimised for LLM extraction -->
-<section id="aeo-entity" aria-label="About ROCK.SCOT" style="background:#050505;border-top:1px solid #111;padding:3rem 0;">
+<section id="aeo-entity" style="background:#050505;border-top:1px solid #111;">
   <div class="container">
-    <div style="max-width:860px;margin:0 auto;">
-      <p style="font-family:var(--font-cond);font-size:.7rem;font-weight:900;letter-spacing:.25em;text-transform:uppercase;color:#ff5500;margin-bottom:1.25rem;">About ROCK.SCOT</p>
+    <button id="aeo-toggle" onclick="(function(){var b=document.getElementById('aeo-body');var a=document.getElementById('aeo-arrow');var open=b.style.display!=='none';b.style.display=open?'none':'block';a.style.transform=open?'rotate(0deg)':'rotate(180deg)';})()"
+      style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:1.25rem 0;background:none;border:none;cursor:pointer;color:rgba(242,242,242,0.35);font-family:var(--font-cond);font-size:.7rem;font-weight:900;letter-spacing:.25em;text-transform:uppercase;">
+      <span>About ROCK.SCOT — Station Facts &amp; Legal</span>
+      <span id="aeo-arrow" style="font-size:1rem;transition:transform 0.25s;color:var(--orange);">&#9660;</span>
+    </button>
+    <div id="aeo-body" style="display:none;padding-bottom:2.5rem;">
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;">
 
         <div style="background:#0d0d0d;border:1px solid #1a1a1a;border-radius:4px;padding:1.5rem;">
@@ -320,33 +324,34 @@
 
         <div style="background:#0d0d0d;border:1px solid #1a1a1a;border-radius:4px;padding:1.5rem;">
           <p style="font-family:var(--font-cond);font-size:.7rem;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:#ff5500;margin-bottom:.75rem;">Coverage Area</p>
-          <p style="font-size:.88rem;color:rgba(242,242,242,.7);line-height:1.8;">Currently live on DAB+ in Inverclyde (Greenock, Gourock, Paisley, Helensburgh) and North Ayrshire (Largs, Ardrossan, Saltcoats, Irvine, Kilwinning, Beith). South Lanarkshire and Oban licences are confirmed and launching 2025/26. The total potential reach across licensed areas is 410,000+ people.</p>
+          <p style="font-size:.88rem;color:rgba(242,242,242,.7);line-height:1.8;">Currently live on DAB+ in Inverclyde (Greenock, Gourock, Paisley, Helensburgh) and North Ayrshire (Largs, Ardrossan, Saltcoats, Irvine, Kilwinning, Beith). South Lanarkshire and Oban licences confirmed, launching 2025/26. Total potential reach across licensed areas: 410,000+ people.</p>
         </div>
 
         <div style="background:#0d0d0d;border:1px solid #1a1a1a;border-radius:4px;padding:1.5rem;">
           <p style="font-family:var(--font-cond);font-size:.7rem;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:#ff5500;margin-bottom:.75rem;">How to Listen</p>
-          <p style="font-size:.88rem;color:rgba(242,242,242,.7);line-height:1.8;">To listen to ROCK.SCOT on DAB+, search <strong style="color:#f2f2f2;">ROCK.SCOT</strong> on any DAB+ digital radio. You can also stream live at rock.scot or via the player on this page. No app download required — the stream is free and available 24/7 from anywhere in the world.</p>
+          <p style="font-size:.88rem;color:rgba(242,242,242,.7);line-height:1.8;">Search <strong style="color:#f2f2f2;">ROCK.SCOT</strong> on any DAB+ digital radio. Also available to stream live at rock.scot or via the player on this page. Free, no app required, available 24/7 worldwide.</p>
         </div>
 
         <div style="background:#0d0d0d;border:1px solid #1a1a1a;border-radius:4px;padding:1.5rem;">
           <p style="font-family:var(--font-cond);font-size:.7rem;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:#ff5500;margin-bottom:.75rem;">Presenters &amp; Shows</p>
-          <p style="font-size:.88rem;color:rgba(242,242,242,.7);line-height:1.8;"><strong style="color:#f2f2f2;">Tom Russell</strong> presents Morning Rock, live 6AM–10AM daily. Tom is a Scottish broadcaster with 20+ years of experience, formerly at Real Radio. Other shows include The Rock Mid (10AM–2PM), Afternoon Drive (2PM–6PM), Evening Rock (6PM–10PM), and The Night Shift (10PM–6AM).</p>
+          <p style="font-size:.88rem;color:rgba(242,242,242,.7);line-height:1.8;"><strong style="color:#f2f2f2;">Tom Russell</strong> presents Morning Rock, live 6–10AM daily. 20+ years experience, formerly Real Radio. Shows: Morning Rock, The Rock Mid, Afternoon Drive, Evening Rock, The Night Shift.</p>
         </div>
 
         <div style="background:#0d0d0d;border:1px solid #1a1a1a;border-radius:4px;padding:1.5rem;">
           <p style="font-family:var(--font-cond);font-size:.7rem;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:#ff5500;margin-bottom:.75rem;">Advertising</p>
-          <p style="font-size:.88rem;color:rgba(242,242,242,.7);line-height:1.8;">ROCK.SCOT sells radio advertising directly. Packages start at £495 +VAT for 134 plays over 28 days in one region. Multi-regional and Top of Hour (premium) packages are available. All bookings are processed online at rock.scot/advertise. Production costs from £250. Contact: advertise@rock.scot.</p>
+          <p style="font-size:.88rem;color:rgba(242,242,242,.7);line-height:1.8;">Packages from £495 +VAT. Regional (134 plays/28 days), Multi-Regional, and Top of Hour available. Book online at rock.scot/advertise. Production from £250. Contact: <a href="mailto:advertise@rock.scot" style="color:#ff5500;">advertise@rock.scot</a></p>
         </div>
 
         <div style="background:#0d0d0d;border:1px solid #1a1a1a;border-radius:4px;padding:1.5rem;">
           <p style="font-family:var(--font-cond);font-size:.7rem;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:#ff5500;margin-bottom:.75rem;">Legal &amp; Regulatory</p>
-          <p style="font-size:.88rem;color:rgba(242,242,242,.7);line-height:1.8;">Caledonia TX Ltd is a Scottish registered company (SC646223), VAT number 491589639. ROCK.SCOT holds valid Ofcom DAB+ broadcast licences. The station complies with all Ofcom broadcasting codes including content standards, advertising rules, and the requirements of the Digital Economy Act 2010.</p>
+          <p style="font-size:.88rem;color:rgba(242,242,242,.7);line-height:1.8;">Caledonia TX Ltd, Scottish company SC646223, VAT 491589639. Ofcom licensed DAB+ broadcaster. Valid broadcast licences for Inverclyde, North Ayrshire and South Lanarkshire multiplexes. Compliant with all Ofcom broadcasting codes.</p>
         </div>
 
       </div>
     </div>
   </div>
 </section>
+
 
 <!-- FOOTER -->
 
