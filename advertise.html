@@ -105,7 +105,7 @@
     <link rel="dns-prefetch" href="https://pwzeapvopeeoahpyicdm.supabase.co">
 
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=8">
+    <link rel="stylesheet" href="css/style.css?v=10">
     <style>html,body{background:#080808!important;color:#f2f2f2!important;margin:0;padding:0;}</style>
 
     
@@ -386,14 +386,11 @@
     ]
   }
   </script>
-  <script src="js/supabase-config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
-  <script src="js/header.js"></script>
-</head>
+  
+  </head>
 <body>
     
-    <!-- header.js injects header, mobile nav, ticker and player -->
-    
+        
     <!-- HERO -->
     <section style="padding: 10rem 2rem 4rem; margin-top: 98px; text-align: center; background: linear-gradient(180deg, var(--black), var(--navy));">
         <div style="max-width: 900px; margin: 0 auto;">
@@ -644,15 +641,51 @@
     <script>
     // ================================================================
     // ROCK.SCOT ADVERTISE PAGE — ENTERPRISE BOOKING SYSTEM
+
+    // Forward declarations — available immediately even before full init
+    // This ensures onclick="selectPackage(...)" always works
+    window.selectPackage  = function(pkg) { if(window._selectPackage) window._selectPackage(pkg); };
+    window.calculateQuote = function()    { if(window._calculateQuote) window._calculateQuote(); };
+    window.onPackageChange= function()    { if(window._onPackageChange) window._onPackageChange(); };
+
     // Mux-aware capacity checking + Edge Function submission
     // ================================================================
 
     const SUPABASE_URL  = window.SUPABASE_URL || 'https://pwzeapvopeeoahpyicdm.supabase.co';
-    const SUPABASE_KEY  = window.SUPABASE_ANON_KEY || '';
+    const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
     const EDGE_URL      = `${SUPABASE_URL}/functions/v1/book_campaign`;
-    const supabase      = (window.supabase && typeof window.supabase.createClient === 'function')
-        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
-        : null;
+    // Supabase via direct REST (no CDN needed - works in Brave)
+    const supabase = { rest: true, _url: SUPABASE_URL, _key: SUPABASE_KEY };
+    supabase.from = function(table) {
+        const base = SUPABASE_URL + '/rest/v1/' + table;
+        const headers = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+        return {
+            select: function(cols) { this._sel = cols || '*'; return this; },
+            eq: function(col, val) { this._filters = (this._filters||[]).concat(col+'=eq.'+encodeURIComponent(val)); return this; },
+            order: function(col, opts) { this._order = col + (opts&&opts.ascending===false?'.desc':'.asc'); return this; },
+            limit: function(n) { this._limit = n; return this; },
+            insert: function(data) {
+                return fetch(base, { method:'POST', headers: Object.assign({}, headers), body: JSON.stringify(data) })
+                    .then(r => r.json()).then(d => ({ data: d, error: null })).catch(e => ({ data: null, error: e }));
+            },
+            then: function(resolve, reject) {
+                let url = base + '?select=' + (this._sel||'*');
+                if (this._filters) this._filters.forEach(f => url += '&' + f);
+                if (this._order) url += '&order=' + this._order;
+                if (this._limit) url += '&limit=' + this._limit;
+                return fetch(url, { headers }).then(r => r.json())
+                    .then(d => resolve({ data: Array.isArray(d)?d:[], error: null }))
+                    .catch(e => resolve({ data: [], error: e }));
+            }
+        };
+    };
+    supabase.rpc = function(fn, params) {
+        return fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+            method: 'POST',
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify(params || {})
+        }).then(r => r.json()).then(d => ({ data: d, error: null })).catch(e => ({ data: null, error: e }));
+    };
 
     if (!supabase) {
         console.warn('Supabase client failed to initialise. Quote UI will still work; live capacity checks may be skipped.');
@@ -1084,9 +1117,12 @@ Please email advertise@rock.scot or call 0141 459 ROCK.`);
         }
     });
 
-    // Ensure inline onclick handlers always resolve in static hosting.
-    window.selectPackage = selectPackage;
-    window.calculateQuote = calculateQuote;
+    // Wire up the real implementations
+    window._selectPackage  = selectPackage;
+    window._calculateQuote = calculateQuote;
+    window._onPackageChange = onPackageChange;
+    window.selectPackage   = selectPackage;
+    window.calculateQuote  = calculateQuote;
     window.onPackageChange = onPackageChange;
 
     // Ensure users can calculate immediately after choosing a package.
@@ -1103,8 +1139,6 @@ Please email advertise@rock.scot or call 0141 459 ROCK.`);
 
     // ── HAMBURGER NAV ─────────────────────────────────────────────
     const hamburger  = document.querySelector('.hamburger');
-    const mobileNav  = null; /* handled by header.js */
-    const closeBtn   = null; /* handled by header.js */
 
     function openMobileNav() {
         if (!hamburger || !mobileNav) return;
@@ -1140,5 +1174,7 @@ Please email advertise@rock.scot or call 0141 459 ROCK.`);
     window.closeMobileNav = closeMobileNav;
 
     </script>
+
+<script src="js/header.js"></script>
 </body>
 </html>

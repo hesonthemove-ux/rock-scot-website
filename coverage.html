@@ -6,7 +6,7 @@
     <title>DAB Coverage — ROCK.SCOT</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=8">
+  <link rel="stylesheet" href="css/style.css?v=10">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
@@ -352,10 +352,8 @@
             .legend-strip { gap: 1rem; }
         }
     </style>
-  <script src="js/supabase-config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
-  <script src="js/header.js"></script>
-  <!-- AEO: Schema for coverage page -->
+  
+    <!-- AEO: Schema for coverage page -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -376,8 +374,6 @@
   </script>
 </head>
 <body>
-
-<!-- header.js injects persistent header -->
 
 <!-- HERO -->
 <section class="hero-band">
@@ -801,5 +797,6 @@ const allPolygons = [
 map.fitBounds(L.latLngBounds(allPolygons).pad(0.1));
 </script>
 
+<script src="js/header.js"></script>
 </body>
 </html>

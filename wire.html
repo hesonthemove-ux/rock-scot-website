@@ -17,16 +17,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=8">
+    <link rel="stylesheet" href="css/style.css?v=10">
     <style>html,body{background:#080808!important;color:#f2f2f2!important;margin:0;padding:0;}  .wire-source-link { color: var(--orange); text-decoration: none; transition: opacity 0.15s; }
   .wire-source-link:hover { opacity: 0.75; text-decoration: underline; }
 </style>
-    <script src="js/supabase-config.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-            crossorigin="anonymous"
-            onerror="window._supabaseFailed=true"></script>
-  <script src="js/header.js"></script>
-  <!-- AEO: NewsMediaOrganization + BreadcrumbList -->
+      
+    <!-- AEO: NewsMediaOrganization + BreadcrumbList -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -55,8 +51,6 @@
   </script>
 </head>
 <body>
-
-<!-- header.js injects persistent header, mobile nav, ticker and player -->
 
 <!-- WIRE HERO -->
 <div class="wire-hero" style="margin-top: 98px;">
@@ -153,102 +147,27 @@
     <div class="copyright">© 2026 ROCK.SCOT • Scotland's Rock Station • Caledonia TX Ltd • SC646223 • VAT 491589639 • Ofcom Licensed Broadcaster</div>
 </footer>
 
-<!-- PLAYER BAR -->
-            <div class="track-name" id="track-name">ROCK.SCOT</div>
-            <div class="track-artist" id="track-artist">Scotland's Rock Station</div>
-        </div>
-        <div class="eq-visualizer" aria-hidden="true">
-            <div class="eq-bar" style="height:40%"></div>
-            <div class="eq-bar" style="height:70%"></div>
-            <div class="eq-bar" style="height:55%"></div>
-            <div class="eq-bar" style="height:85%"></div>
-            <div class="eq-bar" style="height:45%"></div>
-        </div>
-    </div>
-</div>
-
 <script>
 // ================================================================
 // ROCK.SCOT — THE WIRE
 // Supabase-powered live news feed
 // ================================================================
 
-const SUPABASE_URL = window.SUPABASE_URL || 'https://pwzeapvopeeoahpyicdm.supabase.co';
-const SUPABASE_KEY = window.SUPABASE_ANON_KEY || '';
+const SUPABASE_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
 
-let supabaseClient = null;
-
-function initWireSupabase() {
-    try {
-        if (window.supabase && window.supabase.createClient && SUPABASE_KEY) {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-                realtime: { params: { eventsPerSecond: 10 } }
-            });
-            return true;
-        }
-    } catch(e) { console.warn('Supabase init failed:', e); }
-    return false;
-}
-initWireSupabase();
+// Wire data loaded via direct Supabase REST API (see loadStories)
 
 let allStories  = [];
 let filteredStories = [];
 let isLoading   = false;
 
 // ── HEADER SCROLL ─────────────────────────────────────────
-window.addEventListener('scroll', () => {
-    const sh = document.getElementById('rs-header') || document.getElementById('site-header');
-    if (sh) sh.classList.toggle('scrolled', window.scrollY > 80);
-}, { passive: true });
+/* Scroll handled by header.js */
 
-// ── HAMBURGER ─────────────────────────────────────────────
-const hamburger = document.getElementById('hamburger');
-const mobileNav = null; /* handled by header.js */
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-hamburger.addEventListener('click', () => {
-    const isOpen = mobileNav.classList.toggle('open');
-    hamburger.classList.toggle('open', isOpen);
-    hamburger.setAttribute('aria-expanded', isOpen);
-    document.body.style.overflow = isOpen ? 'hidden' : '';
-});
-
-function closeMobileNav() {
-    mobileNav.classList.remove('open');
-    hamburger.classList.remove('open');
-    hamburger.setAttribute('aria-expanded', 'false');
-    document.body.style.overflow = '';
-}
-
-document.addEventListener('click', e => {
-    if (mobileNav.classList.contains('open') && !mobileNav.contains(e.target) && !hamburger.contains(e.target)) {
-        closeMobileNav();
-    }
-});
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeMobileNav(); } });
-
-// ── PLAYER ────────────────────────────────────────────────
-let isPlaying = false;
-let playerIframe;
-
-function openPlayer() {
-    /* player handled by header.js */
-}
-
-document.getElementById('play-btn').addEventListener('click', () => {
-    if (!playerIframe) {
-        playerIframe = document.createElement('iframe');
-        playerIframe.src = 'https://player.broadcast.radio/caledonia-tx-ltd';
-        playerIframe.style.cssText = 'position:absolute;width:0;height:0;border:none;opacity:0;';
-        playerIframe.allow = 'autoplay';
-        document.body.appendChild(playerIframe);
-    }
-    isPlaying = !isPlaying;
-    document.getElementById('play-btn').textContent = isPlaying ? '⏸' : '▶';
-    document.getElementById('track-name').textContent = isPlaying ? 'ROCK.SCOT LIVE' : 'ROCK.SCOT';
-    document.getElementById('track-artist').textContent = isPlaying ? 'Broadcasting Now on DAB+' : "Scotland's Rock Station";
-});
-
-setTimeout(() => openPlayer(), 5000);
+/* Player handled by header.js */
 
 // ── TIME FORMATTER ─────────────────────────────────────────
 function timeAgo(dateStr) {
@@ -385,51 +304,42 @@ async function loadStories(showRefreshFeedback = false) {
     const statusEl = document.getElementById('wire-status-text');
     const loadingEl = document.getElementById('wire-loading');
 
-    if (showRefreshFeedback) {
-        statusEl.textContent = 'Refreshing...';
-        loadingEl.style.display = 'block';
-    }
-
-    if (!supabaseClient) {
-        // No Supabase key — show placeholder cards
-        allStories = generatePlaceholderStories();
-        filteredStories = [...allStories];
-        renderStories(filteredStories);
-        statusEl.textContent = 'Live (demo mode)';
-        isLoading = false;
-        return;
-    }
+    if (statusEl) statusEl.textContent = showRefreshFeedback ? 'Refreshing...' : 'Connecting...';
+    if (loadingEl && showRefreshFeedback) loadingEl.style.display = 'block';
 
     try {
-        const { data, error } = await supabaseClient
-            .from('wire_news')
-            .select('id, title, summary, source_url, source_name, genre, created_at')
-            .eq('is_live', true)
-            .order('created_at', { ascending: false })
-            .limit(100);
+        const url = SUPABASE_URL + '/rest/v1/wire_news?select=id,title,summary,source_url,source_name,genre,created_at&is_live=eq.true&order=created_at.desc&limit=100';
+        const res = await fetch(url, {
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': 'Bearer ' + SUPABASE_KEY,
+                'Content-Type': 'application/json'
+            }
+        });
 
-        if (error) throw error;
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
 
         if (data && data.length > 0) {
             allStories = data;
             filteredStories = [...allStories];
             filterStories();
-            statusEl.textContent = `Updated ${new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'})}`;
+            if (statusEl) statusEl.textContent = data.length + ' Stories Live';
         } else {
-            // No data yet — show placeholder + tip
             allStories = generatePlaceholderStories();
             filteredStories = [...allStories];
             renderStories(filteredStories);
-            statusEl.textContent = 'No live stories yet';
+            if (statusEl) statusEl.textContent = 'Stories Loading';
         }
     } catch (err) {
         console.warn('Wire load error:', err.message);
         allStories = generatePlaceholderStories();
         filteredStories = [...allStories];
         renderStories(filteredStories);
-        statusEl.textContent = 'Live (cached)';
+        if (statusEl) statusEl.textContent = 'Live';
     } finally {
         isLoading = false;
+        if (loadingEl) loadingEl.style.display = 'none';
     }
 }
 
@@ -450,27 +360,8 @@ function generatePlaceholderStories() {
 
 // ── REALTIME SUBSCRIPTION ──────────────────────────────────
 function subscribeRealtime() {
-    if (!supabaseClient) return;
-    supabaseClient
-        .channel('wire-live')
-        .on('postgres_changes', {
-            event: 'INSERT', schema: 'public', table: 'wire_news', filter: 'is_live=eq.true'
-        }, payload => {
-            if (payload.new && payload.new.title) {
-                allStories.unshift(payload.new);
-                if (allStories.length > 100) allStories.pop();
-                filterStories();
-                document.getElementById('wire-status-text').textContent = 'New story added!';
-                setTimeout(() => {
-                    document.getElementById('wire-status-text').textContent = `Updated ${new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'})}`;
-                }, 3000);
-            }
-        })
-        .subscribe(status => {
-            if (status === 'SUBSCRIBED') {
-                document.getElementById('wire-status-text').textContent = 'Live';
-            }
-        });
+    // Poll every 30s as realtime fallback (works without SDK)
+    setInterval(() => loadStories(), 30 * 1000);
 }
 
 // ── HTML HELPERS ──────────────────────────────────────────
@@ -490,21 +381,10 @@ function escAttr(str) {
 loadStories();
 setInterval(() => loadStories(), 15 * 60 * 1000);
 
-// Also retry SDK init for browsers that load it slowly
-if (!supabaseClient) {
-    let attempts = 0;
-    const retry = setInterval(() => {
-        attempts++;
-        if (initWireSupabase()) {
-            clearInterval(retry);
-            loadStories();
-            subscribeRealtime();
-        }
-        if (attempts > 20) clearInterval(retry);
-    }, 300);
-} else {
-    subscribeRealtime();
-}
+// Boot the wire
+subscribeRealtime();
 </script>
+
+<script src="js/header.js"></script>
 </body>
 </html>
