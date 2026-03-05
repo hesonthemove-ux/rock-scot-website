@@ -6,7 +6,7 @@
     <title>DAB Coverage — ROCK.SCOT</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=5">
+  <link rel="stylesheet" href="css/style.css?v=7">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
@@ -355,6 +355,25 @@
   <script src="js/supabase-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
   <script src="js/header.js"></script>
+  <!-- AEO: Schema for coverage page -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": "https://rock.scot/coverage.html",
+    "name": "ROCK.SCOT DAB+ Coverage — Where to Hear Us in Scotland",
+    "description": "ROCK.SCOT DAB+ radio coverage map for Scotland. Currently broadcasting in Inverclyde and North Ayrshire. South Lanarkshire licensed and coming 2025/26.",
+    "url": "https://rock.scot/coverage.html",
+    "publisher": {"@type":"RadioStation","@id":"https://rock.scot/#radiostation","name":"ROCK.SCOT"},
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type":"ListItem","position":1,"name":"ROCK.SCOT","item":"https://rock.scot/"},
+        {"@type":"ListItem","position":2,"name":"Coverage","item":"https://rock.scot/coverage.html"}
+      ]
+    }
+  }
+  </script>
 </head>
 <body>
 

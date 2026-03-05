@@ -63,29 +63,29 @@
           {
             "@type": "Offer",
             "name": "Regional DAB+ Radio Advertising",
-            "price": "299",
+            "price": "495",
             "priceCurrency": "GBP",
-            "priceSpecification": {"@type": "UnitPriceSpecification", "price": "299", "priceCurrency": "GBP"},
+            "priceSpecification": {"@type": "UnitPriceSpecification", "price": "495", "priceCurrency": "GBP"},
             "description": "134 plays over 28 days, single region coverage across DAB+ broadcast area"
           },
           {
             "@type": "Offer",
             "name": "Multi-Regional DAB+ Radio Advertising",
-            "price": "449",
+            "price": "995",
             "priceCurrency": "GBP",
             "description": "134 plays over 28 days across all current ROCK.SCOT broadcast areas"
           },
           {
             "@type": "Offer",
             "name": "Top of Hour Premium Advertising",
-            "price": "2500",
+            "price": "2495",
             "priceCurrency": "GBP",
             "description": "Premium top-of-hour positioning for maximum impact and recall"
           },
           {
             "@type": "Offer",
             "name": "Professional Radio Advert Production",
-            "price": "150",
+            "price": "250",
             "priceCurrency": "GBP",
             "description": "Professional 30-second radio-ready advert including 3 redrafts. Available with any advertising package."
           }
@@ -105,7 +105,7 @@
     <link rel="dns-prefetch" href="https://pwzeapvopeeoahpyicdm.supabase.co">
 
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=5">
+    <link rel="stylesheet" href="css/style.css?v=7">
     <style>html,body{background:#080808!important;color:#f2f2f2!important;margin:0;padding:0;}</style>
 
     
@@ -341,6 +341,51 @@
             }
         }
     </style>
+
+  <!-- AEO: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type":"ListItem","position":1,"name":"ROCK.SCOT","item":"https://rock.scot/"},
+      {"@type":"ListItem","position":2,"name":"Advertise","item":"https://rock.scot/advertise.html"}
+    ]
+  }
+  </script>
+  <!-- AEO: FAQ for advertise page -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How much does it cost to advertise on Scottish DAB+ radio?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "ROCK.SCOT DAB+ radio advertising starts at £495 +VAT for a Regional campaign (134 plays over 28 days). Multi-Regional coverage across all broadcast areas costs £995 +VAT. Top of Hour premium positioning is £2,495 +VAT. Professional advert production is available from £250."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How many people listen to ROCK.SCOT?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "ROCK.SCOT reaches 410,000+ listeners across its DAB+ broadcast areas in Inverclyde and North Ayrshire, with South Lanarkshire coverage licensed and coming in 2025/26."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is Top of Hour radio advertising?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Top of Hour advertising on ROCK.SCOT places your advert as a station ident at the top of every hour, 24 hours a day. This gives 672 plays over 28 days at the premium listening moment when audiences are most attentive. Priced at £2,495 +VAT."
+        }
+      }
+    ]
+  }
+  </script>
   <script src="js/supabase-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
   <script src="js/header.js"></script>
@@ -596,7 +641,6 @@
         <div class="copyright">© 2026 ROCK.SCOT | Ofcom Licensed | SC646223</div>
     </footer>
     
-    <script src="js/main.js"></script>
     <script>
     // ================================================================
     // ROCK.SCOT ADVERTISE PAGE — ENTERPRISE BOOKING SYSTEM
@@ -684,12 +728,16 @@
         if (!PACKAGES[pkgKey]) return;
 
         const packageSelect = document.getElementById('package');
+        if (!packageSelect) return;
         packageSelect.value = pkgKey;
         onPackageChange();
+        calculateQuote();
 
-        const quoteSection = document.getElementById('quote-form');
-        if (quoteSection) {
-            quoteSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        /* Scroll to the calculator — try wrapper first, fallback to form */
+        const target = document.querySelector('.quote-calculator') || document.getElementById('quote-form');
+        if (target) {
+            const offset = target.getBoundingClientRect().top + window.scrollY - 110;
+            window.scrollTo({ top: offset, behavior: 'smooth' });
         }
     }
 

@@ -17,13 +17,42 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=5">
-    <style>html,body{background:#080808!important;color:#f2f2f2!important;margin:0;padding:0;}</style>
+    <link rel="stylesheet" href="css/style.css?v=7">
+    <style>html,body{background:#080808!important;color:#f2f2f2!important;margin:0;padding:0;}  .wire-source-link { color: var(--orange); text-decoration: none; transition: opacity 0.15s; }
+  .wire-source-link:hover { opacity: 0.75; text-decoration: underline; }
+</style>
     <script src="js/supabase-config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
             crossorigin="anonymous"
             onerror="window._supabaseFailed=true"></script>
   <script src="js/header.js"></script>
+  <!-- AEO: NewsMediaOrganization + BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": "https://rock.scot/wire.html",
+    "name": "The Wire — Scottish Rock News",
+    "description": "Real-time Scottish rock music news aggregated from 40+ sources including NME Scotland, The Skinny, Glasgow Music, and Scottish music publications. All stories credited to and linked from their original sources.",
+    "url": "https://rock.scot/wire.html",
+    "publisher": {
+      "@type": "RadioStation",
+      "@id": "https://rock.scot/#radiostation",
+      "name": "ROCK.SCOT"
+    },
+    "about": {
+      "@type": "Thing",
+      "name": "Scottish Rock Music News"
+    },
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type":"ListItem","position":1,"name":"ROCK.SCOT","item":"https://rock.scot/"},
+        {"@type":"ListItem","position":2,"name":"The Wire","item":"https://rock.scot/wire.html"}
+      ]
+    }
+  }
+  </script>
 </head>
 <body>
 
@@ -85,7 +114,8 @@
         <h2 class="wire-modal-title" id="modal-title"></h2>
         <p class="wire-modal-meta" id="modal-meta"></p>
         <p class="wire-modal-summary" id="modal-summary"></p>
-        <a href="#" id="modal-link" class="wire-modal-cta" target="_blank" rel="noopener noreferrer">Read Full Story →</a>
+        <p style="font-size:0.75rem;color:rgba(242,242,242,0.35);margin-bottom:0.75rem;font-style:italic;">Summary by ROCK.SCOT — original story credited below</p>
+        <a href="#" id="modal-link" class="wire-modal-cta" target="_blank" rel="noopener noreferrer">Read Full Story at Source ↗</a>
     </div>
 </div>
 
@@ -282,12 +312,17 @@ function renderStories(stories) {
             <h2 class="wire-card-title">${escHtml(story.title || '')}</h2>
             ${hasSummary ? `<p class="wire-card-summary">${escHtml(story.summary)}</p>` : ''}
             <div class="wire-card-meta">
-                <span class="wire-card-source">${escHtml(story.source_name || 'ROCK.SCOT')}</span>
+                <span class="wire-card-source">
+                  ${hasLink
+                    ? `<a href="${escAttr(story.source_url)}" target="_blank" rel="noopener noreferrer" class="wire-source-link" title="Read full story at ${escAttr(story.source_name || 'source')}">📰 ${escHtml(story.source_name || 'Source')}</a>`
+                    : `📰 ${escHtml(story.source_name || 'ROCK.SCOT')}`
+                  }
+                </span>
                 <span class="wire-card-time">${timeAgo(story.created_at)}</span>
             </div>
             <div class="wire-card-actions">
-                <button class="wire-btn wire-btn-primary" onclick="openModal(${i})">📖 Read</button>
-                ${hasLink ? `<a class="wire-btn wire-btn-secondary" href="${escAttr(story.source_url)}" target="_blank" rel="noopener noreferrer">🔗 Original</a>` : ''}
+                <button class="wire-btn wire-btn-primary" onclick="openModal(${i})">📖 Summary</button>
+                ${hasLink ? `<a class="wire-btn wire-btn-secondary" href="${escAttr(story.source_url)}" target="_blank" rel="noopener noreferrer">Read Full Story ↗</a>` : ''}
             </div>
         `;
         grid.appendChild(card);
