@@ -17,10 +17,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=10">
-    <style>html,body{background:#080808!important;color:#f2f2f2!important;margin:0;padding:0;}  .wire-source-link { color: var(--orange); text-decoration: none; transition: opacity 0.15s; }
-  .wire-source-link:hover { opacity: 0.75; text-decoration: underline; }
-</style>
+    <link rel="stylesheet" href="css/style.css?v=11">
+    
       
     <!-- AEO: NewsMediaOrganization + BreadcrumbList -->
   <script type="application/ld+json">
@@ -183,16 +181,31 @@ function timeAgo(dateStr) {
 }
 
 function genreClass(genre) {
-    const g = (genre || '').toLowerCase();
-    if (g === 'rock') return 'genre-rock';
-    if (g === 'metal') return 'genre-metal';
-    if (g === 'punk') return 'genre-punk';
-    if (g === 'indie') return 'genre-indie';
-    if (g === 'alternative') return 'genre-alternative';
-    return 'genre-rock';
+    // Returns modifier class that pairs with .wire-genre-tag in style.css
+    return (genre || 'rock').toLowerCase().replace(/[^a-z]/g,'');
+}
+
+// ── SEARCH / FILTER ────────────────────────────────────────
+function filterStories() {
+    const query  = (document.getElementById('wire-search')?.value || '').toLowerCase().trim();
+    const genre  = (document.getElementById('genre-filter')?.value || '').toLowerCase();
+
+    filteredStories = allStories.filter(s => {
+        const matchGenre = !genre || (s.genre || '').toLowerCase() === genre;
+        const matchText  = !query ||
+            (s.title  || '').toLowerCase().includes(query) ||
+            (s.source_name || '').toLowerCase().includes(query) ||
+            (s.summary || '').toLowerCase().includes(query);
+        return matchGenre && matchText;
+    });
+
+    renderStories(filteredStories);
 }
 
 // ── RENDER STORIES ─────────────────────────────────────────
+const STORIES_PER_PAGE = 20;
+let shownCount = 0;
+
 function renderStories(stories) {
     const output = document.getElementById('wire-output');
     document.getElementById('wire-loading').style.display = 'none';
@@ -206,45 +219,71 @@ function renderStories(stories) {
                 <button class="wire-refresh-btn" onclick="loadStories(true)">↻ Load Stories</button>
             </div>`;
         document.getElementById('story-count').textContent = '0';
+        shownCount = 0;
         return;
     }
 
     document.getElementById('story-count').textContent = stories.length;
-
-    const grid = document.createElement('div');
-    grid.className = 'wire-grid';
-
-    stories.forEach((story, i) => {
-        const card = document.createElement('article');
-        card.className = 'wire-card';
-        card.style.animationDelay = `${Math.min(i, 20) * 0.04}s`;
-
-        const hasLink    = story.source_url && story.source_url.startsWith('http');
-        const hasSummary = story.summary && story.summary.length > 10;
-
-        card.innerHTML = `
-            <span class="wire-genre-tag ${genreClass(story.genre)}">${story.genre || 'Rock'}</span>
-            <h2 class="wire-card-title">${escHtml(story.title || '')}</h2>
-            ${hasSummary ? `<p class="wire-card-summary">${escHtml(story.summary)}</p>` : ''}
-            <div class="wire-card-meta">
-                <span class="wire-card-source">
-                  ${hasLink
-                    ? `<a href="${escAttr(story.source_url)}" target="_blank" rel="noopener noreferrer" class="wire-source-link" title="Read full story at ${escAttr(story.source_name || 'source')}">📰 ${escHtml(story.source_name || 'Source')}</a>`
-                    : `📰 ${escHtml(story.source_name || 'ROCK.SCOT')}`
-                  }
-                </span>
-                <span class="wire-card-time">${timeAgo(story.created_at)}</span>
-            </div>
-            <div class="wire-card-actions">
-                <button class="wire-btn wire-btn-primary" onclick="openModal(${i})">📖 Summary</button>
-                ${hasLink ? `<a class="wire-btn wire-btn-secondary" href="${escAttr(story.source_url)}" target="_blank" rel="noopener noreferrer">Read Full Story ↗</a>` : ''}
-            </div>
-        `;
-        grid.appendChild(card);
-    });
+    shownCount = Math.min(STORIES_PER_PAGE, stories.length);
 
     output.innerHTML = '';
-    output.appendChild(grid);
+
+    const list = document.createElement('div');
+    list.className = 'wire-stories-list';
+    list.id = 'stories-list';
+
+    stories.slice(0, shownCount).forEach((story, i) => {
+        list.appendChild(buildRow(story, i));
+    });
+
+    output.appendChild(list);
+
+    if (stories.length > shownCount) {
+        const moreBtn = document.createElement('button');
+        moreBtn.className = 'wire-refresh-btn';
+        moreBtn.id = 'load-more-btn';
+        moreBtn.style.cssText = 'display:block;margin:1.5rem auto 0;padding:0.75rem 2rem;font-size:0.9rem;';
+        moreBtn.textContent = `↓ Show More (${stories.length - shownCount} remaining)`;
+        moreBtn.onclick = loadMore;
+        output.appendChild(moreBtn);
+    }
+}
+
+function buildRow(story, i) {
+    const row = document.createElement('article');
+    row.className = 'wire-story-row';
+    row.setAttribute('tabindex', '0');
+    row.setAttribute('role', 'button');
+    row.setAttribute('aria-label', story.title || 'Wire story');
+    row.onclick = () => openModal(i);
+    row.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(i); } };
+
+    const hasSummary = story.summary && story.summary.length > 10;
+    row.innerHTML = `
+        <span class="wire-genre-tag ${genreClass(story.genre)}">${escHtml(story.genre || 'Rock')}</span>
+        <h2 class="wire-card-title">${escHtml(story.title || '')}</h2>
+        ${hasSummary ? `<p class="wire-card-summary">${escHtml(story.summary)}</p>` : ''}
+        <div class="wire-card-meta">
+            <span class="wire-card-source">📰 ${escHtml(story.source_name || 'ROCK.SCOT')}</span>
+            <span class="wire-card-time">${timeAgo(story.created_at)}</span>
+        </div>`;
+    return row;
+}
+
+function loadMore() {
+    const list = document.getElementById('stories-list');
+    if (!list) return;
+    const newCount = Math.min(shownCount + STORIES_PER_PAGE, filteredStories.length);
+    for (let i = shownCount; i < newCount; i++) {
+        list.appendChild(buildRow(filteredStories[i], i));
+    }
+    shownCount = newCount;
+    const btn = document.getElementById('load-more-btn');
+    if (btn) {
+        const remaining = filteredStories.length - shownCount;
+        if (remaining <= 0) btn.remove();
+        else btn.textContent = `↓ Show More (${remaining} remaining)`;
+    }
 }
 
 // ── MODAL ─────────────────────────────────────────────────
@@ -252,17 +291,19 @@ function openModal(index) {
     const story = filteredStories[index];
     if (!story) return;
 
-    document.getElementById('modal-genre').innerHTML = `<span class="wire-genre-tag ${genreClass(story.genre)}">${story.genre || 'Rock'}</span>`;
+    document.getElementById('modal-genre').innerHTML = `<span class="wire-genre-tag ${genreClass(story.genre)}">${escHtml(story.genre || 'Rock')}</span>`;
     document.getElementById('modal-title').textContent = story.title || '';
-    document.getElementById('modal-meta').textContent  = `${story.source_name || 'ROCK.SCOT'} · ${timeAgo(story.created_at)}`;
-    document.getElementById('modal-summary').textContent = story.summary || 'Click Original to read the full story on the source website.';
+    document.getElementById('modal-meta').textContent  = `${escHtml(story.source_name || 'ROCK.SCOT')} · ${timeAgo(story.created_at)}`;
+    document.getElementById('modal-summary').textContent = story.summary || 'No summary available. Click below to read the full story at source.';
 
     const linkEl = document.getElementById('modal-link');
-    if (story.source_url && story.source_url.startsWith('http')) {
+    const hasLink = story.source_url && story.source_url.startsWith('http');
+    if (hasLink) {
         linkEl.href = story.source_url;
-        linkEl.style.display = 'inline-block';
+        linkEl.textContent = `Read Full Story at ${escHtml(story.source_name || 'Source')} ↗`;
+        linkEl.classList.remove('hidden');
     } else {
-        linkEl.style.display = 'none';
+        linkEl.classList.add('hidden');
     }
 
     document.getElementById('story-modal').classList.add('open');
@@ -274,27 +315,11 @@ function closeModal() {
     document.body.style.overflow = '';
 }
 
-// Close modal on overlay click
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 document.getElementById('story-modal').addEventListener('click', e => {
     if (e.target === document.getElementById('story-modal')) closeModal();
 });
 
-// ── FILTER ────────────────────────────────────────────────
-function filterStories() {
-    const query = (document.getElementById('wire-search').value || '').toLowerCase().trim();
-    const genre = document.getElementById('genre-filter').value;
-
-    filteredStories = allStories.filter(s => {
-        const matchGenre = !genre || s.genre === genre;
-        const matchQuery = !query ||
-            (s.title  || '').toLowerCase().includes(query) ||
-            (s.source_name || '').toLowerCase().includes(query) ||
-            (s.summary || '').toLowerCase().includes(query);
-        return matchGenre && matchQuery;
-    });
-
-    renderStories(filteredStories);
-}
 
 // ── LOAD STORIES ──────────────────────────────────────────
 async function loadStories(showRefreshFeedback = false) {

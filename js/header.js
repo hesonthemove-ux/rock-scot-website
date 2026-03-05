@@ -200,7 +200,7 @@ function injectHeader() {
   /* Wire data — fetch directly via REST API (no SDK needed, Brave-safe) */
   var wireCache=[];
   function fetchWireREST(){
-    var url=SUPA_URL+'/rest/v1/wire_news?select=id,title,genre,source_name,source_url,created_at&is_live=eq.true&order=created_at.desc&limit=25';
+    var url=SUPA_URL+'/rest/v1/wire_news?select=id,title,summary,genre,source_name,source_url,created_at&is_live=eq.true&order=created_at.desc&limit=25';
     fetch(url,{
       headers:{
         'apikey': SUPA_KEY,
@@ -225,14 +225,15 @@ function injectHeader() {
   function updateHomepageWire(items){
     var grid=document.getElementById('homepage-wire');
     if(!grid) return;
-    if(!items||!items.length){
-      /* Keep static placeholder — it's better than blank */
-      return;
-    }
-    grid.innerHTML=items.slice(0,3).map(function(s){
-      var link=s.source_url&&s.source_url.startsWith('http')?s.source_url:null;
+    if(!items||!items.length){ return; }
+    // Store data for modal access
+    window.__hwWireData = items.slice(0,3);
+    grid.innerHTML=window.__hwWireData.map(function(s,idx){
       var src=s.source_name?escH(s.source_name):'ROCK.SCOT';
-      return '<div class="wire-card"'+(link?' style="cursor:pointer;" onclick="window.open(\''+escA(s.source_url)+'\',\'_blank\',\'noopener\')"':'')+' >'
+      var genre=(s.genre||'Rock').toLowerCase();
+      return '<div class="wire-card" style="cursor:pointer;" role="button" tabindex="0"'
+        +' onclick="hwOpenModal('+idx+')"'
+        +' onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();hwOpenModal('+idx+');}">'
         +'<div class="wire-card-genre">'+escH(s.genre||'Rock')+'</div>'
         +'<div class="wire-card-title">'+escH(s.title||'')+'</div>'
         +'<div class="wire-card-meta">'+escH(src)+' &bull; '+timeAgo(s.created_at)+'</div>'

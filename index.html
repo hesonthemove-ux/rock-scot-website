@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="dns-prefetch" href="https://pwzeapvopeeoahpyicdm.supabase.co">
-  <link rel="stylesheet" href="css/style.css?v=10">
+  <link rel="stylesheet" href="css/style.css?v=11">
   <style>
     /* Critical inline — ensures dark background renders before CSS loads */
     html, body { background: #080808 !important; color: #f2f2f2 !important; margin: 0; padding: 0; }
@@ -572,5 +572,44 @@ document.querySelectorAll('a[href^="#"]').forEach(function(a) {
 </script>
 
 <script src="js/header.js"></script>
+
+<!-- Homepage wire story modal -->
+<div class="wire-modal-overlay" id="hw-modal" role="dialog" aria-modal="true" aria-labelledby="hw-modal-title">
+  <div class="wire-modal">
+    <button class="wire-modal-close" onclick="hwCloseModal()" aria-label="Close">✕</button>
+    <div id="hw-modal-genre" class="wire-modal-genre"></div>
+    <h2 class="wire-modal-title" id="hw-modal-title"></h2>
+    <p class="wire-modal-meta" id="hw-modal-meta"></p>
+    <p class="wire-modal-summary" id="hw-modal-summary"></p>
+    <p style="font-size:0.72rem;color:rgba(242,242,242,0.3);font-style:italic;margin-bottom:1rem;">Summary by ROCK.SCOT — original story credited at source</p>
+    <a href="#" id="hw-modal-link" class="wire-modal-cta" target="_blank" rel="noopener noreferrer">Read Full Story ↗</a>
+  </div>
+</div>
+<script>
+function hwOpenModal(i){
+  var s=(window.__hwWireData||[])[i]; if(!s) return;
+  function escH(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function ago(d){var s=Math.floor((Date.now()-new Date(d))/1000);if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
+  var genre=(s.genre||'Rock');
+  var gclass=genre.toLowerCase();
+  document.getElementById('hw-modal-genre').innerHTML='<span class="wire-genre-tag '+gclass+'">'+escH(genre)+'</span>';
+  document.getElementById('hw-modal-title').textContent=s.title||'';
+  document.getElementById('hw-modal-meta').textContent=(s.source_name||'ROCK.SCOT')+' · '+ago(s.created_at);
+  document.getElementById('hw-modal-summary').textContent=s.summary||'Read the full story at the original source.';
+  var lnk=document.getElementById('hw-modal-link');
+  var hasLink=s.source_url&&s.source_url.startsWith('http');
+  if(hasLink){lnk.href=s.source_url;lnk.textContent='Read Full Story at '+(s.source_name||'Source')+' ↗';lnk.style.display='';}
+  else{lnk.style.display='none';}
+  var m=document.getElementById('hw-modal');
+  m.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function hwCloseModal(){
+  document.getElementById('hw-modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('click',function(e){if(e.target&&e.target.id==='hw-modal')hwCloseModal();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')hwCloseModal();});
+</script>
 </body>
 </html>
