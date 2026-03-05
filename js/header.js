@@ -169,6 +169,8 @@ function injectHeader() {
     if(pb) pb.innerHTML=isPlaying?'&#9646;&#9646;':'&#9654;';
     if(tit) tit.textContent=isPlaying?'ROCK.SCOT — Live on DAB+':'ROCK.SCOT';
     if(sub) sub.textContent=isPlaying?'Broadcasting Now':"Scotland's Rock Station — DAB+";
+    // Persist play state across page navigation
+    try { sessionStorage.setItem('rs_playing', isPlaying?'1':'0'); } catch(e){}
   }
   var listenBtn=document.getElementById('rs-listen');
   var mobListen=document.getElementById('rs-mob-listen');
@@ -186,7 +188,15 @@ function injectHeader() {
       e.preventDefault(); showPlayer(); if(!isPlaying) togglePlay();
     }
   },true);
-  setTimeout(function(){ showPlayer(); },6000);
+  // Auto-resume stream if playing on previous page
+  try {
+    if(sessionStorage.getItem('rs_playing')==='1'){
+      showPlayer();
+      setTimeout(function(){ if(!isPlaying) togglePlay(); },800);
+    } else {
+      setTimeout(function(){ showPlayer(); },6000);
+    }
+  } catch(e){ setTimeout(function(){ showPlayer(); },6000); }
 
   /* Ticker scroll animation */
   var tickerEl=null,tickerX=0,tickerRAF=null;

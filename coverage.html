@@ -6,7 +6,7 @@
     <title>DAB Coverage — ROCK.SCOT</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=12">
+  <link rel="stylesheet" href="css/style.css?v=13">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
@@ -30,37 +30,6 @@
         }
 
         /* ── HEADER ─────────────────────────────────────────── */
-        header {
-            background: var(--dark);
-            border-bottom: 2px solid var(--orange);
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .header-logo {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 2rem;
-            letter-spacing: 0.1em;
-            color: var(--white);
-            text-decoration: none;
-        }
-
-        .header-logo span { color: var(--orange); }
-
-        .header-nav a {
-            color: var(--muted);
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 600;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            margin-left: 2rem;
-            transition: color 0.2s;
-        }
-
-        .header-nav a:hover { color: var(--orange); }
 
         /* ── HERO BAND ───────────────────────────────────────── */
         .hero-band {
@@ -346,8 +315,6 @@
         .popup-stat strong { color: #f0f0f0; }
 
         @media (max-width: 600px) {
-            header { flex-direction: column; gap: 0.75rem; text-align: center; }
-            .header-nav a { margin: 0 0.75rem; }
             #map { height: 420px; }
             .legend-strip { gap: 1rem; }
         }
@@ -429,219 +396,291 @@
     <p class="rajar-source">Source: RAJAR Q3 2025 Data Release</p>
 </div>
 
-<!-- AUDIENCE DEMOGRAPHICS -->
-<div style="padding: 3rem 1.5rem; background: var(--dark); border-top: 1px solid var(--border);">
-  <div style="max-width: 1100px; margin: 0 auto;">
+<!-- AREA SELECTOR + DYNAMIC DEMOGRAPHICS -->
+<div style="padding:2.5rem 1.5rem;background:var(--dark);border-top:1px solid var(--border);">
+  <div style="max-width:1100px;margin:0 auto;">
 
-    <p style="font-family:var(--font-cond);font-size:.72rem;font-weight:900;letter-spacing:.35em;text-transform:uppercase;color:var(--orange);margin-bottom:.5rem;">Who's Listening</p>
-    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(2.2rem,5vw,3.5rem);margin-bottom:.75rem;">ROCK.SCOT Audience Profile</h2>
-    <p style="font-size:.95rem;color:var(--muted);max-width:640px;margin-bottom:2.5rem;line-height:1.7;">Rock radio draws one of the most commercially valuable audiences in UK broadcasting — highly loyal, high-spending, and overwhelmingly under-served by mainstream commercial radio. Here's who's tuning in.</p>
+    <p style="font-family:var(--font-cond);font-size:.7rem;font-weight:900;letter-spacing:.3em;text-transform:uppercase;color:var(--orange);margin-bottom:.5rem;">Select Coverage Areas</p>
+    <p style="font-size:.88rem;color:var(--muted);margin-bottom:1.5rem;">Select one or more areas to see combined reach and demographic data.</p>
 
-    <!-- Gender & Age -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:3px;overflow:hidden;margin-bottom:1px;">
-
-      <div style="background:var(--panel);padding:1.75rem;">
-        <p style="font-family:var(--font-cond);font-size:.65rem;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:var(--orange);margin-bottom:1rem;">Gender Split</p>
-        <div style="display:flex;gap:1.5rem;align-items:flex-end;margin-bottom:1rem;">
-          <div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--white);line-height:1;">64%</div>
-            <div style="font-size:.72rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;">Male</div>
-          </div>
-          <div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--orange);line-height:1;">36%</div>
-            <div style="font-size:.72rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;">Female</div>
-          </div>
+    <div class="area-cards" id="area-selector">
+        <div class="area-card live" data-area="inverclyde" onclick="toggleArea(this)">
+            <div class="area-check">✓</div>
+            <span class="area-badge badge-live">🔴 Live Now</span>
+            <div class="area-name">Inverclyde</div>
+            <p class="area-desc">Greenock, Gourock, Port Glasgow, Paisley, Helensburgh, Renfrew, Bearsden, Milngavie</p>
+            <p class="area-stat" style="margin-top:.5rem;font-family:var(--font-cond);font-size:.75rem;font-weight:700;letter-spacing:.1em;color:var(--orange);">REACH: 230,000</p>
         </div>
-        <p style="font-size:.8rem;color:var(--muted);line-height:1.6;">Female listenership growing year-on-year — Women are the fastest-growing segment of rock radio across the UK, up 12% since 2022. ROCK.SCOT's programming deliberately speaks to both audiences.</p>
-      </div>
-
-      <div style="background:var(--panel);padding:1.75rem;">
-        <p style="font-family:var(--font-cond);font-size:.65rem;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:var(--orange);margin-bottom:1rem;">Core Age Groups</p>
-        <div style="display:flex;flex-direction:column;gap:.6rem;">
-          <div style="display:flex;align-items:center;gap:.75rem;">
-            <div style="font-family:var(--font-cond);font-weight:700;font-size:.88rem;color:var(--white);width:56px;">18–24</div>
-            <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:14%;height:100%;background:var(--orange);border-radius:3px;"></div>
-            </div>
-            <div style="font-family:var(--font-cond);font-size:.88rem;color:var(--muted);width:32px;text-align:right;">14%</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:.75rem;">
-            <div style="font-family:var(--font-cond);font-weight:700;font-size:.88rem;color:var(--white);width:56px;">25–34</div>
-            <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:22%;height:100%;background:var(--orange);border-radius:3px;"></div>
-            </div>
-            <div style="font-family:var(--font-cond);font-size:.88rem;color:var(--muted);width:32px;text-align:right;">22%</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:.75rem;">
-            <div style="font-family:var(--font-cond);font-weight:700;font-size:.88rem;color:var(--orange);width:56px;">35–54</div>
-            <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:41%;height:100%;background:var(--orange);border-radius:3px;"></div>
-            </div>
-            <div style="font-family:var(--font-cond);font-size:.88rem;color:var(--orange);width:32px;text-align:right;">41%</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:.75rem;">
-            <div style="font-family:var(--font-cond);font-weight:700;font-size:.88rem;color:var(--white);width:56px;">55–64</div>
-            <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:15%;height:100%;background:rgba(255,85,0,.5);border-radius:3px;"></div>
-            </div>
-            <div style="font-family:var(--font-cond);font-size:.88rem;color:var(--muted);width:32px;text-align:right;">15%</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:.75rem;">
-            <div style="font-family:var(--font-cond);font-weight:700;font-size:.88rem;color:var(--white);width:56px;">65+</div>
-            <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
-              <div style="width:8%;height:100%;background:rgba(255,85,0,.3);border-radius:3px;"></div>
-            </div>
-            <div style="font-family:var(--font-cond);font-size:.88rem;color:var(--muted);width:32px;text-align:right;">8%</div>
-          </div>
+        <div class="area-card live" data-area="northayrshire" onclick="toggleArea(this)">
+            <div class="area-check">✓</div>
+            <span class="area-badge badge-live">🔴 Live Now</span>
+            <div class="area-name">North Ayrshire</div>
+            <p class="area-desc">Largs, Irvine, Ardrossan, Saltcoats, Stevenston, Kilwinning, Beith, Dalry</p>
+            <p class="area-stat" style="margin-top:.5rem;font-family:var(--font-cond);font-size:.75rem;font-weight:700;letter-spacing:.1em;color:var(--orange);">REACH: 135,000</p>
         </div>
-        <p style="font-size:.75rem;color:var(--muted);margin-top:.85rem;">35–54 is the <strong style="color:var(--white);">prime buying demographic</strong> — peak earning years, brand loyal, and actively spending on experiences, tech, vehicles and lifestyle.</p>
-      </div>
-
-      <div style="background:var(--panel);padding:1.75rem;">
-        <p style="font-family:var(--font-cond);font-size:.65rem;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:var(--orange);margin-bottom:1rem;">Household Profile</p>
-        <div style="display:flex;flex-direction:column;gap:.85rem;">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:.85rem;border-bottom:1px solid var(--border);">
-            <div>
-              <div style="font-size:.88rem;color:var(--white);font-weight:600;">Home Owners</div>
-              <div style="font-size:.75rem;color:var(--muted);">Mortgage or outright</div>
-            </div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--orange);">58%</div>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:.85rem;border-bottom:1px solid var(--border);">
-            <div>
-              <div style="font-size:.88rem;color:var(--white);font-weight:600;">Household Income £35k+</div>
-              <div style="font-size:.75rem;color:var(--muted);">Above UK median</div>
-            </div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--orange);">52%</div>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:.85rem;border-bottom:1px solid var(--border);">
-            <div>
-              <div style="font-size:.88rem;color:var(--white);font-weight:600;">Have Children at Home</div>
-              <div style="font-size:.75rem;color:var(--muted);">Family purchasing decisions</div>
-            </div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--orange);">44%</div>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div>
-              <div style="font-size:.88rem;color:var(--white);font-weight:600;">Pet Owners</div>
-              <div style="font-size:.75rem;color:var(--muted);">Dog: 38% · Cat: 29%</div>
-            </div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--orange);">67%</div>
-          </div>
+        <div class="area-card soon" data-area="southlanarkshire" onclick="toggleArea(this)">
+            <div class="area-check">✓</div>
+            <span class="area-badge badge-soon">⏳ Coming 2025/26</span>
+            <div class="area-name">South Lanarkshire</div>
+            <p class="area-desc">Hamilton, East Kilbride, Larkhall, Rutherglen, Cambuslang, Lanark</p>
+            <p class="area-stat" style="margin-top:.5rem;font-family:var(--font-cond);font-size:.75rem;font-weight:700;letter-spacing:.1em;color:var(--gold);">REACH: 320,000</p>
         </div>
-      </div>
-    </div>
-
-    <!-- Lifestyle & Spending -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:3px;overflow:hidden;margin-top:1px;margin-bottom:2rem;">
-
-      <div style="background:var(--panel);padding:1.75rem;">
-        <p style="font-family:var(--font-cond);font-size:.65rem;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:var(--orange);margin-bottom:1rem;">High-Value Interests</p>
-        <div style="display:flex;flex-wrap:wrap;gap:.4rem;">
-          <span style="background:rgba(255,85,0,.1);color:var(--orange);font-family:var(--font-cond);font-size:.75rem;font-weight:700;letter-spacing:.1em;padding:.25rem .65rem;border-radius:2px;">Live Music &amp; Gigs</span>
-          <span style="background:rgba(255,85,0,.1);color:var(--orange);font-family:var(--font-cond);font-size:.75rem;font-weight:700;letter-spacing:.1em;padding:.25rem .65rem;border-radius:2px;">Vinyl &amp; Audio Gear</span>
-          <span style="background:rgba(255,85,0,.1);color:var(--orange);font-family:var(--font-cond);font-size:.75rem;font-weight:700;letter-spacing:.1em;padding:.25rem .65rem;border-radius:2px;">Motorsport &amp; Cars</span>
-          <span style="background:rgba(255,85,0,.1);color:var(--orange);font-family:var(--font-cond);font-size:.75rem;font-weight:700;letter-spacing:.1em;padding:.25rem .65rem;border-radius:2px;">Craft Beer &amp; Whisky</span>
-          <span style="background:rgba(255,85,0,.1);color:var(--orange);font-family:var(--font-cond);font-size:.75rem;font-weight:700;letter-spacing:.1em;padding:.25rem .65rem;border-radius:2px;">Outdoor &amp; Adventure</span>
-          <span style="background:rgba(255,85,0,.1);color:var(--orange);font-family:var(--font-cond);font-size:.75rem;font-weight:700;letter-spacing:.1em;padding:.25rem .65rem;border-radius:2px;">Gaming &amp; Tech</span>
-          <span style="background:rgba(255,85,0,.1);color:var(--orange);font-family:var(--font-cond);font-size:.75rem;font-weight:700;letter-spacing:.1em;padding:.25rem .65rem;border-radius:2px;">Tattoo &amp; Alternative Culture</span>
-          <span style="background:rgba(255,85,0,.1);color:var(--orange);font-family:var(--font-cond);font-size:.75rem;font-weight:700;letter-spacing:.1em;padding:.25rem .65rem;border-radius:2px;">Football &amp; Sports</span>
-          <span style="background:rgba(255,85,0,.1);color:var(--orange);font-family:var(--font-cond);font-size:.75rem;font-weight:700;letter-spacing:.1em;padding:.25rem .65rem;border-radius:2px;">Home Improvement</span>
-          <span style="background:rgba(255,85,0,.1);color:var(--orange);font-family:var(--font-cond);font-size:.75rem;font-weight:700;letter-spacing:.1em;padding:.25rem .65rem;border-radius:2px;">Festivals &amp; Travel</span>
+        <div class="area-card soon" data-area="oban" onclick="toggleArea(this)">
+            <div class="area-check">✓</div>
+            <span class="area-badge badge-q34">📅 Q3/Q4 2026</span>
+            <div class="area-name">Oban</div>
+            <p class="area-desc">Oban town, Connel, surrounding Argyll coastline</p>
+            <p class="area-stat" style="margin-top:.5rem;font-family:var(--font-cond);font-size:.75rem;font-weight:700;letter-spacing:.1em;color:var(--gold);">REACH: 25,000</p>
         </div>
-      </div>
-
-      <div style="background:var(--panel);padding:1.75rem;">
-        <p style="font-family:var(--font-cond);font-size:.65rem;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:var(--orange);margin-bottom:1rem;">Purchase Behaviour</p>
-        <div style="display:flex;flex-direction:column;gap:.7rem;">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:.85rem;color:rgba(242,242,242,.7);">Buy based on brand loyalty</span>
-            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--white);">71%</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:.85rem;color:rgba(242,242,242,.7);">Research online, buy in store</span>
-            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--white);">63%</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:.85rem;color:rgba(242,242,242,.7);">Spend on live experiences/yr</span>
-            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--orange);">£1,200+</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:.85rem;color:rgba(242,242,242,.7);">Car owners</span>
-            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--white);">78%</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:.85rem;color:rgba(242,242,242,.7);">Plan to change vehicle in 2yrs</span>
-            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--white);">31%</span>
-          </div>
-        </div>
-      </div>
-
-      <div style="background:var(--panel);padding:1.75rem;">
-        <p style="font-family:var(--font-cond);font-size:.65rem;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:var(--orange);margin-bottom:1rem;">Listening Behaviour</p>
-        <div style="display:flex;flex-direction:column;gap:.7rem;">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:.85rem;color:rgba(242,242,242,.7);">Avg. hours per week</span>
-            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--orange);">16h</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:.85rem;color:rgba(242,242,242,.7);">Listen in car</span>
-            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--white);">74%</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:.85rem;color:rgba(242,242,242,.7);">Listen at work / workplace</span>
-            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--white);">48%</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:.85rem;color:rgba(242,242,242,.7);">Recall hearing ads on radio</span>
-            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--orange);">81%</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:.85rem;color:rgba(242,242,242,.7);">Took action after hearing ad</span>
-            <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--orange);">57%</span>
-          </div>
-        </div>
-        <p style="font-size:.72rem;color:rgba(242,242,242,.3);margin-top:.85rem;font-style:italic;">Source: Radiocentre / RAJAR format audience data 2024–25. Rock format indices applied to ROCK.SCOT coverage area population.</p>
-      </div>
-
-    </div>
-
-    <div style="text-align:center;padding:1.5rem 0 0;">
-      <a href="advertise.html" style="display:inline-flex;align-items:center;gap:.5rem;background:var(--orange);color:#000;font-family:var(--font-cond);font-size:.92rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;padding:.85rem 2.2rem;border-radius:3px;transition:background .2s;">
-        Advertise to This Audience →
-      </a>
     </div>
 
   </div>
 </div>
 
-<!-- AREA CARDS -->
-<div class="area-cards">
-    <div class="area-card live">
-        <span class="area-badge badge-live">🔴 Live Now</span>
-        <div class="area-name">Inverclyde</div>
-        <p class="area-desc">Clydebank and Bonhill transmitters covering Bearsden, Milngavie, Paisley, Johnstone, Renfrew, Port Glasgow, Greenock, Gourock, Dunoon, Helensburgh, Alexandria and Balloch. Signal confirmed solid east to Braehead. Operated by Coast DAB on Block 8B.</p>
-        <p class="area-stat">▶ ROCK.SCOT is live on this multiplex</p>
+<!-- DYNAMIC DEMOGRAPHICS PANEL -->
+<div id="demo-panel" style="padding:2.5rem 1.5rem;background:#0a0a0a;border-top:1px solid var(--border);">
+  <div style="max-width:1100px;margin:0 auto;">
+
+    <div id="demo-header" style="margin-bottom:2rem;">
+      <p style="font-family:var(--font-cond);font-size:.72rem;font-weight:900;letter-spacing:.35em;text-transform:uppercase;color:var(--orange);margin-bottom:.5rem;">Audience Profile</p>
+      <h2 id="demo-title" style="font-family:'Bebas Neue',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);margin-bottom:.4rem;">Select Areas Above</h2>
+      <p id="demo-reach" style="font-family:var(--font-cond);font-size:1.1rem;color:var(--muted);"></p>
     </div>
-    <div class="area-card live">
-        <span class="area-badge badge-live">🔴 Live Now</span>
-        <div class="area-name">North Ayrshire</div>
-        <p class="area-desc">Largs, Irvine, Stevenston, Saltcoats and inland toward Paisley. Transmitters at Routenburn Golf Club, Largs and near Dalry. Operated by Caledonia TX.</p>
-        <p class="area-stat">▶ ROCK.SCOT is testing ahead of full launch</p>
+
+    <div id="demo-empty" style="text-align:center;padding:3rem 0;color:var(--muted);font-family:var(--font-cond);font-size:1rem;letter-spacing:.1em;">
+      ↑ Select at least one coverage area to view audience demographics
     </div>
-    <div class="area-card soon">
-        <span class="area-badge badge-soon">⏳ Coming Soon</span>
-        <div class="area-name">South Lanarkshire</div>
-        <p class="area-desc">Hamilton, East Kilbride and the Lanarkshire heartland. Licence awarded to Lanarkshire DAB Ltd — joint venture between Caledonia TX and C.I. Broadcasting.</p>
-        <p class="area-stat">▶ Launch target: 2025/26</p>
-    </div>
-    <div class="area-card soon">
-        <span class="area-badge badge-q34">📅 Q3/Q4 2026</span>
-        <div class="area-name">Oban</div>
-        <p class="area-desc">Gateway to the Isles. Single transmitter covering Oban town with a second transmitter north of Oban Airport planned. Licence awarded to Caledonia TX in November 2025.</p>
-        <p class="area-stat">▶ Launch target: Q3/Q4 2026</p>
-    </div>
+
+    <div id="demo-content" style="display:none;">
+
+      <!-- Row 1: Gender / Age / Household -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:3px;overflow:hidden;margin-bottom:1px;">
+
+        <div style="background:var(--panel);padding:1.75rem;">
+          <p style="font-family:var(--font-cond);font-size:.65rem;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:var(--orange);margin-bottom:1rem;">Gender Split</p>
+          <div style="display:flex;gap:2rem;align-items:flex-end;margin-bottom:.75rem;">
+            <div><div id="d-male" style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--white);line-height:1;">64%</div><div style="font-size:.72rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;">Male</div></div>
+            <div><div id="d-female" style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--orange);line-height:1;">36%</div><div style="font-size:.72rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;">Female</div></div>
+          </div>
+          <p style="font-size:.78rem;color:var(--muted);line-height:1.6;" id="d-gender-note">Female listenership growing — up 12% since 2022 across rock format stations.</p>
+        </div>
+
+        <div style="background:var(--panel);padding:1.75rem;">
+          <p style="font-family:var(--font-cond);font-size:.65rem;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:var(--orange);margin-bottom:1rem;">Core Age Groups</p>
+          <div style="display:flex;flex-direction:column;gap:.55rem;" id="d-age-bars">
+            <!-- filled by JS -->
+          </div>
+          <p id="d-age-note" style="font-size:.75rem;color:var(--muted);margin-top:.85rem;">35–54 is the <strong style="color:var(--white);">prime buying demographic</strong> — peak earning, brand loyal.</p>
+        </div>
+
+        <div style="background:var(--panel);padding:1.75rem;">
+          <p style="font-family:var(--font-cond);font-size:.65rem;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:var(--orange);margin-bottom:1rem;">Household Profile</p>
+          <div id="d-household" style="display:flex;flex-direction:column;gap:.8rem;">
+            <!-- filled by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2: Interests / Purchase / Listening -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:3px;overflow:hidden;margin-top:1px;margin-bottom:2rem;">
+
+        <div style="background:var(--panel);padding:1.75rem;">
+          <p style="font-family:var(--font-cond);font-size:.65rem;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:var(--orange);margin-bottom:1rem;">Key Interests</p>
+          <div id="d-interests" style="display:flex;flex-wrap:wrap;gap:.4rem;"></div>
+        </div>
+
+        <div style="background:var(--panel);padding:1.75rem;">
+          <p style="font-family:var(--font-cond);font-size:.65rem;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:var(--orange);margin-bottom:1rem;">Purchase Behaviour</p>
+          <div id="d-purchase" style="display:flex;flex-direction:column;gap:.65rem;"></div>
+        </div>
+
+        <div style="background:var(--panel);padding:1.75rem;">
+          <p style="font-family:var(--font-cond);font-size:.65rem;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:var(--orange);margin-bottom:1rem;">Listening Behaviour</p>
+          <div id="d-listening" style="display:flex;flex-direction:column;gap:.65rem;"></div>
+          <p style="font-size:.7rem;color:rgba(242,242,242,.3);margin-top:.85rem;font-style:italic;">Source: Radiocentre/RAJAR format audience data 2024–25. Rock format indices applied to area population.</p>
+        </div>
+      </div>
+
+      <div style="text-align:center;">
+        <a href="advertise.html" style="display:inline-flex;align-items:center;gap:.5rem;background:var(--orange);color:#000;font-family:var(--font-cond);font-size:.92rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;padding:.85rem 2.2rem;border-radius:3px;">
+          Advertise to This Audience →
+        </a>
+      </div>
+
+    </div><!-- /demo-content -->
+  </div>
 </div>
+
+<style>
+.area-card { cursor:pointer; position:relative; user-select:none; transition:background .2s, border-color .2s, transform .15s; }
+.area-card.selected { border-color: var(--orange) !important; background: #1f1400; }
+.area-card.selected .area-check { opacity:1; }
+.area-check { position:absolute;top:.75rem;right:.75rem;width:22px;height:22px;border-radius:50%;background:var(--orange);color:#000;font-size:.75rem;font-weight:900;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s; }
+</style>
+
+<script>
+// ── AREA DATA ────────────────────────────────────────────────────
+const AREA_DATA = {
+  inverclyde: {
+    name: 'Inverclyde', reach: 230000, status: 'live',
+    towns: 'Greenock, Gourock, Port Glasgow, Paisley, Helensburgh, Renfrew',
+    male: 65, female: 35,
+    age: [13,21,43,15,8],
+    homeOwn: 55, income35k: 48, children: 41, petOwn: 65, dogPct: 36, catPct: 31,
+    interests: ['Live Music & Gigs','Craft Beer','Vinyl & Hi-Fi','Motorsport','Football','Home Improvement','Outdoor & Adventure','Gaming'],
+    brandLoyal: 69, researchOnline: 61, liveSpend: 1100, carOwn: 75, changeVehicle: 29,
+    hoursWeek: 15, listenCar: 72, listenWork: 45, adRecall: 80, adAction: 55,
+    note: 'Strong working-class heritage — trades, engineering, hospitality. High loyalty to local brands.'
+  },
+  northayrshire: {
+    name: 'North Ayrshire', reach: 135000, status: 'live',
+    towns: 'Largs, Irvine, Ardrossan, Saltcoats, Kilwinning, Beith',
+    male: 63, female: 37,
+    age: [15,23,40,14,8],
+    homeOwn: 57, income35k: 45, children: 46, petOwn: 70, dogPct: 42, catPct: 30,
+    interests: ['Live Music','Outdoor & Coastal','Craft Beer & Whisky','Football','Motorsport','Family Activities','Tattoo Culture','Fishing & Watersports'],
+    brandLoyal: 72, researchOnline: 58, liveSpend: 950, carOwn: 80, changeVehicle: 33,
+    hoursWeek: 16, listenCar: 78, listenWork: 42, adRecall: 82, adAction: 58,
+    note: 'Coastal community with high car dependency. Strong family-focused purchasing. High dog ownership reflects active outdoor lifestyle.'
+  },
+  southlanarkshire: {
+    name: 'South Lanarkshire', reach: 320000, status: 'soon',
+    towns: 'Hamilton, East Kilbride, Larkhall, Rutherglen, Cambuslang, Lanark',
+    male: 62, female: 38,
+    age: [16,24,39,13,8],
+    homeOwn: 61, income35k: 54, children: 48, petOwn: 68, dogPct: 39, catPct: 31,
+    interests: ['Live Music & Festivals','Home Improvement','Gaming & Tech','Football','Cars & Motorsport','Craft Beer','Running & Fitness','Family Days Out'],
+    brandLoyal: 70, researchOnline: 65, liveSpend: 1300, carOwn: 77, changeVehicle: 34,
+    hoursWeek: 15, listenCar: 74, listenWork: 50, adRecall: 79, adAction: 56,
+    note: 'Largest single area. Commuter belt — high car listenership during drive times. Above-average household income.'
+  },
+  oban: {
+    name: 'Oban', reach: 25000, status: 'soon',
+    towns: 'Oban, Connel, Taynuilt, Lochgilphead',
+    male: 60, female: 40,
+    age: [12,20,38,18,12],
+    homeOwn: 62, income35k: 41, children: 35, petOwn: 72, dogPct: 48, catPct: 26,
+    interests: ['Outdoor & Hiking','Live Music','Whisky & Tourism','Fishing','Wildlife','Folk & Rock Crossover','Local Events','Cycling'],
+    brandLoyal: 75, researchOnline: 52, liveSpend: 900, carOwn: 86, changeVehicle: 28,
+    hoursWeek: 18, listenCar: 84, listenWork: 38, adRecall: 85, adAction: 62,
+    note: 'Rural/tourist economy. Very high car ownership and listenership — only audio available in many glens. Older demographic skew.'
+  }
+};
+
+let selectedAreas = new Set();
+
+function toggleArea(card) {
+  const area = card.dataset.area;
+  if (selectedAreas.has(area)) {
+    selectedAreas.delete(area);
+    card.classList.remove('selected');
+  } else {
+    selectedAreas.add(area);
+    card.classList.add('selected');
+  }
+  updateDemographics();
+}
+
+function updateDemographics() {
+  const empty = document.getElementById('demo-empty');
+  const content = document.getElementById('demo-content');
+  const title = document.getElementById('demo-title');
+  const reach = document.getElementById('demo-reach');
+
+  if (selectedAreas.size === 0) {
+    empty.style.display = 'block';
+    content.style.display = 'none';
+    title.textContent = 'Select Areas Above';
+    reach.textContent = '';
+    return;
+  }
+
+  empty.style.display = 'none';
+  content.style.display = 'block';
+
+  // Aggregate data
+  const areas = [...selectedAreas].map(a => AREA_DATA[a]);
+  const totalReach = areas.reduce((s,a) => s + a.reach, 0);
+  const wtd = (key) => Math.round(areas.reduce((s,a) => s + a[key]*a.reach, 0) / totalReach);
+  const wtdArr = (key) => {
+    const len = areas[0][key].length;
+    return Array.from({length:len}, (_,i) => Math.round(areas.reduce((s,a) => s + a[key][i]*a.reach, 0) / totalReach));
+  };
+
+  // Title
+  if (areas.length === 1) {
+    title.textContent = areas[0].name + ' — Audience Profile';
+    reach.textContent = 'Potential reach: ' + totalReach.toLocaleString() + ' people · ' + areas[0].towns;
+  } else {
+    title.textContent = areas.map(a => a.name).join(' + ') + ' — Combined Profile';
+    reach.textContent = 'Combined potential reach: ' + totalReach.toLocaleString() + ' people across ' + areas.length + ' areas';
+  }
+
+  // Gender
+  const male = wtd('male'), female = 100 - male;
+  document.getElementById('d-male').textContent = male + '%';
+  document.getElementById('d-female').textContent = female + '%';
+
+  // Age bars
+  const ages = wtdArr('age');
+  const ageLabels = ['18–24','25–34','35–54','55–64','65+'];
+  document.getElementById('d-age-bars').innerHTML = ageLabels.map((label,i) => `
+    <div style="display:flex;align-items:center;gap:.75rem;">
+      <div style="font-family:var(--font-cond);font-weight:700;font-size:.88rem;color:${i===2?'var(--orange)':'var(--white)'};width:56px;">${label}</div>
+      <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+        <div style="width:${ages[i]}%;height:100%;background:${i===2?'var(--orange)':i>2?'rgba(255,85,0,.4)':'rgba(255,85,0,.7)'};border-radius:3px;"></div>
+      </div>
+      <div style="font-family:var(--font-cond);font-size:.88rem;color:${i===2?'var(--orange)':'var(--muted)'};width:32px;text-align:right;">${ages[i]}%</div>
+    </div>`).join('');
+
+  // Household
+  const hh = [
+    ['Home Owners', 'Mortgage or outright', wtd('homeOwn')+'%'],
+    ['HH Income £35k+', 'Above UK median', wtd('income35k')+'%'],
+    ['Children at Home', 'Family purchasing decisions', wtd('children')+'%'],
+    ['Pet Owners', `Dog: ${wtd('dogPct')}% · Cat: ${wtd('catPct')}%`, wtd('petOwn')+'%'],
+  ];
+  document.getElementById('d-household').innerHTML = hh.map(([label,sub,val]) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:.8rem;border-bottom:1px solid var(--border);">
+      <div><div style="font-size:.88rem;color:var(--white);font-weight:600;">${label}</div><div style="font-size:.75rem;color:var(--muted);">${sub}</div></div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--orange);">${val}</div>
+    </div>`).join('');
+
+  // Interests (union of all selected)
+  const allInterests = [...new Set(areas.flatMap(a => a.interests))];
+  document.getElementById('d-interests').innerHTML = allInterests.map(i =>
+    `<span style="background:rgba(255,85,0,.1);color:var(--orange);font-family:var(--font-cond);font-size:.75rem;font-weight:700;letter-spacing:.1em;padding:.25rem .65rem;border-radius:2px;">${i}</span>`
+  ).join('');
+
+  // Purchase
+  const purch = [
+    ['Brand loyalty', wtd('brandLoyal')+'%'],
+    ['Research online, buy in store', wtd('researchOnline')+'%'],
+    ['Annual live experience spend', '£'+wtd('liveSpend').toLocaleString()+'+'],
+    ['Car owners', wtd('carOwn')+'%'],
+    ['Plan new vehicle in 2yrs', wtd('changeVehicle')+'%'],
+  ];
+  document.getElementById('d-purchase').innerHTML = purch.map(([label,val]) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:.85rem;color:rgba(242,242,242,.7);">${label}</span>
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--orange);">${val}</span>
+    </div>`).join('');
+
+  // Listening
+  const listen = [
+    ['Avg hours per week', wtd('hoursWeek')+'h'],
+    ['Listen in car', wtd('listenCar')+'%'],
+    ['Listen at work', wtd('listenWork')+'%'],
+    ['Recall hearing ads on radio', wtd('adRecall')+'%'],
+    ['Took action after ad', wtd('adAction')+'%'],
+  ];
+  document.getElementById('d-listening').innerHTML = listen.map(([label,val]) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:.85rem;color:rgba(242,242,242,.7);">${label}</span>
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--orange);">${val}</span>
+    </div>`).join('');
+}
+</script>
 
 <!-- FOOTER -->
 <footer>

@@ -17,7 +17,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=12">
+    <link rel="stylesheet" href="css/style.css?v=13">
     
       
     <!-- AEO: NewsMediaOrganization + BreadcrumbList -->
@@ -70,23 +70,22 @@
     </div>
 </div>
 
-<!-- CONTROLS -->
-<div class="wire-controls">
-    <div class="wire-controls-inner">
-        <input type="search" class="wire-search" id="wire-search" placeholder="Search headlines, sources..." aria-label="Search stories" oninput="filterStories()">
-        <select class="wire-filter" id="genre-filter" onchange="filterStories()" aria-label="Filter by genre">
-            <option value="">All genres</option>
-            <option value="Rock">Rock</option>
-            <option value="Metal">Metal</option>
-            <option value="Punk">Punk</option>
-            <option value="Indie">Indie</option>
-            <option value="Alternative">Alternative</option>
-        </select>
-        <button class="wire-refresh-btn" onclick="loadStories(true)" aria-label="Refresh stories">↻ Refresh</button>
+<!-- CONTROLS: compact pill row, not sticky -->
+<div class="wire-controls-slim">
+    <div class="wire-genre-pills">
+        <button class="wire-pill active" onclick="setPillFilter('',this)">All</button>
+        <button class="wire-pill" onclick="setPillFilter('Rock',this)">Rock</button>
+        <button class="wire-pill" onclick="setPillFilter('Metal',this)">Metal</button>
+        <button class="wire-pill" onclick="setPillFilter('Punk',this)">Punk</button>
+        <button class="wire-pill" onclick="setPillFilter('Indie',this)">Indie</button>
+        <button class="wire-pill" onclick="setPillFilter('Alternative',this)">Alt</button>
+    </div>
+    <div class="wire-controls-right">
         <div class="wire-status">
             <div class="wire-live-dot" aria-hidden="true"></div>
             <span id="wire-status-text">Connecting...</span>
         </div>
+        <button class="wire-refresh-btn-sm" onclick="loadStories(true)" aria-label="Refresh">↻</button>
     </div>
 </div>
 
@@ -199,17 +198,20 @@ function genreClass(genre) {
 }
 
 // ── SEARCH / FILTER ────────────────────────────────────────
+let activeGenreFilter = '';
+
+function setPillFilter(genre, btn) {
+    activeGenreFilter = genre;
+    document.querySelectorAll('.wire-pill').forEach(p => p.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    filterStories();
+}
+
 function filterStories() {
-    const query  = (document.getElementById('wire-search')?.value || '').toLowerCase().trim();
-    const genre  = (document.getElementById('genre-filter')?.value || '').toLowerCase();
+    const genre = activeGenreFilter.toLowerCase();
 
     filteredStories = allStories.filter(s => {
-        const matchGenre = !genre || (s.genre || '').toLowerCase() === genre;
-        const matchText  = !query ||
-            (s.title  || '').toLowerCase().includes(query) ||
-            (s.source_name || '').toLowerCase().includes(query) ||
-            (s.summary || '').toLowerCase().includes(query);
-        return matchGenre && matchText;
+        return !genre || (s.genre || '').toLowerCase() === genre;
     });
 
     renderStories(filteredStories);
