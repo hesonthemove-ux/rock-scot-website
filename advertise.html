@@ -642,11 +642,8 @@
     // ================================================================
     // ROCK.SCOT ADVERTISE PAGE — ENTERPRISE BOOKING SYSTEM
 
-    // Forward declarations — available immediately even before full init
-    // This ensures onclick="selectPackage(...)" always works
-    window.selectPackage  = function(pkg) { if(window._selectPackage) window._selectPackage(pkg); };
-    window.calculateQuote = function()    { if(window._calculateQuote) window._calculateQuote(); };
-    window.onPackageChange= function()    { if(window._onPackageChange) window._onPackageChange(); };
+    // Functions are assigned directly to window as they're defined below
+    // Script runs at end of body, DOM is ready, no deferred wrapper needed
 
     // Mux-aware capacity checking + Edge Function submission
     // ================================================================
@@ -757,7 +754,7 @@
     }
 
     // ── PACKAGE SHORTCUT BUTTONS ──────────────────────────────────
-    function selectPackage(pkgKey) {
+    window.selectPackage = function(pkgKey) {
         if (!PACKAGES[pkgKey]) return;
 
         const packageSelect = document.getElementById('package');
@@ -772,10 +769,10 @@
             const offset = target.getBoundingClientRect().top + window.scrollY - 110;
             window.scrollTo({ top: offset, behavior: 'smooth' });
         }
-    }
+    };
 
     // ── PACKAGE CHANGE: show/hide mux selector ───────────────────
-    function onPackageChange() {
+    window.onPackageChange = function() {
         const pkg = document.getElementById('package').value;
         const muxGroup = document.getElementById('mux-selector-group');
         const muxSelect = document.getElementById('selected-mux');
@@ -801,7 +798,7 @@
 
         if (pkg) checkCapacityLive(pkg);
         calculateQuote();
-    }
+    };
 
     // ── LIVE CAPACITY CHECK ───────────────────────────────────────
     async function checkCapacityLive(pkgKey) {
@@ -864,7 +861,7 @@
     }
 
     // ── QUOTE CALCULATOR ─────────────────────────────────────────
-    function calculateQuote() {
+    window.calculateQuote = function() {
         const pkgKey    = document.getElementById('package').value;
         let startDate   = document.getElementById('start-date').value;
         const length    = parseInt(document.getElementById('campaign-length').value) || 28;
@@ -952,7 +949,7 @@
 
         // Check capacity whenever quote is calculated
         if (startDate) checkCapacityLive(pkgKey);
-    }
+    };
 
     // Recalculate when start date changes
     document.getElementById('start-date').addEventListener('change', () => {
@@ -1053,27 +1050,59 @@
         };
 
         try {
-            const { data: { session } } = supabase
-                ? await supabase.auth.getSession()
-                : { data: { session: null } };
-            const bearerToken = (session && session.access_token) ? session.access_token : SUPABASE_KEY;
+            // REST-only client - no auth session, always use anon key
+            const bearerToken = SUPABASE_KEY;
 
-            // Use Edge Function (server-side validation + email)
-            const resp = await fetch(EDGE_URL, {
-                method:  'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey':        SUPABASE_KEY,
-                    'Authorization': `Bearer ${bearerToken}`,
-                },
-                body: JSON.stringify(payload),
-            });
+            let result = null;
+            let usedFallback = false;
 
-            const result = await resp.json();
-
-            if (!resp.ok) {
-                throw new Error(result.error || 'Submission failed');
+            // Try Edge Function first (server-side validation + email trigger)
+            try {
+                const resp = await fetch(EDGE_URL, {
+                    method:  'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey':        SUPABASE_KEY,
+                        'Authorization': `Bearer ${bearerToken}`,
+                    },
+                    body: JSON.stringify(payload),
+                });
+                if (resp.ok) {
+                    result = await resp.json();
+                } else {
+                    const errBody = await resp.json().catch(() => ({}));
+                    throw new Error(errBody.error || `Edge function returned ${resp.status}`);
+                }
+            } catch (edgeErr) {
+                console.warn('Edge function unavailable, falling back to direct insert:', edgeErr.message);
+                // Fallback: insert directly into campaign_requests table
+                const insertResp = await fetch(
+                    SUPABASE_URL + '/rest/v1/campaign_requests',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': 'Bearer ' + SUPABASE_KEY,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=representation',
+                        },
+                        body: JSON.stringify({
+                            ...payload,
+                            status: 'pending',
+                            submitted_at: new Date().toISOString(),
+                        }),
+                    }
+                );
+                if (!insertResp.ok) {
+                    const insertErr = await insertResp.json().catch(() => ({}));
+                    throw new Error(insertErr.message || insertErr.error || 'Direct insert failed');
+                }
+                const insertData = await insertResp.json();
+                result = { booking_id: Array.isArray(insertData) ? insertData[0]?.id : insertData?.id };
+                usedFallback = true;
             }
+
+            if (!result) throw new Error('No response from server');
 
             // Success — hide form, show confirmation, scroll into view
             const formEl = document.getElementById('quote-form');
@@ -1117,13 +1146,7 @@ Please email advertise@rock.scot or call 0141 459 ROCK.`);
         }
     });
 
-    // Wire up the real implementations
-    window._selectPackage  = selectPackage;
-    window._calculateQuote = calculateQuote;
-    window._onPackageChange = onPackageChange;
-    window.selectPackage   = selectPackage;
-    window.calculateQuote  = calculateQuote;
-    window.onPackageChange = onPackageChange;
+    // Functions already global — no wire-up needed
 
     // Ensure users can calculate immediately after choosing a package.
     ensureStartDate();
@@ -1137,41 +1160,7 @@ Please email advertise@rock.scot or call 0141 459 ROCK.`);
         document.getElementById('quote-form').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // ── HAMBURGER NAV ─────────────────────────────────────────────
-    const hamburger  = document.querySelector('.hamburger');
-
-    function openMobileNav() {
-        if (!hamburger || !mobileNav) return;
-        hamburger.classList.add('open');
-        mobileNav.classList.add('open');
-        hamburger.setAttribute('aria-expanded', 'true');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeMobileNav() {
-        if (!hamburger || !mobileNav) return;
-        hamburger.classList.remove('open');
-        mobileNav.classList.remove('open');
-        hamburger.setAttribute('aria-expanded', 'false');
-        document.body.style.overflow = '';
-    }
-
-    if (hamburger) hamburger.addEventListener('click', () =>
-        hamburger.classList.contains('open') ? closeMobileNav() : openMobileNav());
-    if (closeBtn) closeBtn.addEventListener('click', closeMobileNav);
-
-    document.addEventListener('click', (e) => {
-        if (mobileNav && mobileNav.classList.contains('open') &&
-            !mobileNav.contains(e.target) && !hamburger.contains(e.target)) {
-            closeMobileNav();
-        }
-    });
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeMobileNav();
-    });
-
-    window.closeMobileNav = closeMobileNav;
+    // Nav handled by header.js
 
     </script>
 
