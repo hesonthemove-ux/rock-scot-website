@@ -1072,17 +1072,17 @@ async function refreshAll() {
 async function loadOverview() {
   try {
     const token = currentSession?.access_token;
-    const [leads, campaigns, activity] = await Promise.all([
-      sbGet('/rest/v1/advertising_leads?select=id,status,final_price_pence,created_at,company_name,email,mux_type,product_id,is_rush,bolt_on_included&order=created_at.desc&limit=200', token),
-      sbGet('/rest/v1/campaigns?select=id,status&limit=200', token),
+    const [leads, requests, campaigns, activity] = await Promise.all([
+      sbGet('/rest/v1/advertising_leads?select=id,first_name,last_name,company,email,mux_type,selected_mux,product_id,product_name,final_price_pence,is_rush,bolt_on_included,start_date,campaign_length_days,discount_code,discount_amount_pence,message,created_at&order=created_at.desc&limit=200', token),
+      sbGet('/rest/v1/campaign_requests?select=id,status,first_name,last_name,company,email,final_price_pence,submitted_at&order=submitted_at.desc&limit=200', token),
+      sbGet('/rest/v1/campaigns?select=id,status,name&limit=200', token),
       sbGet('/rest/v1/activity_log?select=action,entity_type,created_at,user_id&order=created_at.desc&limit=12', token)
     ]);
 
-    // Stats
-    const pending   = leads.filter(l => l.status === 'pending').length;
-    const confirmed = leads.filter(l => ['confirmed','live'].includes(l.status)).length;
-    const revenue   = leads.filter(l => l.status !== 'cancelled')
-                           .reduce((s, l) => s + (l.final_price_pence || 0), 0);
+    // Stats — status lives on campaign_requests, not advertising_leads
+    const pending   = requests.filter(r => r.status === 'pending').length;
+    const confirmed = campaigns.filter(c => ['approved','active'].includes(c.status)).length;
+    const revenue   = leads.reduce((s, l) => s + (l.final_price_pence || 0), 0);
     document.getElementById('stat-total-leads').textContent = leads.length;
     document.getElementById('stat-pending').textContent     = pending;
     document.getElementById('stat-confirmed').textContent   = confirmed;
@@ -1161,9 +1161,18 @@ async function loadLeads() {
       '/rest/v1/advertising_leads?select=*&order=created_at.desc&limit=500',
       token
     );
+    // Also load campaign_requests for status info
+    const requests = await sbGet(
+      '/rest/v1/campaign_requests?select=*&order=submitted_at.desc&limit=500',
+      token
+    );
+    // Attach status from campaign_requests where email matches
+    allLeads = allLeads.map(l => {
+      const match = requests.find(r => r.email === l.email);
+      return { ...l, _status: match?.status || 'submitted', _req: match };
+    });
     renderLeadsTable(allLeads, 'leads-table-output', false);
-    document.getElementById('nav-count-leads').textContent =
-      allLeads.filter(l => l.status === 'pending').length || allLeads.length;
+    document.getElementById('nav-count-leads').textContent = allLeads.length;
   } catch(e) {
     document.getElementById('leads-table-output').innerHTML =
       `<div class="empty-state"><div class="empty-icon">⚠</div><div class="empty-text">${escH(e.message)}</div></div>`;
@@ -1175,12 +1184,55 @@ function filterLeads() {
   const st  = document.getElementById('leads-status-filter')?.value || '';
   const mux = document.getElementById('leads-mux-filter')?.value || '';
   const filtered = allLeads.filter(l => {
-    const matchQ   = !q   || [l.email,l.company_name,l.contact_name].join(' ').toLowerCase().includes(q);
-    const matchSt  = !st  || l.status === st;
-    const matchMux = !mux || l.mux_type === mux;
+    const matchQ   = !q   || [l.email,l.company,l.first_name,l.last_name].join(' ').toLowerCase().includes(q);
+    const matchSt  = !st  || l._status === st;
+    const matchMux = !mux || (l.selected_mux === mux || l.mux_type === mux);
     return matchQ && matchSt && matchMux;
   });
   renderLeadsTable(filtered, 'leads-table-output', false);
+}
+
+function renderLeadsTable(leads, containerId, compact) {
+  const out = document.getElementById(containerId);
+  document.getElementById('leads-count') &&
+    (document.getElementById('leads-count').textContent = leads.length + ' leads');
+
+  if (!leads.length) {
+    out.innerHTML = '<div class="empty-state"><div class="empty-icon">📥</div><div class="empty-text">No leads found</div></div>';
+    return;
+  }
+
+  const rows = leads.map(l => {
+    const price  = l.final_price_pence ? '£' + (l.final_price_pence/100).toLocaleString('en-GB',{minimumFractionDigits:0}) : '—';
+    const status = l._status || 'submitted';
+    const tags   = [l.is_rush && '<span class="badge badge-live">Rush</span>',
+                    l.bolt_on_included && '<span class="badge badge-invoiced">+Bolt</span>']
+                    .filter(Boolean).join(' ');
+    const name   = [l.first_name, l.last_name].filter(Boolean).join(' ') || '—';
+    return `<tr onclick="openLead('${l.id}')" style="cursor:pointer;">
+      <td>
+        <div class="td-mono" style="font-size:0.85rem;">${escH(l.company || name)}</div>
+        <div class="td-muted">${escH(l.company ? name : '')} ${escH(l.email || '')}</div>
+      </td>
+      ${!compact ? `<td class="td-muted">${escH(fmtMux(l.selected_mux))} <span style="opacity:0.5;font-size:0.75rem;">${escH(fmtMuxType(l.mux_type))}</span></td>` : ''}
+      ${!compact ? `<td class="td-muted">${escH(l.product_name || fmtProduct(l.product_id))}</td>` : ''}
+      <td><span class="badge ${badgeClass(status)}">${escH(status)}</span> ${tags}</td>
+      <td class="td-mono">${price}</td>
+      <td class="td-muted">${fmtDate(l.created_at)}</td>
+    </tr>`;
+  }).join('');
+
+  out.innerHTML = `<table>
+    <thead><tr>
+      <th>Contact</th>
+      ${!compact ? '<th>Mux</th>' : ''}
+      ${!compact ? '<th>Package</th>' : ''}
+      <th>Status</th>
+      <th>Price</th>
+      <th>Date</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
 }
 
 function renderLeadsTable(leads, containerId, compact) {
@@ -1268,7 +1320,7 @@ async function openLead(id) {
           <label>Current Status</label>
           <select class="field-input" id="lm-status-select">
             ${['pending','confirmed','live','completed','cancelled'].map(s =>
-              `<option value="${s}" ${(lead.status||'pending')===s?'selected':''}>${s}</option>`
+              `<option value="${s}" ${(lead._status||'submitted')===s?'selected':''}>${s}</option>`
             ).join('')}
           </select>
         </div>
@@ -1294,18 +1346,21 @@ async function openLead(id) {
 
 async function saveLeadStatus(id) {
   const newStatus = document.getElementById('lm-status-select').value;
+  const lead = allLeads.find(l => l.id === id);
   try {
-    await sbPatch(
-      '/rest/v1/advertising_leads?id=eq.' + id,
-      { status: newStatus },
-      currentSession?.access_token
-    );
+    // Status lives on campaign_requests, matched by email
+    if (lead?._req?.id) {
+      await sbPatch(
+        '/rest/v1/campaign_requests?id=eq.' + lead._req.id,
+        { status: newStatus },
+        currentSession?.access_token
+      );
+    }
     // Update local cache
     const idx = allLeads.findIndex(l => l.id === id);
-    if (idx > -1) allLeads[idx].status = newStatus;
+    if (idx > -1) allLeads[idx]._status = newStatus;
     toast('Status updated → ' + newStatus, 'ok');
     closeModal('lead-modal');
-    // Re-render whichever table is visible
     renderLeadsTable(allLeads, 'leads-table-output', false);
     renderLeadsTable(allLeads.slice(0,5), 'overview-leads-table', true);
   } catch(e) { toast('Save failed: ' + e.message, 'err'); }
