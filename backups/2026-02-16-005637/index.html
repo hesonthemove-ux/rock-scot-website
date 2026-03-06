@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ROCK.SCOT | Scotland's Rock Station</title>
+  <meta name="description" content="Fresh ROCK.SCOT homepage with dedicated Wire page, same Supabase backend, and compliance links retained.">
+  <link rel="stylesheet" href="css/revamp.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="/"><span class="dot">ROCK</span>.SCOT</a>
+      <nav class="menu">
+        <a href="/">Home</a>
+        <a href="/wire.html">Wire</a>
+        <a href="/advertise.html">Advertise</a>
+        <a href="/admin-dashboard.html">Admin</a>
+        <a href="/home-classic.html">Classic</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Scotland's Rock Station, refreshed</h1>
+      <p>New front-end, same content stack, same Supabase/SQL backend power. The wire now lives on its own full page.</p>
+      <div class="cta">
+        <a class="btn" href="/wire.html">Open the Wire</a>
+        <a class="btn alt" href="/home-classic.html">Open Classic Site</a>
+      </div>
+      <div class="kpis">
+        <span class="pill">Backend: Supabase + SQL</span>
+        <span class="pill">Wire: Dedicated page</span>
+        <span class="pill">Compliance links: Retained</span>
+      </div>
+    </section>
+
+    <section class="grid three">
+      <article class="card">
+        <h3>Live station</h3>
+        <p class="muted">Broadcast and station experience remain available via the classic pages and player setup.</p>
+        <a class="btn alt" href="/home-classic.html">Go to Live Experience</a>
+      </article>
+      <article class="card">
+        <h3>Rock Wire</h3>
+        <p class="muted">Ticker removed from homepage. Browse all wire stories on a dedicated interface.</p>
+        <a class="btn" href="/wire.html">Browse Wire News</a>
+      </article>
+      <article class="card">
+        <h3>Compliance</h3>
+        <p class="muted">Privacy, terms, and consent behavior remain first-class and visible.</p>
+        <a class="btn alt" href="/privacy.html">Privacy Policy</a>
+      </article>
+    </section>
+
+    <section class="panel">
+      <h2>Latest from the Wire</h2>
+      <p class="muted">Preview of recent stories from <code>wire_news</code>.</p>
+      <div id="homeWirePreview" class="wire-grid">
+        <div class="muted">Loading wire preview...</div>
+      </div>
+    </section>
+
+    <section class="panel notice">
+      Compliance note: this redesign keeps legal pages linked, preserves cookie consent script usage, and keeps frontend keys publishable-only.
+    </section>
+  </main>
+
+  <footer class="container footer">
+    <p>ROCK.SCOT • Scottish Rock Station</p>
+    <p>
+      <a href="/privacy.html">Privacy</a> •
+      <a href="/terms.html">Terms</a> •
+      <a href="/wire.html">Wire</a> •
+      <a href="/home-classic.html">Classic Homepage</a>
+    </p>
+  </footer>
+
+  <script src="js/supabase-config.js"></script>
+  <script src="js/home-wire-preview.js"></script>
+  <script src="js/cookie-consent.js"></script>
+</body>
+</html>

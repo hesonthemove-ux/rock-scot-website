@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ROCK.SCOT | Scotland's Rock Station</title>
+  <meta name="description" content="Scotland's only 24/7 dedicated rock station on DAB+ digital radio. Fresh design with original station content and dedicated Wire page.">
+  <link rel="stylesheet" href="css/revamp.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand-wrap" href="/">
+        <img class="brand-logo" src="/logo.png" alt="ROCK.SCOT logo">
+        <span class="brand">ROCK<span class="dot">.SCOT</span><span class="brand-sub">Scotland's Rock Station</span></span>
+      </a>
+      <nav class="menu">
+        <a href="/">Home</a>
+        <a href="/wire.html">Wire</a>
+        <a href="/home-classic.html">Classic Site</a>
+        <a href="/advertise.html">Advertise</a>
+        <a href="/admin-dashboard.html">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Scotland's only 24/7 dedicated rock station on DAB+ digital radio</h1>
+      <p>Metal, alt, punk and classic rock with legendary DJ Tom Russell. Broadcasting Inverclyde, North Ayrshire, South Lanarkshire and expanding across Scotland.</p>
+      <div class="cta">
+        <a class="btn" href="/wire.html">Open Scottish Rock Wire</a>
+        <a class="btn alt" href="/home-classic.html">Open Full Classic Homepage</a>
+      </div>
+      <div class="kpis">
+        <span class="pill">Live station content preserved</span>
+        <span class="pill">Supabase + SQL backend unchanged</span>
+        <span class="pill">Compliance links retained</span>
+      </div>
+    </section>
+
+    <section class="grid three">
+      <article class="card">
+        <h3>Station and schedule</h3>
+        <p class="muted">Your original station pages are still available exactly as before.</p>
+        <div class="story-actions">
+          <a class="btn alt" href="/home-classic.html">Open classic content</a>
+        </div>
+      </article>
+      <article class="card">
+        <h3>Wire redesign</h3>
+        <p class="muted">Wire now uses a dedicated page with popout story reader and source links.</p>
+        <div class="story-actions">
+          <a class="btn" href="/wire.html">Open wire page</a>
+        </div>
+      </article>
+      <article class="card">
+        <h3>Commercial + admin</h3>
+        <p class="muted">Advertiser and admin workflows remain connected to your existing backend.</p>
+        <div class="story-actions">
+          <a class="btn alt" href="/advertise.html">Advertise</a>
+          <a class="btn alt" href="/admin-dashboard.html">Admin</a>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <h2>Latest from the Wire</h2>
+      <p class="muted">Live preview from <code>wire_news</code>.</p>
+      <div id="homeWirePreview" class="wire-grid">
+        <div class="muted">Loading wire preview...</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Original site stories and images</h2>
+      <p class="muted">Loaded from your existing story pages and assets so your original content stays front and center.</p>
+      <div id="originalStories" class="story-grid">
+        <div class="muted">Loading original stories...</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Compliance and legal</h2>
+      <div class="compliance-row">
+        <span class="pill"><a href="/privacy.html">Privacy Policy</a></span>
+        <span class="pill"><a href="/terms.html">Terms</a></span>
+        <span class="pill">Cookie consent enabled</span>
+        <span class="pill">No service role keys in frontend</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container footer">
+    <p>ROCK.SCOT • Scottish Rock Station</p>
+    <p><a href="/privacy.html">Privacy</a> • <a href="/terms.html">Terms</a> • <a href="/wire.html">Wire</a> • <a href="/home-classic.html">Classic homepage</a></p>
+  </footer>
+
+  <script src="js/supabase-config.js?v=1771203503"></script>
+  <script src="js/home-wire-preview.js?v=1771203503"></script>
+  <script src="js/original-stories.js?v=1771203503"></script>
+  <script src="js/cookie-consent.js?v=1771203503"></script>
+</body>
+</html>

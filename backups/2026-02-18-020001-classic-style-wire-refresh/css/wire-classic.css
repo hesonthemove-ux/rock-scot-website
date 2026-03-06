@@ -1,0 +1,75 @@
+.wire-launch-card{
+  margin:18px 0;
+  border:1px solid #2c3a55;
+  border-radius:14px;
+  background:linear-gradient(135deg,#111a2d,#182641);
+  color:#eef3ff;
+  padding:16px;
+}
+.wire-launch-card h2{margin:0 0 8px 0;font-size:1.3rem}
+.wire-launch-card p{margin:0 0 10px 0;color:#c9d3ea;line-height:1.45}
+.wire-launch-card .wire-cta-actions{display:flex;gap:8px;flex-wrap:wrap}
+.wire-btn{
+  display:inline-block;border:1px solid #3a4b71;border-radius:10px;
+  padding:9px 12px;background:#1a2a49;color:#fff;text-decoration:none;font-weight:700;
+}
+.wire-btn.primary{background:linear-gradient(90deg,#ff2f6d,#ff9f1a);border:none}
+.wire-fab{
+  position:fixed;right:16px;bottom:16px;z-index:999;
+  border:1px solid #3a4b71;border-radius:999px;padding:10px 14px;
+  background:linear-gradient(90deg,#ff2f6d,#ff9f1a);color:#fff;font-weight:700;text-decoration:none;
+  box-shadow:0 8px 20px rgba(0,0,0,.35)
+}
+.wire-shell{
+  max-width:1200px;margin:0 auto;padding:18px 14px;color:#eef3ff;
+}
+.wire-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  margin-bottom:12px;border:1px solid #2b3854;border-radius:14px;background:#111a2e;padding:14px;
+}
+.wire-brand{display:flex;align-items:center;gap:10px}
+.wire-brand img{width:42px;height:42px;object-fit:cover;border-radius:8px;border:1px solid #314263}
+.wire-brand .title{font-size:1.15rem;font-weight:800}
+.wire-brand .sub{display:block;color:#b6c2dc;font-size:.85rem}
+.wire-nav a{color:#e7edfb;text-decoration:none;margin-left:12px}
+.wire-controls{
+  border:1px solid #2b3854;border-radius:14px;background:#111a2e;padding:12px;margin-bottom:12px;
+}
+.wire-controls .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.wire-controls input,.wire-controls select{
+  border:1px solid #344768;border-radius:10px;background:#0d1527;color:#eef3ff;padding:9px 11px;min-width:220px;
+}
+.wire-chip{display:inline-block;border:1px solid #334665;border-radius:999px;padding:4px 10px;color:#b6c2dc;font-size:.82rem}
+.wire-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:12px;
+}
+.wire-card{
+  border:1px solid #2b3854;border-radius:12px;background:#0f182b;padding:12px;
+}
+.wire-card img{
+  width:100%;height:138px;object-fit:cover;border-radius:9px;border:1px solid #2c3b59;background:#0a1222;margin-bottom:8px;
+}
+.wire-card h3{font-size:1rem;line-height:1.33;margin:0 0 8px 0}
+.wire-meta{font-size:.84rem;color:#b8c3de;margin-bottom:8px}
+.wire-actions{display:flex;gap:8px;flex-wrap:wrap}
+.wire-modal{position:fixed;inset:0;display:none;z-index:10000}
+.wire-modal.is-open{display:block}
+.wire-modal .backdrop{position:absolute;inset:0;background:rgba(2,5,12,.76)}
+.wire-modal .dialog{
+  position:relative;width:min(920px,94vw);max-height:90vh;overflow:auto;margin:4vh auto 0;
+  border:1px solid #2b3854;border-radius:14px;background:#111a2e;padding:14px;box-shadow:0 14px 34px rgba(0,0,0,.45)
+}
+.wire-modal .close{
+  float:right;border:1px solid #344768;background:#1a2a49;color:#fff;border-radius:10px;padding:6px 10px;cursor:pointer;
+}
+.wire-modal h3{margin:2px 0 8px 0}
+.wire-modal .meta{color:#b8c3de;font-size:.9rem;margin-bottom:8px}
+.wire-modal .summary{margin:10px 0 0 0;color:#dbe4f6}
+.wire-modal .content{white-space:pre-wrap;line-height:1.58;margin-top:10px}
+.wire-modal .image{
+  width:100%;max-height:340px;object-fit:cover;border-radius:12px;border:1px solid #2c3b59;background:#0a1222
+}
+.wire-foot{
+  margin-top:16px;border-top:1px solid #2b3854;padding-top:10px;color:#b6c2dc
+}
+.wire-foot a{color:#e9eeff}

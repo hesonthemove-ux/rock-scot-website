@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ROCK.SCOT Wire | Scottish Rock News</title>
+  <meta name="description" content="Scottish Rock Wire with popout story reading, source credit and original article links.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/wire-classic.css">
+</head>
+<body>
+  <main class="wire-shell">
+    <section class="wire-head">
+      <div class="wire-brand">
+        <img src="/logo.png" alt="Rock.Scot logo">
+        <div>
+          <div class="title">ROCK.SCOT — Scottish Rock Wire</div>
+          <span class="sub">Radio-first newsroom with searchable genres and popout reading</span>
+        </div>
+      </div>
+      <nav class="wire-nav">
+        <a href="/">Home</a>
+        <a href="/home-classic.html">Classic Site</a>
+        <a href="/advertise.html">Advertise</a>
+      </nav>
+    </section>
+
+    <section class="wire-controls">
+      <div class="row">
+        <input id="wireSearch" type="search" placeholder="Search headlines, summary, source">
+        <select id="wireGenre"><option value="">All genres</option></select>
+        <button id="wireRefresh" class="wire-btn" type="button">Refresh</button>
+        <span id="wireCount" class="wire-chip">0 stories</span>
+      </div>
+      <p id="wireStatus" style="margin:10px 0 0 0;color:#b7c3dd;">Loading stories...</p>
+    </section>
+
+    <section>
+      <div id="wireGrid" class="wire-grid"></div>
+    </section>
+
+    <section class="wire-foot">
+      <a href="/privacy.html">Privacy Policy</a> •
+      <a href="/terms.html">Terms</a> •
+      <a href="/home-classic.html">Classic Homepage</a>
+    </section>
+  </main>
+
+  <div id="wireModal" class="wire-modal" aria-hidden="true">
+    <div class="backdrop" data-close-modal="1"></div>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="wireModalTitle">
+      <button class="close" data-close-modal="1" type="button">Close</button>
+      <h3 id="wireModalTitle">Story</h3>
+      <div id="wireModalMeta" class="meta"></div>
+      <div id="wireModalImageWrap"><img id="wireModalImage" class="image" alt="Story image"></div>
+      <p id="wireModalSummary" class="summary"></p>
+      <div id="wireModalBody" class="content"></div>
+      <p id="wireModalSource" class="meta"></p>
+      <div class="wire-actions">
+        <a id="wireModalLink" class="wire-btn primary" href="#" target="_blank" rel="noopener">Open original article</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/supabase-config.js"></script>
+  <script src="js/wire-classic.js"></script>
+  <script src="js/cookie-consent.js"></script>
+</body>
+</html>

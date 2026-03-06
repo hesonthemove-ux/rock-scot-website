@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ROCK.SCOT Wire | Scottish Rock News</title>
+  <meta name="description" content="Browse the Scottish Rock Wire with popout article reader and source links.">
+  <link rel="stylesheet" href="css/revamp.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand-wrap" href="/">
+        <img class="brand-logo" src="/logo.png" alt="ROCK.SCOT logo">
+        <span class="brand">ROCK<span class="dot">.SCOT</span><span class="brand-sub">Scottish Rock Wire</span></span>
+      </a>
+      <nav class="menu">
+        <a href="/">Home</a>
+        <a href="/wire.html">Wire</a>
+        <a href="/home-classic.html">Classic Site</a>
+        <a href="/advertise.html">Advertise</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Scottish Rock News Wire</h1>
+      <p>Open any story in a popout reader and jump to the original source article when available.</p>
+      <div class="controls">
+        <input id="wireSearch" type="search" placeholder="Search wire headlines...">
+        <select id="wireGenre"><option value="">All genres</option></select>
+        <button id="wireRefresh" class="btn alt" type="button">Refresh</button>
+      </div>
+      <div id="wireMeta" class="muted" style="margin-top:10px;">Loading stories...</div>
+    </section>
+
+    <section>
+      <div id="wireGrid" class="wire-grid">
+        <div class="muted">Loading stories...</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Compliance and source integrity</h2>
+      <div class="compliance-row">
+        <span class="pill">Story popout is read-only</span>
+        <span class="pill">Original source link shown per story</span>
+        <span class="pill"><a href="/privacy.html">Privacy policy</a></span>
+        <span class="pill"><a href="/terms.html">Terms</a></span>
+      </div>
+    </section>
+  </main>
+
+  <div id="wireModal" class="wire-modal" aria-hidden="true">
+    <div class="wire-modal-backdrop" data-close-modal="1"></div>
+    <div class="wire-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="wireModalTitle">
+      <button class="wire-modal-close" data-close-modal="1" type="button">Close</button>
+      <h3 id="wireModalTitle">Story</h3>
+      <div id="wireModalMeta" class="wire-modal-meta"></div>
+      <div id="wireModalImageWrap">
+        <img id="wireModalImage" class="wire-modal-image" alt="Story image">
+      </div>
+      <p id="wireModalSummary" class="muted" style="margin-top:10px;"></p>
+      <div id="wireModalBody" class="wire-modal-content"></div>
+      <div class="story-actions" style="margin-top:14px;">
+        <a id="wireModalLink" class="btn" href="#" target="_blank" rel="noopener">Open original article</a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="container footer">
+    <p>ROCK.SCOT Wire • Powered by your existing Supabase + SQL backend</p>
+    <p><a href="/">Home</a> • <a href="/home-classic.html">Classic homepage</a> • <a href="/privacy.html">Privacy</a> • <a href="/terms.html">Terms</a></p>
+  </footer>
+
+  <script src="js/supabase-config.js?v=1771203503"></script>
+  <script src="js/wire-page.js?v=1771203503"></script>
+  <script src="js/cookie-consent.js?v=1771203503"></script>
+</body>
+</html>

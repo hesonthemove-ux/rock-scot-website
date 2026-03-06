@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ROCK.SCOT Wire | Scottish Rock News</title>
+  <meta name="description" content="Latest Scottish and global rock stories, powered by the ROCK.SCOT wire backend.">
+  <link rel="stylesheet" href="css/revamp.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="/"><span class="dot">ROCK</span>.SCOT</a>
+      <nav class="menu">
+        <a href="/">Home</a>
+        <a href="/wire.html">Wire</a>
+        <a href="/advertise.html">Advertise</a>
+        <a href="/home-classic.html">Classic Site</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Scottish Rock News Wire</h1>
+      <p>Live wire feed from Supabase. No ticker, full-page browsing.</p>
+      <div class="controls">
+        <input id="wireSearch" type="search" placeholder="Search headlines...">
+        <select id="wireGenre"><option value="">All genres</option></select>
+      </div>
+      <div id="wireMeta" class="muted" style="margin-top:10px;">Waiting for wire feed...</div>
+    </section>
+
+    <section>
+      <div id="wireGrid" class="wire-grid"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Compliance and data</h2>
+      <p class="muted">This page keeps legal links visible and uses publishable frontend credentials only.</p>
+      <div class="kpis">
+        <span class="pill"><a href="/privacy.html">Privacy Policy</a></span>
+        <span class="pill"><a href="/terms.html">Terms</a></span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container footer">
+    <p>ROCK.SCOT • Scottish Rock Station</p>
+    <p><a href="/privacy.html">Privacy</a> • <a href="/terms.html">Terms</a> • <a href="/home-classic.html">Classic Homepage</a></p>
+  </footer>
+
+  <script src="js/supabase-config.js"></script>
+  <script src="js/wire-page.js"></script>
+  <script src="js/cookie-consent.js"></script>
+</body>
+</html>
