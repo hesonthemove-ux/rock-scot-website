@@ -1510,48 +1510,6 @@ function renderLeadsTable(leads, containerId, compact) {
   </table>`;
 }
 
-function renderLeadsTable(leads, containerId, compact) {
-  const out = document.getElementById(containerId);
-  document.getElementById('leads-count') &&
-    (document.getElementById('leads-count').textContent = leads.length + ' leads');
-
-  if (!leads.length) {
-    out.innerHTML = '<div class="empty-state"><div class="empty-icon">📥</div><div class="empty-text">No leads found</div></div>';
-    return;
-  }
-
-  const rows = leads.map(l => {
-    const price = l.final_price_pence ? '£' + (l.final_price_pence/100).toLocaleString('en-GB',{minimumFractionDigits:0}) : '—';
-    const tags  = [l.is_rush && '<span class="badge badge-live">Rush</span>',
-                   l.bolt_on_included && '<span class="badge badge-invoiced">+Bolt</span>']
-                   .filter(Boolean).join(' ');
-    const name  = [l.first_name, l.last_name].filter(Boolean).join(' ') || '—';
-    return `<tr onclick="openLead('${l.id}')" style="cursor:pointer;">
-      <td>
-        <div class="td-mono" style="font-size:0.85rem;">${escH(l.company || name)}</div>
-        <div class="td-muted">${escH(name !== '—' && l.company ? name : '')} ${escH(l.email || '')}</div>
-      </td>
-      ${!compact ? `<td class="td-muted">${escH(fmtMux(l.selected_mux || l.mux_type))}</td>` : ''}
-      ${!compact ? `<td class="td-muted">${escH(fmtProduct(l.product_id))}</td>` : ''}
-      <td><span class="badge ${badgeClass(l.status)}">${escH(l.status || 'pending')}</span> ${tags}</td>
-      <td class="td-mono">${price}</td>
-      <td class="td-muted">${fmtDate(l.created_at)}</td>
-    </tr>`;
-  }).join('');
-
-  out.innerHTML = `<table>
-    <thead><tr>
-      <th>Contact</th>
-      ${!compact ? '<th>Mux</th>' : ''}
-      ${!compact ? '<th>Package</th>' : ''}
-      <th>Status</th>
-      <th>Price</th>
-      <th>Date</th>
-    </tr></thead>
-    <tbody>${rows}</tbody>
-  </table>`;
-}
-
 /* ── LEAD MODAL ─────────────────────────────────────────────────── */
 async function openLead(id) {
   const lead = allLeads.find(l => l.id === id);
