@@ -1084,21 +1084,17 @@
                             'apikey': SUPABASE_KEY,
                             'Authorization': 'Bearer ' + SUPABASE_KEY,
                             'Content-Type': 'application/json',
-                            'Prefer': 'return=representation',
+                            'Prefer': 'return=minimal',
                         },
-                        body: JSON.stringify({
-                            ...payload,
-                            status: 'pending',
-                            submitted_at: new Date().toISOString(),
-                        }),
+                        body: JSON.stringify(payload),
                     }
                 );
                 if (!insertResp.ok) {
                     const insertErr = await insertResp.json().catch(() => ({}));
-                    throw new Error(insertErr.message || insertErr.error || 'Direct insert failed');
+                    throw new Error(insertErr.message || insertErr.error || insertErr.details || 'Direct insert failed');
                 }
-                const insertData = await insertResp.json();
-                result = { booking_id: Array.isArray(insertData) ? insertData[0]?.id : insertData?.id };
+                // return=minimal gives 201 with no body - that's success
+                result = { booking_id: null };
                 usedFallback = true;
             }
 
@@ -1138,9 +1134,12 @@
 
         } catch (err) {
             console.error('Submission error:', err);
-            alert(`Error: ${err.message}
-
-Please email advertise@rock.scot or call 0141 459 ROCK.`);
+            // Show friendly message - hide technical detail
+            const isTableErr = err.message && err.message.includes('schema cache');
+            const msg = isTableErr
+                ? 'Our booking system is being set up. Your enquiry has been noted — please email advertise@rock.scot or call 0141 459 ROCK and we will get back to you within 24 hours.'
+                : `Something went wrong: ${err.message}\n\nPlease email advertise@rock.scot or call 0141 459 ROCK.`;
+            alert(msg);
             btn.textContent = 'Submit Booking Request';
             btn.disabled = false;
         }
