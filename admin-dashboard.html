@@ -1072,35 +1072,34 @@ async function refreshAll() {
 async function loadOverview() {
   try {
     const token = currentSession?.access_token;
-    const [leads, requests, campaigns, activity] = await Promise.all([
-      sbGet('/rest/v1/advertising_leads?select=id,first_name,last_name,company,email,mux_type,selected_mux,product_id,product_name,final_price_pence,is_rush,bolt_on_included,start_date,campaign_length_days,discount_code,discount_amount_pence,message,created_at&order=created_at.desc&limit=200', token),
-      sbGet('/rest/v1/campaign_requests?select=id,status,first_name,last_name,company,email,final_price_pence,submitted_at&order=submitted_at.desc&limit=200', token),
+    const [requests, campaigns, activity] = await Promise.all([
+      sbGet('/rest/v1/campaign_requests?select=*&order=submitted_at.desc&limit=200', token),
       sbGet('/rest/v1/campaigns?select=id,status,name&limit=200', token),
       sbGet('/rest/v1/activity_log?select=action,entity_type,created_at,user_id&order=created_at.desc&limit=12', token)
     ]);
 
-    // Stats — status lives on campaign_requests, not advertising_leads
     const pending   = requests.filter(r => r.status === 'pending').length;
     const confirmed = campaigns.filter(c => ['approved','active'].includes(c.status)).length;
-    const revenue   = leads.reduce((s, l) => s + (l.final_price_pence || 0), 0);
-    document.getElementById('stat-total-leads').textContent = leads.length;
+    const revenue   = requests.reduce((s, r) => s + (r.final_price_pence || 0), 0);
+
+    document.getElementById('stat-total-leads').textContent = requests.length;
     document.getElementById('stat-pending').textContent     = pending;
     document.getElementById('stat-confirmed').textContent   = confirmed;
     document.getElementById('stat-revenue').textContent     = '£' + Math.round(revenue/100).toLocaleString();
-    document.getElementById('nav-count-leads').textContent  = pending || leads.length;
+    document.getElementById('nav-count-leads').textContent  = pending || requests.length;
     document.getElementById('nav-count-campaigns').textContent = campaigns.length;
 
-    // Latest 5 leads table
-    renderLeadsTable(leads.slice(0, 5), 'overview-leads-table', true);
+    // Normalise campaign_requests to match renderLeadsTable expectations
+    allLeads = requests.map(r => ({
+      ...r,
+      created_at: r.submitted_at,
+      _status: r.status || 'pending',
+      _req: r
+    }));
 
-    // Activity
+    renderLeadsTable(allLeads.slice(0, 5), 'overview-leads-table', true);
     renderActivityRecent(activity);
-
-    // Cache for other panels
-    allLeads     = leads;
     allCampaigns = campaigns;
-
-    // Capacity
     loadCapacity();
 
   } catch(e) { toast('Failed to load overview: ' + e.message, 'err'); }
@@ -1157,20 +1156,16 @@ async function loadLeads() {
   document.getElementById('leads-table-output').innerHTML = '<div class="spinner"></div>';
   try {
     const token = currentSession?.access_token;
-    allLeads = await sbGet(
-      '/rest/v1/advertising_leads?select=*&order=created_at.desc&limit=500',
-      token
-    );
-    // Also load campaign_requests for status info
     const requests = await sbGet(
       '/rest/v1/campaign_requests?select=*&order=submitted_at.desc&limit=500',
       token
     );
-    // Attach status from campaign_requests where email matches
-    allLeads = allLeads.map(l => {
-      const match = requests.find(r => r.email === l.email);
-      return { ...l, _status: match?.status || 'submitted', _req: match };
-    });
+    allLeads = requests.map(r => ({
+      ...r,
+      created_at: r.submitted_at,
+      _status: r.status || 'pending',
+      _req: r
+    }));
     renderLeadsTable(allLeads, 'leads-table-output', false);
     document.getElementById('nav-count-leads').textContent = allLeads.length;
   } catch(e) {
