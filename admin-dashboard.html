@@ -966,7 +966,7 @@ async function init() {
 async function validateSession(sess) {
   try {
     const profiles = await sbGet(
-      '/rest/v1/user_profiles?user_id=eq.' + sess.user.id + '&select=role,display_name',
+      '/rest/v1/user_profiles?id=eq.' + sess.user.id + '&select=role,first_name,last_name',
       sess.access_token
     );
     if (!profiles.length || !ALLOWED_ROLES.includes(profiles[0].role)) {
