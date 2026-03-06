@@ -1201,7 +1201,8 @@ function renderLeadsTable(leads, containerId, compact) {
     const price  = l.final_price_pence ? '£' + (l.final_price_pence/100).toLocaleString('en-GB',{minimumFractionDigits:0}) : '—';
     const status = l._status || 'submitted';
     const tags   = [l.is_rush && '<span class="badge badge-live">Rush</span>',
-                    l.bolt_on_included && '<span class="badge badge-invoiced">+Bolt</span>']
+                    l.bolt_on_included && '<span class="badge badge-invoiced">+Bolt</span>',
+                    (Array.isArray(l.admin_notes) && l.admin_notes.length) && `<span class="badge" style="background:rgba(68,136,255,0.15);color:var(--blue);">📝 ${l.admin_notes.length}</span>`]
                     .filter(Boolean).join(' ');
     const name   = [l.first_name, l.last_name].filter(Boolean).join(' ') || '—';
     return `<tr onclick="openLead('${l.id}')" style="cursor:pointer;">
@@ -1302,9 +1303,9 @@ async function openLead(id) {
         <div class="modal-field"><label>Mux Type</label><div class="field-val">${escH(fmtMuxType(lead.mux_type))} ${lead.selected_mux ? '— ' + escH(fmtMux(lead.selected_mux)) : ''}</div></div>
         <div class="modal-field"><label>Start Date</label><div class="field-val">${fmtDate(lead.start_date)}</div></div>
         <div class="modal-field"><label>Campaign Length</label><div class="field-val">${lead.campaign_length_days || 28} days</div></div>
-        <div class="modal-field"><label>Rush?</label><div class="field-val">${lead.is_rush ? '✅ Yes (+£50)' : 'No'}</div></div>
+        <div class="modal-field"><label>Rush?</label><div class="field-val">${lead.is_rush ? '✅ Yes' : 'No'}</div></div>
         <div class="modal-field"><label>Bolt-on Production?</label><div class="field-val">${lead.bolt_on_included ? '✅ Yes — £' + ((lead.bolt_on_cost_pence||0)/100).toFixed(0) : 'No'}</div></div>
-        <div class="modal-field"><label>Discount Code</label><div class="field-val">${escH(lead.discount_code || '—')}${lead.discount_amount_pence ? ' (−£' + (lead.discount_amount_pence/100).toFixed(0) + ')' : ''}</div></div>
+        <div class="modal-field"><label>Discount Code</label><div class="field-val">${escH(lead.discount_code || '—')}</div></div>
         <div class="modal-field"><label>Final Price</label><div class="field-val" style="color:var(--orange);font-family:var(--font-display);font-size:1.4rem;">${lead.final_price_pence ? '£'+(lead.final_price_pence/100).toLocaleString('en-GB',{minimumFractionDigits:2}) : '—'}</div></div>
       </div>
     </div>
@@ -1315,21 +1316,32 @@ async function openLead(id) {
           <label>Current Status</label>
           <select class="field-input" id="lm-status-select">
             ${['pending','confirmed','live','completed','cancelled'].map(s =>
-              `<option value="${s}" ${(lead._status||'submitted')===s?'selected':''}>${s}</option>`
+              `<option value="${s}" ${(lead._status||'pending')===s?'selected':''}>${s}</option>`
             ).join('')}
           </select>
         </div>
-        <div class="modal-field"><label>Lead ID</label><div class="field-val td-muted" style="font-size:0.72rem;word-break:break-all;">${lead.id}</div></div>
+        <div class="modal-field"><label>Submitted</label><div class="field-val td-muted">${fmtDate(lead.submitted_at || lead.created_at)}</div></div>
       </div>
     </div>
     ${lead.message ? `<div class="modal-section">
       <div class="modal-section-title">Message from Client</div>
       <div class="field-val td-muted" style="font-size:0.88rem;line-height:1.7;">${escH(lead.message)}</div>
     </div>` : ''}
-    ${lead.meta ? `<div class="modal-section">
-      <div class="modal-section-title">Meta</div>
-      <div class="field-val td-muted" style="font-size:0.72rem;white-space:pre-wrap;">${escH(typeof lead.meta === 'object' ? JSON.stringify(lead.meta, null, 2) : lead.meta)}</div>
-    </div>` : ''}`;
+    <div class="modal-section">
+      <div class="modal-section-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Admin Notes</span>
+        <span class="td-muted" style="font-size:0.72rem;">internal only — never shown to client</span>
+      </div>
+      <div id="lm-notes-log" style="margin-bottom:0.75rem;">
+        ${renderNotesLog(lead.admin_notes)}
+      </div>
+      <div style="display:flex;gap:0.5rem;align-items:flex-end;">
+        <textarea id="lm-note-input" class="field-input" rows="2"
+          placeholder="Add a note…"
+          style="flex:1;resize:vertical;min-height:2.5rem;font-family:var(--font-body);font-size:0.88rem;line-height:1.5;"></textarea>
+        <button class="btn btn-primary" style="white-space:nowrap;" onclick="addNote('${lead.id}')">+ Add Note</button>
+      </div>
+    </div>`;
 
   actions.innerHTML = `
     <button class="btn btn-primary" onclick="saveLeadStatus('${lead.id}')">Save Status</button>
@@ -1342,23 +1354,66 @@ async function openLead(id) {
 async function saveLeadStatus(id) {
   const newStatus = document.getElementById('lm-status-select').value;
   const lead = allLeads.find(l => l.id === id);
+  if (!lead?._req?.id) { toast('No request record found', 'err'); return; }
   try {
-    // Status lives on campaign_requests, matched by email
-    if (lead?._req?.id) {
-      await sbPatch(
-        '/rest/v1/campaign_requests?id=eq.' + lead._req.id,
-        { status: newStatus },
-        currentSession?.access_token
-      );
-    }
-    // Update local cache
+    await sbPatch(
+      '/rest/v1/campaign_requests?id=eq.' + lead._req.id,
+      { status: newStatus },
+      currentSession?.access_token
+    );
     const idx = allLeads.findIndex(l => l.id === id);
-    if (idx > -1) allLeads[idx]._status = newStatus;
+    if (idx > -1) { allLeads[idx]._status = newStatus; allLeads[idx].status = newStatus; }
     toast('Status updated → ' + newStatus, 'ok');
     closeModal('lead-modal');
     renderLeadsTable(allLeads, 'leads-table-output', false);
     renderLeadsTable(allLeads.slice(0,5), 'overview-leads-table', true);
   } catch(e) { toast('Save failed: ' + e.message, 'err'); }
+}
+
+function renderNotesLog(notes) {
+  const list = Array.isArray(notes) ? notes : [];
+  if (!list.length) return '<div class="td-muted" style="font-size:0.82rem;padding:0.5rem 0;opacity:0.5;">No notes yet.</div>';
+  return list.slice().reverse().map(n => `
+    <div style="border-left:2px solid var(--border);padding:0.5rem 0.75rem;margin-bottom:0.5rem;background:rgba(255,255,255,0.02);border-radius:0 3px 3px 0;">
+      <div style="font-size:0.82rem;line-height:1.6;color:var(--white);">${escH(n.text)}</div>
+      <div style="font-size:0.7rem;color:var(--muted);margin-top:0.25rem;">
+        ${escH(n.by || 'admin')} &mdash; ${n.at ? new Date(n.at).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—'}
+      </div>
+    </div>`).join('');
+}
+
+async function addNote(id) {
+  const input = document.getElementById('lm-note-input');
+  const text  = input?.value?.trim();
+  if (!text) { toast('Note is empty', 'err'); return; }
+
+  const lead = allLeads.find(l => l.id === id);
+  if (!lead?._req?.id) { toast('No request record found', 'err'); return; }
+
+  const existing = Array.isArray(lead.admin_notes) ? lead.admin_notes : [];
+  const newNote  = {
+    text,
+    at:  new Date().toISOString(),
+    by:  currentSession?.user?.email || 'admin'
+  };
+  const updated = [...existing, newNote];
+
+  try {
+    await sbPatch(
+      '/rest/v1/campaign_requests?id=eq.' + lead._req.id,
+      { admin_notes: updated },
+      currentSession?.access_token
+    );
+    // Update local cache
+    const idx = allLeads.findIndex(l => l.id === id);
+    if (idx > -1) {
+      allLeads[idx].admin_notes    = updated;
+      allLeads[idx]._req.admin_notes = updated;
+    }
+    input.value = '';
+    document.getElementById('lm-notes-log').innerHTML = renderNotesLog(updated);
+    toast('Note saved', 'ok');
+  } catch(e) { toast('Failed to save note: ' + e.message, 'err'); }
 }
 
 /* ── CAMPAIGNS ──────────────────────────────────────────────────── */
