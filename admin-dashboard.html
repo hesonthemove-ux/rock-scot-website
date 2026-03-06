@@ -457,6 +457,121 @@
       letter-spacing: 0.08em; color: var(--white);
     }
 
+    /* ── PLANNER ─────────────────────────────────────────────────── */
+    .planner-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;
+    }
+    .planner-nav { display: flex; align-items: center; gap: 0.5rem; }
+    .planner-month {
+      font-family: var(--font-display); font-size: 1.6rem;
+      letter-spacing: 0.05em; color: var(--white); min-width: 200px; text-align: center;
+    }
+    .planner-grid {
+      display: grid; grid-template-columns: 120px 1fr;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      overflow: hidden; background: var(--panel);
+    }
+    .planner-labels { border-right: 1px solid var(--border); }
+    .planner-label-header {
+      height: 36px; background: var(--dark);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 0.75rem;
+      font-family: var(--font-cond); font-size: 0.65rem;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+    }
+    .planner-label-row {
+      height: 44px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 0.75rem;
+      font-size: 0.78rem; gap: 0.4rem;
+    }
+    .planner-label-row:last-child { border-bottom: none; }
+    .planner-timeline { overflow-x: auto; position: relative; }
+    .planner-days-header {
+      display: flex; height: 36px; background: var(--dark);
+      border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 2;
+    }
+    .planner-day-head {
+      flex-shrink: 0; width: 28px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-cond); font-size: 0.6rem;
+      letter-spacing: 0.05em; color: var(--muted);
+      border-right: 1px solid rgba(255,255,255,0.04);
+    }
+    .planner-day-head.today { color: var(--orange); font-weight: 700; }
+    .planner-day-head.weekend { background: rgba(255,255,255,0.02); }
+    .planner-bar-row {
+      height: 44px; border-bottom: 1px solid var(--border);
+      position: relative; display: flex; align-items: center;
+    }
+    .planner-bar-row:last-child { border-bottom: none; }
+    .planner-day-cell {
+      flex-shrink: 0; width: 28px; height: 100%;
+      border-right: 1px solid rgba(255,255,255,0.03);
+    }
+    .planner-day-cell.today { background: rgba(255,85,0,0.06); }
+    .planner-day-cell.weekend { background: rgba(255,255,255,0.01); }
+    .planner-bar {
+      position: absolute; height: 26px; border-radius: 3px;
+      display: flex; align-items: center; padding: 0 0.5rem;
+      font-family: var(--font-cond); font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.05em; white-space: nowrap; overflow: hidden;
+      cursor: pointer; transition: filter 0.15s; z-index: 1;
+    }
+    .planner-bar:hover { filter: brightness(1.2); }
+    .planner-bar.pending   { background: rgba(255,215,0,0.25); color: var(--gold); border: 1px solid rgba(255,215,0,0.4); }
+    .planner-bar.confirmed { background: rgba(0,204,136,0.2); color: var(--green); border: 1px solid rgba(0,204,136,0.4); }
+    .planner-bar.live      { background: rgba(255,85,0,0.22); color: var(--orange); border: 1px solid rgba(255,85,0,0.5); }
+    .planner-bar.completed { background: rgba(68,136,255,0.18); color: var(--blue); border: 1px solid rgba(68,136,255,0.3); }
+    .planner-bar.cancelled { background: rgba(221,17,17,0.12); color: var(--red); border: 1px solid rgba(221,17,17,0.2); }
+    .planner-empty { padding: 3rem; text-align: center; color: var(--muted); font-size: 0.85rem; }
+    .planner-legend {
+      display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;
+      font-family: var(--font-cond); font-size: 0.72rem; letter-spacing: 0.06em;
+    }
+    .planner-legend-item { display: flex; align-items: center; gap: 0.4rem; }
+    .planner-legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+    @media print {
+      .sidebar, .topbar, .page-header, .planner-header .btn,
+      .nav-item, #toast { display: none !important; }
+      #main { margin: 0 !important; padding: 0 !important; }
+      .planner-grid { border: 1px solid #ccc; }
+      body { background: white !important; color: black !important; }
+    }
+
+    /* ── INTELLIGENCE ────────────────────────────────────────────── */
+    .intel-layout { display: grid; grid-template-columns: 280px 1fr; gap: 1.5rem; align-items: start; }
+    .intel-lead-card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.25rem;
+    }
+    .intel-section {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem;
+    }
+    .intel-section-title {
+      font-family: var(--font-cond); font-size: 0.72rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--orange); margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .intel-score {
+      display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;
+      padding: 1rem; background: var(--dark); border-radius: var(--radius);
+    }
+    .intel-score-num {
+      font-family: var(--font-display); font-size: 3rem; line-height: 1;
+    }
+    .intel-score-label { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+    .intel-flag {
+      display: flex; align-items: flex-start; gap: 0.5rem;
+      padding: 0.5rem 0.75rem; border-radius: var(--radius);
+      margin-bottom: 0.4rem; font-size: 0.82rem; line-height: 1.5;
+    }
+    .intel-flag.green { background: rgba(0,204,136,0.08); border-left: 3px solid var(--green); }
+    .intel-flag.amber { background: rgba(255,215,0,0.08); border-left: 3px solid var(--gold); }
+    .intel-flag.red   { background: rgba(221,17,17,0.08); border-left: 3px solid var(--red); }
+    .intel-flag.blue  { background: rgba(68,136,255,0.08); border-left: 3px solid var(--blue); }
+
     /* ── FINANCIAL STRIP ────────────────────────────────────────── */
     .financial-strip {
       display: grid;
@@ -615,12 +730,18 @@
       <span class="nav-count muted" id="nav-count-payments">—</span>
     </div>
     <div class="nav-section-label" style="margin-top:1rem;">Tools</div>
+    <div class="nav-item" data-panel="planner" onclick="showPanel('planner')">
+      📅 Campaign Planner
+    </div>
     <div class="nav-item" data-panel="discounts" onclick="showPanel('discounts')">
       🏷️ Discounts
       <span class="nav-count muted" id="nav-count-discounts">—</span>
     </div>
     <div class="nav-item" data-panel="emails" onclick="showPanel('emails')">
       ✉️ Email Templates
+    </div>
+    <div class="nav-item" data-panel="intelligence" onclick="showPanel('intelligence')">
+      🧠 Lead Intelligence
     </div>
     <div class="nav-item" data-panel="activity" onclick="showPanel('activity')">
       📋 Activity Log
@@ -1012,6 +1133,94 @@
       </div>
     </div>
 
+    <!-- ══ CAMPAIGN PLANNER ══════════════════════════════════════════ -->
+    <div id="panel-planner" class="panel">
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="page-tag">Tools</div>
+          <div class="page-title">Campaign Planner</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-ghost" onclick="window.print()">🖨️ Print Schedule</button>
+          <button class="btn btn-ghost" onclick="toggleCancelled()">👁 Toggle Cancelled</button>
+        </div>
+      </div>
+
+      <div class="planner-header">
+        <div class="planner-nav">
+          <button class="btn btn-ghost btn-sm" onclick="plannerChangeMonth(-1)">← Prev</button>
+          <div class="planner-month" id="planner-month-label">—</div>
+          <button class="btn btn-ghost btn-sm" onclick="plannerChangeMonth(1)">Next →</button>
+        </div>
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" onclick="plannerGoToday()">Today</button>
+          <select class="ctrl-select" id="planner-view" onchange="renderPlanner()" style="font-size:0.8rem;">
+            <option value="month">Month View</option>
+            <option value="week">4-Week View</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="planner-legend">
+        <div class="planner-legend-item"><div class="planner-legend-dot" style="background:rgba(255,215,0,0.5);"></div>Pending</div>
+        <div class="planner-legend-item"><div class="planner-legend-dot" style="background:rgba(0,204,136,0.5);"></div>Confirmed</div>
+        <div class="planner-legend-item"><div class="planner-legend-dot" style="background:rgba(255,85,0,0.5);"></div>Live</div>
+        <div class="planner-legend-item"><div class="planner-legend-dot" style="background:rgba(68,136,255,0.5);"></div>Completed</div>
+        <div class="planner-legend-item"><div class="planner-legend-dot" style="background:rgba(221,17,17,0.3);"></div>Cancelled</div>
+      </div>
+
+      <div style="margin-top:1rem;" id="planner-output">
+        <div class="spinner"></div>
+      </div>
+
+      <!-- Printable summary below planner -->
+      <div id="planner-print-summary" style="margin-top:2rem;display:none;">
+        <div style="font-family:var(--font-display);font-size:1.2rem;letter-spacing:0.05em;margin-bottom:1rem;">CAMPAIGN SCHEDULE</div>
+        <div id="planner-print-table"></div>
+      </div>
+    </div>
+
+    <!-- ══ LEAD INTELLIGENCE ══════════════════════════════════════════ -->
+    <div id="panel-intelligence" class="panel">
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="page-tag">Tools</div>
+          <div class="page-title">Lead Intelligence</div>
+        </div>
+        <div class="page-actions">
+          <div class="td-muted" style="font-size:0.8rem;">AI-powered business research for sales preparation</div>
+        </div>
+      </div>
+
+      <div class="intel-layout">
+        <!-- Lead selector -->
+        <div>
+          <div class="intel-lead-card" style="margin-bottom:1rem;">
+            <div style="font-family:var(--font-cond);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">Select Lead to Research</div>
+            <select id="intel-lead-select" class="ctrl-select" style="width:100%;margin-bottom:0.75rem;" onchange="onIntelLeadChange()">
+              <option value="">— Choose lead —</option>
+            </select>
+            <button class="btn btn-primary" style="width:100%;" onclick="runIntelligence()">🧠 Run Intelligence Report</button>
+          </div>
+          <div class="intel-lead-card" id="intel-lead-preview" style="display:none;">
+            <div style="font-family:var(--font-cond);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">Lead Summary</div>
+            <div id="intel-lead-summary"></div>
+          </div>
+        </div>
+
+        <!-- Intelligence output -->
+        <div id="intel-output">
+          <div class="intel-section">
+            <div class="intel-section-title">🧠 Lead Intelligence</div>
+            <div class="td-muted" style="font-size:0.85rem;line-height:1.7;">
+              Select a lead and click <strong style="color:var(--white);">Run Intelligence Report</strong> to generate an AI-powered dossier on the prospect.<br><br>
+              The report covers company background, industry context, financial health indicators, Companies House data, CCJs/judgements, previous advertising activity, and a sales readiness score with specific talking points for your team.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -1257,21 +1466,6 @@ function showApp(email, role) {
 }
 
 /* ── PANEL NAVIGATION ───────────────────────────────────────────── */
-function showPanel(name) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
-  document.querySelector('[data-panel="' + name + '"]').classList.add('active');
-  // Lazy load panel data
-  if (name === 'leads' && !allLeads.length)     loadLeads();
-  if (name === 'campaigns' && !allCampaigns.length) loadCampaigns();
-  if (name === 'invoices' && !allInvoices.length)   loadInvoices();
-  if (name === 'payments' && !allPayments.length)   loadPayments();
-  if (name === 'discounts' && !allDiscounts.length)  loadDiscounts();
-  if (name === 'activity')                           loadActivityLog();
-  if (name === 'emails')                             populateEmailLeadSelect();
-}
-
 /* ── REFRESH ALL ────────────────────────────────────────────────── */
 async function refreshAll() {
   allLeads = []; allCampaigns = []; allInvoices = [];
@@ -2560,7 +2754,403 @@ function openMailto() {
   window.location.href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
-/* ── BOOT ───────────────────────────────────────────────────────── */
+/* ── CAMPAIGN PLANNER ───────────────────────────────────────────── */
+let plannerDate    = new Date();
+let showCancelled  = false;
+
+function plannerGoToday()      { plannerDate = new Date(); renderPlanner(); }
+function plannerChangeMonth(d) { plannerDate = new Date(plannerDate.getFullYear(), plannerDate.getMonth() + d, 1); renderPlanner(); }
+function toggleCancelled()     { showCancelled = !showCancelled; renderPlanner(); }
+
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + name)?.classList.add('active');
+  document.querySelector('[data-panel="' + name + '"]')?.classList.add('active');
+  if (name === 'leads'        && !allLeads.length)     loadLeads();
+  if (name === 'campaigns'    && !allCampaigns.length) loadCampaigns();
+  if (name === 'invoices'     && !allInvoices.length)  loadInvoices();
+  if (name === 'payments'     && !allPayments.length)  loadPayments();
+  if (name === 'discounts'    && !allDiscounts.length) loadDiscounts();
+  if (name === 'activity')                             loadActivityLog();
+  if (name === 'emails')                               populateEmailLeadSelect();
+  if (name === 'intelligence')                         populateIntelLeadSelect();
+  if (name === 'planner')                              renderPlanner();
+}
+
+function renderPlanner() {
+  const out = document.getElementById('planner-output');
+  if (!allLeads.length) { out.innerHTML = '<div class="planner-empty">No leads loaded — visit Leads & Bookings first.</div>'; return; }
+
+  const view     = document.getElementById('planner-view')?.value || 'month';
+  const today    = new Date(); today.setHours(0,0,0,0);
+
+  let startDay, numDays;
+  if (view === 'week') {
+    startDay = new Date(today); startDay.setDate(today.getDate() - today.getDay() + 1);
+    numDays  = 28;
+  } else {
+    startDay = new Date(plannerDate.getFullYear(), plannerDate.getMonth(), 1);
+    numDays  = new Date(plannerDate.getFullYear(), plannerDate.getMonth() + 1, 0).getDate();
+  }
+
+  document.getElementById('planner-month-label').textContent =
+    startDay.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+  // Filter leads with start dates
+  const leads = allLeads.filter(l => {
+    if (!l.start_date) return false;
+    if (!showCancelled && l._status === 'cancelled') return false;
+    const s = new Date(l.start_date);
+    const e = new Date(s); e.setDate(s.getDate() + (l.campaign_length_days || 28) - 1);
+    const end = new Date(startDay); end.setDate(startDay.getDate() + numDays - 1);
+    return s <= end && e >= startDay;
+  });
+
+  if (!leads.length) {
+    out.innerHTML = `<div class="planner-empty">No campaigns with start dates in this period.<br><span style="font-size:0.78rem;opacity:0.5;">Leads need a start date set to appear here.</span></div>`;
+    buildPrintSummary([]);
+    return;
+  }
+
+  // Build day headers
+  const dayHeads = Array.from({length: numDays}, (_, i) => {
+    const d   = new Date(startDay); d.setDate(startDay.getDate() + i);
+    const isT = d.toDateString() === today.toDateString();
+    const isW = d.getDay() === 0 || d.getDay() === 6;
+    return `<div class="planner-day-head${isT?' today':''}${isW?' weekend':''}">${d.getDate()}</div>`;
+  }).join('');
+
+  // Build rows
+  const rows = leads.map(l => {
+    const name    = l.company || [l.first_name, l.last_name].filter(Boolean).join(' ') || '—';
+    const status  = l._status || 'pending';
+    const sDate   = new Date(l.start_date); sDate.setHours(0,0,0,0);
+    const eDate   = new Date(sDate); eDate.setDate(sDate.getDate() + (l.campaign_length_days || 28) - 1);
+
+    // Clamp to view window
+    const barStart = Math.max(0, Math.round((sDate - startDay) / 86400000));
+    const barEnd   = Math.min(numDays - 1, Math.round((eDate - startDay) / 86400000));
+    const barW     = Math.max(1, barEnd - barStart + 1);
+
+    const price = l.final_price_pence ? '£' + Math.round(l.final_price_pence/100).toLocaleString() : '';
+
+    // Day cells background
+    const cells = Array.from({length: numDays}, (_, i) => {
+      const d   = new Date(startDay); d.setDate(startDay.getDate() + i);
+      const isT = d.toDateString() === today.toDateString();
+      const isW = d.getDay() === 0 || d.getDay() === 6;
+      return `<div class="planner-day-cell${isT?' today':''}${isW?' weekend':''}"></div>`;
+    }).join('');
+
+    const labelRow = `<div class="planner-label-row">
+      <span class="badge ${badgeClass(status)}" style="font-size:0.6rem;padding:0.1rem 0.35rem;">${status}</span>
+      <span style="font-size:0.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escH(name)}">${escH(name.length > 14 ? name.substring(0,14)+'…' : name)}</span>
+    </div>`;
+
+    const barRow = `<div class="planner-bar-row">
+      ${cells}
+      <div class="planner-bar ${status}"
+        style="left:${barStart * 28}px;width:${barW * 28 - 2}px;"
+        onclick="openLead('${l.id}')"
+        title="${escH(name)} | ${status} | ${fmtDate(l.start_date)} → ${fmtDate(eDate.toISOString())} | ${price}">
+        ${escH(name.length > 12 ? name.substring(0,12)+'…' : name)} ${price ? '· ' + price : ''}
+      </div>
+    </div>`;
+
+    return { labelRow, barRow };
+  });
+
+  out.innerHTML = `<div class="planner-grid">
+    <div class="planner-labels">
+      <div class="planner-label-header">Campaign</div>
+      ${rows.map(r => r.labelRow).join('')}
+    </div>
+    <div class="planner-timeline">
+      <div class="planner-days-header">${dayHeads}</div>
+      ${rows.map(r => r.barRow).join('')}
+    </div>
+  </div>`;
+
+  buildPrintSummary(leads);
+}
+
+function buildPrintSummary(leads) {
+  const el = document.getElementById('planner-print-summary');
+  const tb = document.getElementById('planner-print-table');
+  if (!leads.length) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  const sorted = leads.slice().sort((a,b) => new Date(a.start_date) - new Date(b.start_date));
+  tb.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+    <thead><tr style="border-bottom:2px solid var(--border);">
+      <th style="text-align:left;padding:0.4rem;">Company</th>
+      <th style="text-align:left;padding:0.4rem;">Package</th>
+      <th style="text-align:left;padding:0.4rem;">Start</th>
+      <th style="text-align:left;padding:0.4rem;">Days</th>
+      <th style="text-align:left;padding:0.4rem;">Status</th>
+      <th style="text-align:right;padding:0.4rem;">Value</th>
+    </tr></thead>
+    <tbody>${sorted.map(l => `<tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:0.4rem;">${escH(l.company || [l.first_name,l.last_name].filter(Boolean).join(' '))}</td>
+      <td style="padding:0.4rem;">${escH(l.product_name || fmtProduct(l.product_id))}</td>
+      <td style="padding:0.4rem;">${fmtDate(l.start_date)}</td>
+      <td style="padding:0.4rem;">${l.campaign_length_days || 28}</td>
+      <td style="padding:0.4rem;">${escH(l._status || '—')}</td>
+      <td style="padding:0.4rem;text-align:right;">${l.final_price_pence ? '£'+(l.final_price_pence/100).toLocaleString('en-GB',{minimumFractionDigits:2}) : '—'}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+/* ── LEAD INTELLIGENCE ──────────────────────────────────────────── */
+function populateIntelLeadSelect() {
+  const sel = document.getElementById('intel-lead-select');
+  if (!sel) return;
+  if (!allLeads.length) { loadLeads().then(populateIntelLeadSelect); return; }
+  sel.innerHTML = '<option value="">— Choose lead —</option>' +
+    allLeads.map(l => {
+      const name = [l.first_name, l.last_name].filter(Boolean).join(' ');
+      return `<option value="${l.id}">${escH(l.company || name)} — ${escH(l.email)}</option>`;
+    }).join('');
+}
+
+function onIntelLeadChange() {
+  const id   = document.getElementById('intel-lead-select')?.value;
+  const lead = allLeads.find(l => l.id === id);
+  const prev = document.getElementById('intel-lead-preview');
+  const sum  = document.getElementById('intel-lead-summary');
+  if (!lead) { prev.style.display = 'none'; return; }
+
+  const name  = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || '—';
+  const price = lead.final_price_pence ? '£' + (lead.final_price_pence/100).toLocaleString('en-GB',{minimumFractionDigits:2}) : '—';
+
+  sum.innerHTML = `
+    <div style="font-size:0.88rem;line-height:1.8;">
+      <div><strong>${escH(lead.company || name)}</strong></div>
+      <div class="td-muted">${escH(name)} · ${escH(lead.email)}</div>
+      ${lead.phone ? `<div class="td-muted">${escH(lead.phone)}</div>` : ''}
+      <div style="margin-top:0.5rem;">
+        <span class="badge ${badgeClass(lead._status)}">${lead._status}</span>
+        <span class="td-muted" style="font-size:0.78rem;margin-left:0.5rem;">${price}</span>
+      </div>
+      <div class="td-muted" style="font-size:0.75rem;margin-top:0.35rem;">${escH(lead.product_name||'')} · ${escH(fmtMuxType(lead.mux_type))}</div>
+    </div>`;
+  prev.style.display = 'block';
+}
+
+async function runIntelligence() {
+  const id   = document.getElementById('intel-lead-select')?.value;
+  const lead = allLeads.find(l => l.id === id);
+  if (!lead) { toast('Please select a lead first', 'err'); return; }
+
+  const out  = document.getElementById('intel-output');
+  const name = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || '—';
+  const company = lead.company || name;
+
+  out.innerHTML = `<div class="intel-section" style="text-align:center;padding:2rem;">
+    <div class="spinner" style="margin:0 auto 1rem;"></div>
+    <div class="td-muted" style="font-size:0.85rem;">Researching ${escH(company)}…<br><span style="font-size:0.75rem;opacity:0.6;">Searching Companies House, web presence, industry data…</span></div>
+  </div>`;
+
+  try {
+    const prompt = `You are a B2B sales intelligence analyst for ROCK.SCOT, a Scottish DAB+ rock radio station. Research the following advertising prospect and produce a detailed intelligence report to help our sales team convert this lead.
+
+PROSPECT DETAILS:
+- Company: ${company}
+- Contact: ${name}
+- Email: ${lead.email}
+- Phone: ${lead.phone || 'Not provided'}
+- Package Enquired: ${lead.product_name || lead.product_id}
+- Coverage: ${fmtMuxType(lead.mux_type)}${lead.selected_mux ? ' — ' + fmtMux(lead.selected_mux) : ''}
+- Campaign Value: ${lead.final_price_pence ? '£' + (lead.final_price_pence/100).toFixed(2) : 'TBC'}
+- Enquiry Date: ${fmtDate(lead.submitted_at || lead.created_at)}
+- Message: ${lead.message || 'None provided'}
+
+Using web search, produce a JSON response with this EXACT structure (respond with JSON only, no markdown):
+{
+  "score": <number 1-100, overall lead quality and payment risk score>,
+  "score_label": "<Hot Lead|Warm Lead|Cold Lead|Risky Lead>",
+  "score_rationale": "<2-3 sentence explanation of score>",
+  "company_overview": {
+    "industry": "<industry>",
+    "description": "<2-3 sentences about the company>",
+    "founded": "<year or unknown>",
+    "size": "<micro/small/medium/large or employee count>",
+    "location": "<location>",
+    "website": "<url or unknown>",
+    "companies_house_number": "<number or unknown>",
+    "registered_status": "<active/dissolved/unknown>"
+  },
+  "financial_health": {
+    "summary": "<2-3 sentences on financial health based on available data>",
+    "accounts_filed": "<yes/no/unknown>",
+    "last_accounts_date": "<date or unknown>",
+    "estimated_turnover": "<range or unknown>",
+    "ccjs_judgements": "<known CCJs or judgements, or 'None found'>",
+    "credit_risk": "<low/medium/high/unknown>",
+    "payment_risk_flags": ["<flag1>", "<flag2>"]
+  },
+  "advertising_history": {
+    "summary": "<have they advertised on radio/TV/digital before?>",
+    "channels_used": ["<channel1>", "<channel2>"],
+    "notable_campaigns": "<any known campaigns>",
+    "advertising_sophistication": "<low/medium/high>"
+  },
+  "sales_intelligence": {
+    "why_rock_scot_fits": "<specific reasons this company would benefit from DAB+ rock radio in their coverage area>",
+    "target_audience_match": "<how well does the rock music audience match their customers?>",
+    "competitor_advertisers": "<any similar businesses already advertising on radio?>",
+    "best_angle": "<the single most compelling pitch angle for this specific company>",
+    "objections_to_prepare_for": ["<objection1>", "<objection2>"],
+    "talking_points": ["<point1>", "<point2>", "<point3>"]
+  },
+  "due_diligence": {
+    "overall_risk": "<low/medium/high>",
+    "red_flags": ["<flag or 'None identified'>"],
+    "positive_indicators": ["<indicator1>", "<indicator2>"],
+    "recommendation": "<proceed/proceed with caution/request payment upfront/decline>"
+  },
+  "social_presence": {
+    "facebook": "<url or not found>",
+    "instagram": "<url or not found>",
+    "twitter_x": "<url or not found>",
+    "linkedin": "<url or not found>",
+    "follower_summary": "<brief summary of social presence size>"
+  }
+}`;
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const result = await resp.json();
+    const text   = result.content?.filter(c => c.type === 'text').map(c => c.text).join('') || '';
+
+    let data;
+    try {
+      const clean = text.replace(/```json|```/g, '').trim();
+      data = JSON.parse(clean);
+    } catch(e) {
+      // Fallback: show raw text
+      out.innerHTML = `<div class="intel-section"><div class="intel-section-title">🧠 Intelligence Report — ${escH(company)}</div><pre style="font-size:0.78rem;line-height:1.7;white-space:pre-wrap;color:var(--muted);">${escH(text)}</pre></div>`;
+      return;
+    }
+
+    const scoreColor = data.score >= 70 ? 'var(--green)' : data.score >= 45 ? 'var(--gold)' : 'var(--red)';
+    const riskColor  = { low: 'var(--green)', medium: 'var(--gold)', high: 'var(--red)' };
+
+    const flagHtml = (arr, type) => (arr||[]).map(f =>
+      `<div class="intel-flag ${type}"><span>${type==='green'?'✅':type==='red'?'🚨':type==='amber'?'⚠️':'ℹ️'}</span><span>${escH(f)}</span></div>`
+    ).join('');
+
+    out.innerHTML = `
+      <!-- Score -->
+      <div class="intel-section">
+        <div class="intel-section-title">📊 Lead Score & Summary</div>
+        <div class="intel-score">
+          <div class="intel-score-num" style="color:${scoreColor}">${data.score}</div>
+          <div>
+            <div style="font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.05em;color:${scoreColor};">${escH(data.score_label||'')}</div>
+            <div class="intel-score-label">${escH(data.score_rationale||'')}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Company -->
+      <div class="intel-section">
+        <div class="intel-section-title">🏢 Company Overview</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.75rem;">
+          ${[
+            ['Industry', data.company_overview?.industry],
+            ['Founded', data.company_overview?.founded],
+            ['Size', data.company_overview?.size],
+            ['Location', data.company_overview?.location],
+            ['Companies House', data.company_overview?.companies_house_number],
+            ['Status', data.company_overview?.registered_status],
+          ].map(([l,v]) => v && v !== 'unknown' ? `<div style="font-size:0.78rem;"><span class="td-muted">${l}: </span><strong>${escH(v)}</strong></div>` : '').join('')}
+        </div>
+        <div style="font-size:0.85rem;color:var(--muted);line-height:1.7;">${escH(data.company_overview?.description||'')}</div>
+        ${data.company_overview?.website && data.company_overview.website !== 'unknown' ?
+          `<div style="margin-top:0.5rem;"><a href="${escH(data.company_overview.website)}" target="_blank" style="color:var(--orange);font-size:0.82rem;">🌐 ${escH(data.company_overview.website)}</a></div>` : ''}
+      </div>
+
+      <!-- Financial -->
+      <div class="intel-section">
+        <div class="intel-section-title">💰 Financial Health & Due Diligence</div>
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;padding:0.75rem;background:var(--dark);border-radius:var(--radius);">
+          <div style="font-family:var(--font-display);font-size:1.5rem;color:${riskColor[data.financial_health?.credit_risk]||'var(--muted)'};">${(data.financial_health?.credit_risk||'?').toUpperCase()}</div>
+          <div style="font-size:0.78rem;color:var(--muted);">Credit Risk · ${escH(data.financial_health?.estimated_turnover||'Turnover unknown')}</div>
+        </div>
+        <div style="font-size:0.85rem;color:var(--muted);line-height:1.7;margin-bottom:0.75rem;">${escH(data.financial_health?.summary||'')}</div>
+        <div class="intel-flag ${data.financial_health?.ccjs_judgements && data.financial_health.ccjs_judgements.toLowerCase()!=='none found' ? 'red' : 'green'}">
+          <span>${data.financial_health?.ccjs_judgements && data.financial_health.ccjs_judgements.toLowerCase()!=='none found' ? '🚨' : '✅'}</span>
+          <span>CCJs/Judgements: ${escH(data.financial_health?.ccjs_judgements||'Unknown')}</span>
+        </div>
+        ${flagHtml(data.financial_health?.payment_risk_flags, 'amber')}
+      </div>
+
+      <!-- Due Diligence -->
+      <div class="intel-section">
+        <div class="intel-section-title">🛡️ Due Diligence</div>
+        <div style="margin-bottom:0.5rem;">
+          <span style="font-family:var(--font-cond);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);">Recommendation: </span>
+          <strong style="color:${data.due_diligence?.recommendation?.includes('decline')?'var(--red)':data.due_diligence?.recommendation?.includes('caution')||data.due_diligence?.recommendation?.includes('upfront')?'var(--gold)':'var(--green)'};">${escH(data.due_diligence?.recommendation||'—')}</strong>
+        </div>
+        ${flagHtml(data.due_diligence?.red_flags?.filter(f=>f!=='None identified'), 'red')}
+        ${flagHtml(data.due_diligence?.positive_indicators, 'green')}
+      </div>
+
+      <!-- Sales Intelligence -->
+      <div class="intel-section">
+        <div class="intel-section-title">🎯 Sales Intelligence</div>
+        <div style="margin-bottom:0.75rem;padding:0.75rem;background:rgba(255,85,0,0.06);border:1px solid rgba(255,85,0,0.2);border-radius:var(--radius);">
+          <div style="font-family:var(--font-cond);font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--orange);margin-bottom:0.3rem;">Best Pitch Angle</div>
+          <div style="font-size:0.88rem;line-height:1.7;">${escH(data.sales_intelligence?.best_angle||'')}</div>
+        </div>
+        <div style="font-size:0.85rem;color:var(--muted);line-height:1.7;margin-bottom:0.75rem;">${escH(data.sales_intelligence?.why_rock_scot_fits||'')}</div>
+        <div style="margin-bottom:0.5rem;font-family:var(--font-cond);font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);">Talking Points</div>
+        ${(data.sales_intelligence?.talking_points||[]).map(p => `<div class="intel-flag blue"><span>💬</span><span>${escH(p)}</span></div>`).join('')}
+        <div style="margin-top:0.5rem;margin-bottom:0.5rem;font-family:var(--font-cond);font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);">Prepare For These Objections</div>
+        ${flagHtml(data.sales_intelligence?.objections_to_prepare_for, 'amber')}
+      </div>
+
+      <!-- Advertising history -->
+      <div class="intel-section">
+        <div class="intel-section-title">📢 Advertising History</div>
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.5rem;">
+          <span class="td-muted" style="font-size:0.78rem;">Sophistication:</span>
+          <span class="badge ${data.advertising_history?.advertising_sophistication==='high'?'badge-live':data.advertising_history?.advertising_sophistication==='medium'?'badge-confirmed':'badge-pending'}">${escH(data.advertising_history?.advertising_sophistication||'unknown')}</span>
+        </div>
+        <div style="font-size:0.85rem;color:var(--muted);line-height:1.7;margin-bottom:0.5rem;">${escH(data.advertising_history?.summary||'')}</div>
+        ${(data.advertising_history?.channels_used||[]).length ? `<div style="display:flex;gap:0.4rem;flex-wrap:wrap;">${(data.advertising_history.channels_used).map(c=>`<span class="badge badge-draft">${escH(c)}</span>`).join('')}</div>` : ''}
+      </div>
+
+      <!-- Social -->
+      <div class="intel-section">
+        <div class="intel-section-title">📱 Social Presence</div>
+        <div style="font-size:0.85rem;color:var(--muted);margin-bottom:0.75rem;">${escH(data.social_presence?.follower_summary||'')}</div>
+        <div style="display:flex;flex-direction:column;gap:0.3rem;">
+          ${[['Facebook',data.social_presence?.facebook],['Instagram',data.social_presence?.instagram],['X/Twitter',data.social_presence?.twitter_x],['LinkedIn',data.social_presence?.linkedin]]
+            .filter(([,u]) => u && u !== 'not found')
+            .map(([n,u]) => `<div style="font-size:0.82rem;"><span class="td-muted">${n}: </span><a href="${escH(u)}" target="_blank" style="color:var(--orange);">${escH(u)}</a></div>`).join('')}
+        </div>
+      </div>
+
+      <div style="margin-top:0.5rem;padding:0.75rem;background:rgba(68,136,255,0.06);border:1px solid rgba(68,136,255,0.2);border-radius:var(--radius);font-size:0.75rem;color:var(--muted);line-height:1.6;">
+        🤖 AI-generated intelligence report using web search. Verify Companies House data at <a href="https://find-and-update.company-information.service.gov.uk/" target="_blank" style="color:var(--blue);">Companies House</a> and CCJs at <a href="https://www.trustonline.org.uk/" target="_blank" style="color:var(--blue);">Trust Online</a>. Always exercise professional judgement.
+      </div>`;
+
+  } catch(e) {
+    out.innerHTML = `<div class="intel-section"><div class="intel-section-title">⚠️ Error</div><div class="td-muted">${escH(e.message)}</div></div>`;
+  }
+}
+
 /* ── BOOT ───────────────────────────────────────────────────────── */
 init();
 </script>
