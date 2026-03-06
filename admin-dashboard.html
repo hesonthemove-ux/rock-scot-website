@@ -273,6 +273,7 @@
     .badge-confirmed { background: rgba(0,204,136,0.12); color: var(--green); }
     .badge-live      { background: rgba(255,85,0,0.14); color: var(--orange); }
     .badge-cancelled { background: rgba(221,17,17,0.12); color: var(--red); }
+    .badge-completed { background: rgba(68,136,255,0.12); color: var(--blue); }
     .badge-paid      { background: rgba(68,136,255,0.12); color: var(--blue); }
     .badge-invoiced  { background: rgba(255,215,0,0.08); color: var(--gold); }
     .badge-draft     { background: rgba(242,242,242,0.06); color: var(--muted); }
@@ -455,6 +456,53 @@
       font-family: var(--font-cond); font-size: 0.78rem; font-weight: 700;
       letter-spacing: 0.08em; color: var(--white);
     }
+
+    /* ── FINANCIAL STRIP ────────────────────────────────────────── */
+    .financial-strip {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: var(--radius); margin-bottom: 1.5rem; overflow: hidden;
+    }
+    .fin-card { padding: 1.1rem 1rem; text-align: center; }
+    .fin-divider { width: 1px; background: var(--border); margin: 0.5rem 0; }
+    .fin-label {
+      font-family: var(--font-cond); font-size: 0.65rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem;
+    }
+    .fin-value {
+      font-family: var(--font-display); font-size: 1.4rem; letter-spacing: 0.02em;
+      line-height: 1; margin-bottom: 0.2rem;
+    }
+    .fin-sub { font-size: 0.68rem; color: var(--muted); }
+
+    /* ── CAPACITY VISUAL ────────────────────────────────────────── */
+    .cap-dashboard { padding: 1.25rem; }
+    .cap-headline {
+      display: flex; align-items: baseline; gap: 1rem;
+      padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border);
+    }
+    .cap-big { font-family: var(--font-display); font-size: 2.8rem; line-height: 1; color: var(--green); }
+    .cap-big.warn { color: var(--gold); }
+    .cap-big.full { color: var(--red); }
+    .cap-big-label { font-family: var(--font-cond); font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+    .cap-slots { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.6rem; }
+    .cap-slot {
+      background: var(--dark); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 0.65rem 0.85rem;
+    }
+    .cap-slot-name { font-family: var(--font-cond); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; }
+    .cap-slot-val { font-family: var(--font-display); font-size: 1.3rem; line-height: 1; margin-bottom: 0.35rem; }
+    .cap-mini-bar { height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
+    .cap-mini-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.6s ease; }
+    .cap-mini-fill.warn { background: var(--gold); }
+    .cap-mini-fill.full { background: var(--red); }
+    .cap-toh {
+      background: var(--dark); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 0.65rem 0.85rem; display: flex; align-items: center; justify-content: space-between;
+    }
+    .cap-toh-label { font-family: var(--font-cond); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+    .cap-toh-val { font-family: var(--font-display); font-size: 1rem; }
     .activity-item {
       display: flex; align-items: flex-start; gap: 0.75rem;
       padding: 0.65rem 0; border-bottom: 1px solid var(--border);
@@ -571,8 +619,14 @@
       🏷️ Discounts
       <span class="nav-count muted" id="nav-count-discounts">—</span>
     </div>
+    <div class="nav-item" data-panel="emails" onclick="showPanel('emails')">
+      ✉️ Email Templates
+    </div>
     <div class="nav-item" data-panel="activity" onclick="showPanel('activity')">
       📋 Activity Log
+    </div>
+    <div class="nav-item" data-panel="guide" onclick="showPanel('guide')">
+      📖 Admin Guide
     </div>
   </aside>
 
@@ -594,24 +648,51 @@
 
       <div class="stat-grid" id="overview-stats">
         <div class="stat-card">
-          <div class="stat-label">Total Leads</div>
+          <div class="stat-label">Total Enquiries</div>
           <div class="stat-value orange" id="stat-total-leads">—</div>
-          <div class="stat-sub">All time bookings</div>
+          <div class="stat-sub">All time submissions</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Pending</div>
           <div class="stat-value gold" id="stat-pending">—</div>
-          <div class="stat-sub">Awaiting confirmation</div>
+          <div class="stat-sub">Awaiting your action</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Confirmed</div>
           <div class="stat-value green" id="stat-confirmed">—</div>
-          <div class="stat-sub">Active campaigns</div>
+          <div class="stat-sub">Live &amp; approved campaigns</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Revenue (all)</div>
-          <div class="stat-value" id="stat-revenue">—</div>
-          <div class="stat-sub">Total booked £</div>
+          <div class="stat-label">Cancelled / Lost</div>
+          <div class="stat-value red" id="stat-cancelled">—</div>
+          <div class="stat-sub">Lost revenue</div>
+        </div>
+      </div>
+
+      <!-- Financial strip -->
+      <div class="financial-strip" id="financial-strip">
+        <div class="fin-card">
+          <div class="fin-label">Pipeline Value</div>
+          <div class="fin-value gold" id="fin-pipeline">—</div>
+          <div class="fin-sub">Pending enquiries</div>
+        </div>
+        <div class="fin-divider"></div>
+        <div class="fin-card">
+          <div class="fin-label">Confirmed Revenue</div>
+          <div class="fin-value green" id="fin-confirmed">—</div>
+          <div class="fin-sub">Confirmed &amp; live</div>
+        </div>
+        <div class="fin-divider"></div>
+        <div class="fin-card">
+          <div class="fin-label">Completed Revenue</div>
+          <div class="fin-value" id="fin-completed">—</div>
+          <div class="fin-sub">Campaigns finished</div>
+        </div>
+        <div class="fin-divider"></div>
+        <div class="fin-card">
+          <div class="fin-label">Total Booked</div>
+          <div class="fin-value orange" id="fin-total">—</div>
+          <div class="fin-sub">All non-cancelled</div>
         </div>
       </div>
 
@@ -796,9 +877,138 @@
           <div class="page-title">Activity Log</div>
         </div>
       </div>
-
       <div class="table-wrap">
         <div id="activity-table-output"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- ══ EMAIL TEMPLATES ═══════════════════════════════════════════ -->
+    <div id="panel-emails" class="panel">
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="page-tag">Tools</div>
+          <div class="page-title">Email Templates</div>
+        </div>
+        <div class="page-actions">
+          <div class="td-muted" style="font-size:0.8rem;">Select a lead then choose a template — fields auto-populate</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:280px 1fr;gap:1.5rem;align-items:start;">
+        <!-- Template selector -->
+        <div class="table-wrap" style="padding:1.25rem;">
+          <div style="font-family:var(--font-cond);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">1. Select Lead</div>
+          <select id="email-lead-select" class="ctrl-select" style="width:100%;margin-bottom:1rem;" onchange="onEmailLeadChange()">
+            <option value="">— Choose lead —</option>
+          </select>
+          <div style="font-family:var(--font-cond);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">2. Choose Template</div>
+          <div style="display:flex;flex-direction:column;gap:0.5rem;">
+            <button class="btn btn-ghost" style="text-align:left;justify-content:flex-start;" onclick="loadTemplate('enquiry_received')">📥 Enquiry Received</button>
+            <button class="btn btn-ghost" style="text-align:left;justify-content:flex-start;" onclick="loadTemplate('quote_followup')">💬 Quote Follow-up</button>
+            <button class="btn btn-ghost" style="text-align:left;justify-content:flex-start;" onclick="loadTemplate('booking_confirmed')">✅ Booking Confirmed</button>
+            <button class="btn btn-ghost" style="text-align:left;justify-content:flex-start;" onclick="loadTemplate('contract_sent')">📄 Contract &amp; T&amp;Cs</button>
+            <button class="btn btn-ghost" style="text-align:left;justify-content:flex-start;" onclick="loadTemplate('creative_request')">🎙️ Creative Brief Request</button>
+            <button class="btn btn-ghost" style="text-align:left;justify-content:flex-start;" onclick="loadTemplate('invoice_sent')">🧾 Invoice Sent</button>
+            <button class="btn btn-ghost" style="text-align:left;justify-content:flex-start;" onclick="loadTemplate('campaign_live')">📡 Campaign Now Live</button>
+            <button class="btn btn-ghost" style="text-align:left;justify-content:flex-start;" onclick="loadTemplate('campaign_complete')">🏁 Campaign Complete</button>
+            <button class="btn btn-ghost" style="text-align:left;justify-content:flex-start;" onclick="loadTemplate('ai_contract')">🤖 AI Generate Contract</button>
+          </div>
+        </div>
+
+        <!-- Email composer -->
+        <div class="table-wrap" style="padding:1.25rem;">
+          <div id="email-compose-area">
+            <div class="empty-state" style="padding:2rem;">
+              <div class="empty-icon">✉️</div>
+              <div class="empty-text">Select a lead and template to compose</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ADMIN GUIDE ════════════════════════════════════════════════ -->
+    <div id="panel-guide" class="panel">
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="page-tag">Help</div>
+          <div class="page-title">Admin Guide</div>
+        </div>
+      </div>
+      <div style="max-width:800px;" id="guide-content">
+
+        <div class="table-wrap" style="padding:1.5rem;margin-bottom:1.5rem;">
+          <div style="font-family:var(--font-display);font-size:1.4rem;color:var(--orange);margin-bottom:1rem;letter-spacing:0.05em;">BOOKING WORKFLOW — END TO END</div>
+          <div style="display:grid;gap:0;counter-reset:steps;">
+
+            ${[
+              ['📥', 'Enquiry Received', 'pending', 'A new lead arrives via the advertise page. Status is automatically <strong>pending</strong>. You\'ll see it in Total Enquiries and the Pipeline Value on the dashboard. Send the <em>Enquiry Received</em> email to acknowledge within 24hrs.'],
+              ['💬', 'Review & Quote', 'pending', 'Open the lead, review the package, mux, dates and price. If you need to adjust pricing or clarify anything, use the notes field to log your actions and send the <em>Quote Follow-up</em> email template.'],
+              ['📄', 'Send Contract', 'pending', 'Use the <em>Contract & T&Cs</em> email template — this auto-generates a personalised advertising contract with the client\'s details, package info, and ROCK.SCOT terms. Send this before confirming.'],
+              ['✅', 'Confirm Booking', 'confirmed', 'Once the client has agreed and you\'re happy, change status to <strong>confirmed</strong> and click Save Status. Send the <em>Booking Confirmed</em> email. The confirmed revenue figure on the dashboard will update.'],
+              ['🎙️', 'Request Creative', 'confirmed', 'Send the <em>Creative Brief Request</em> email — this asks the client for their audio ad or briefs them on production. If they\'ve taken the bolt-on, production is included.'],
+              ['🧾', 'Send Invoice', 'confirmed', 'Create the invoice in the Invoices panel and send via Revolut or bank transfer. Send the <em>Invoice Sent</em> email template. Note payment in the payments panel once received.'],
+              ['📡', 'Campaign Live', 'live', 'Once the ad is approved and broadcasting, change status to <strong>live</strong>. Send the <em>Campaign Now Live</em> email. The confirmed revenue stays, capacity units are now consumed.'],
+              ['🏁', 'Campaign Complete', 'completed', 'When the campaign run ends, change status to <strong>completed</strong>. Send the <em>Campaign Complete</em> email — this is a great opportunity to upsell renewal. Revenue moves to Completed Revenue on the dashboard.'],
+            ].map(([icon, title, badge, desc], i) => `
+              <div style="display:flex;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--border);">
+                <div style="font-size:1.5rem;flex-shrink:0;padding-top:0.1rem;">${icon}</div>
+                <div style="flex:1;">
+                  <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.4rem;">
+                    <span style="font-family:var(--font-cond);font-weight:700;font-size:1rem;letter-spacing:0.05em;">${title}</span>
+                    <span class="badge ${badge==='confirmed'?'badge-confirmed':badge==='live'?'badge-live':badge==='completed'?'badge-completed':'badge-pending'}">${badge}</span>
+                  </div>
+                  <div style="font-size:0.85rem;color:var(--muted);line-height:1.7;">${desc}</div>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <div class="table-wrap" style="padding:1.5rem;margin-bottom:1.5rem;">
+          <div style="font-family:var(--font-display);font-size:1.4rem;color:var(--orange);margin-bottom:1rem;letter-spacing:0.05em;">STATUS REFERENCE</div>
+          ${[
+            ['pending',   'badge-pending',   'New enquiry received, no action taken yet. Shows in Pipeline Value.'],
+            ['confirmed', 'badge-confirmed', 'Client has agreed, contract sent/signed, booking is locked in. Shows in Confirmed Revenue.'],
+            ['live',      'badge-live',      'Ad is actively broadcasting on DAB+. Capacity units consumed. Still in Confirmed Revenue.'],
+            ['completed', 'badge-completed', 'Campaign run has ended. Moves to Completed Revenue. Good time to chase renewal.'],
+            ['cancelled', 'badge-cancelled', 'Booking cancelled — by client or by you. Removed from all revenue figures. Log reason in notes.'],
+          ].map(([s, cls, desc]) => `
+            <div style="display:flex;align-items:flex-start;gap:1rem;padding:0.75rem 0;border-bottom:1px solid var(--border);">
+              <span class="badge ${cls}" style="flex-shrink:0;margin-top:0.1rem;">${s}</span>
+              <span style="font-size:0.85rem;color:var(--muted);line-height:1.6;">${desc}</span>
+            </div>`).join('')}
+        </div>
+
+        <div class="table-wrap" style="padding:1.5rem;margin-bottom:1.5rem;">
+          <div style="font-family:var(--font-display);font-size:1.4rem;color:var(--orange);margin-bottom:1rem;letter-spacing:0.05em;">CAPACITY EXPLAINED</div>
+          <div style="font-size:0.85rem;color:var(--muted);line-height:1.9;">
+            <p style="margin-bottom:0.75rem;">ROCK.SCOT operates on <strong style="color:var(--white);">3 DAB+ multiplexes</strong> — Inverclyde, North Ayrshire, and South Lanarkshire. Total system capacity is <strong style="color:var(--white);">120 units</strong>.</p>
+            <p style="margin-bottom:0.75rem;"><span class="badge badge-confirmed">Single Mux</span> — Weight 1. One advertiser on one mux. Uses 1 capacity unit. Max 120 single slots available.</p>
+            <p style="margin-bottom:0.75rem;"><span class="badge badge-live">Multi-Regional</span> — Weight 3. Advertiser broadcasts across all 3 muxes simultaneously. Uses 3 capacity units. Max 40 multi slots available.</p>
+            <p style="margin-bottom:0.75rem;"><span class="badge" style="background:rgba(255,215,0,0.15);color:var(--gold);">Top of Hour</span> — Premium slot. Only 1 advertiser at a time. Cannot be combined with other TOH bookings.</p>
+            <p>The capacity widget shows remaining units in real time. Green = plenty of space. Amber = getting full. Red = nearly sold out. Never confirm a booking that would exceed capacity.</p>
+          </div>
+        </div>
+
+        <div class="table-wrap" style="padding:1.5rem;margin-bottom:1.5rem;">
+          <div style="font-family:var(--font-display);font-size:1.4rem;color:var(--orange);margin-bottom:1rem;letter-spacing:0.05em;">FINANCIAL DASHBOARD</div>
+          <div style="font-size:0.85rem;color:var(--muted);line-height:1.9;">
+            <p style="margin-bottom:0.5rem;"><strong style="color:var(--gold);">Pipeline Value</strong> — Total value of all pending enquiries. This is potential revenue not yet confirmed.</p>
+            <p style="margin-bottom:0.5rem;"><strong style="color:var(--green);">Confirmed Revenue</strong> — Value of all confirmed and live campaigns. Money you can count on.</p>
+            <p style="margin-bottom:0.5rem;"><strong style="color:var(--white);">Completed Revenue</strong> — Campaigns that have fully run. Realised income.</p>
+            <p><strong style="color:var(--orange);">Total Booked</strong> — All non-cancelled bookings combined (pending + confirmed + live + completed). Your gross pipeline.</p>
+          </div>
+        </div>
+
+        <div class="table-wrap" style="padding:1.5rem;">
+          <div style="font-family:var(--font-display);font-size:1.4rem;color:var(--orange);margin-bottom:1rem;letter-spacing:0.05em;">ADMIN NOTES</div>
+          <div style="font-size:0.85rem;color:var(--muted);line-height:1.9;">
+            <p style="margin-bottom:0.5rem;">Every lead has a private notes log — visible only in this admin panel, never to the client. Use it to track every interaction: calls made, emails sent, creative received, payment chased, etc.</p>
+            <p style="margin-bottom:0.5rem;">Notes are timestamped with your email and the exact date/time automatically. They're stored in order oldest to newest so you can read the full story of a booking from top to bottom.</p>
+            <p>A 📝 badge on a lead in the table shows how many notes it has, so you can quickly see which leads have active correspondence.</p>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -1059,6 +1269,7 @@ function showPanel(name) {
   if (name === 'payments' && !allPayments.length)   loadPayments();
   if (name === 'discounts' && !allDiscounts.length)  loadDiscounts();
   if (name === 'activity')                           loadActivityLog();
+  if (name === 'emails')                             populateEmailLeadSelect();
 }
 
 /* ── REFRESH ALL ────────────────────────────────────────────────── */
@@ -1080,12 +1291,29 @@ async function loadOverview() {
 
     const pending   = requests.filter(r => r.status === 'pending').length;
     const confirmed = campaigns.filter(c => ['approved','active'].includes(c.status)).length;
-    const revenue   = requests.reduce((s, r) => s + (r.final_price_pence || 0), 0);
+    const cancelled = requests.filter(r => r.status === 'cancelled').length;
+
+    // Financial breakdown by status
+    const pipeline  = requests.filter(r => r.status === 'pending')
+                               .reduce((s,r) => s + (r.final_price_pence||0), 0);
+    const confVal   = requests.filter(r => ['confirmed','live'].includes(r.status))
+                               .reduce((s,r) => s + (r.final_price_pence||0), 0);
+    const compVal   = requests.filter(r => r.status === 'completed')
+                               .reduce((s,r) => s + (r.final_price_pence||0), 0);
+    const totalVal  = requests.filter(r => r.status !== 'cancelled')
+                               .reduce((s,r) => s + (r.final_price_pence||0), 0);
+
+    const fmt = p => '£' + Math.round(p/100).toLocaleString('en-GB');
 
     document.getElementById('stat-total-leads').textContent = requests.length;
     document.getElementById('stat-pending').textContent     = pending;
     document.getElementById('stat-confirmed').textContent   = confirmed;
-    document.getElementById('stat-revenue').textContent     = '£' + Math.round(revenue/100).toLocaleString();
+    document.getElementById('stat-cancelled').textContent   = cancelled;
+
+    document.getElementById('fin-pipeline').textContent  = fmt(pipeline);
+    document.getElementById('fin-confirmed').textContent = fmt(confVal);
+    document.getElementById('fin-completed').textContent = fmt(compVal);
+    document.getElementById('fin-total').textContent     = fmt(totalVal);
     document.getElementById('nav-count-leads').textContent  = pending || requests.length;
     document.getElementById('nav-count-campaigns').textContent = campaigns.length;
 
@@ -1112,24 +1340,75 @@ async function loadCapacity() {
   try {
     const token = currentSession?.access_token;
     const data  = await sbRpc('capacity_summary', {}, token);
-    if (!data || !data.length) {
+    // RPC returns a single JSON object (not an array)
+    const d = Array.isArray(data) ? data[0] : data;
+    if (!d) {
       out.innerHTML = '<div class="empty-state"><div class="empty-icon">📡</div><div class="empty-text">No capacity data</div></div>';
       return;
     }
-    out.innerHTML = data.map(r => {
-      const pct  = Math.round((r.used / (r.total || 1)) * 100);
-      const cls  = pct >= 90 ? 'full' : pct >= 70 ? 'warn' : '';
-      return `
-        <div class="capacity-bar-wrap">
-          <div class="capacity-label">
-            <span class="capacity-mux-name">${escH(r.mux_type || r.area || 'Mux')}</span>
-            <span class="td-muted" style="font-family:var(--font-cond);font-size:0.72rem;">${r.used}/${r.total} slots &mdash; ${pct}%</span>
-          </div>
-          <div class="capacity-bar"><div class="capacity-fill ${cls}" style="width:${pct}%"></div></div>
-        </div>`;
-    }).join('');
+
+    const max       = d.max_capacity || 120;
+    const used      = d.active_weight_used || 0;
+    const remaining = d.capacity_remaining ?? (max - used);
+    const pct       = Math.round((used / max) * 100);
+    const cls       = pct >= 90 ? 'full' : pct >= 60 ? 'warn' : '';
+
+    // Per-mux slot counts
+    const maxSingle = 120; // 1 weight each
+    const maxMulti  = 40;  // 3 weight each
+    const usedSingle = d.active_single || 0;
+    const usedMulti  = d.active_multi  || 0;
+    const pctSingle  = Math.round((usedSingle / maxSingle) * 100);
+    const pctMulti   = Math.round((usedMulti  / maxMulti)  * 100);
+    const clsS = pctSingle >= 90 ? 'full' : pctSingle >= 60 ? 'warn' : '';
+    const clsM = pctMulti  >= 90 ? 'full' : pctMulti  >= 60 ? 'warn' : '';
+
+    out.innerHTML = `<div class="cap-dashboard">
+      <div class="cap-headline">
+        <div class="cap-big ${cls}">${remaining}</div>
+        <div>
+          <div class="cap-big-label">Capacity units remaining</div>
+          <div style="font-size:0.75rem;color:var(--muted);margin-top:0.2rem;">${used} used of ${max} total &mdash; ${pct}% full</div>
+        </div>
+        <div style="margin-left:auto;text-align:right;">
+          <div style="font-family:var(--font-display);font-size:1.1rem;color:var(--orange);">${d.active_campaigns || 0}</div>
+          <div style="font-size:0.68rem;color:var(--muted);font-family:var(--font-cond);letter-spacing:0.1em;text-transform:uppercase;">Active Campaigns</div>
+        </div>
+      </div>
+
+      <div class="cap-slots">
+        <div class="cap-slot">
+          <div class="cap-slot-name">Single Mux (weight 1)</div>
+          <div class="cap-slot-val" style="color:${clsS==='full'?'var(--red)':clsS==='warn'?'var(--gold)':'var(--green)'}">${maxSingle - usedSingle} <span style="font-size:0.8rem;opacity:0.5;">left</span></div>
+          <div class="cap-mini-bar"><div class="cap-mini-fill ${clsS}" style="width:${pctSingle}%"></div></div>
+          <div style="font-size:0.65rem;color:var(--muted);margin-top:0.3rem;">${usedSingle}/${maxSingle} slots used</div>
+        </div>
+        <div class="cap-slot">
+          <div class="cap-slot-name">Multi-Regional (weight 3)</div>
+          <div class="cap-slot-val" style="color:${clsM==='full'?'var(--red)':clsM==='warn'?'var(--gold)':'var(--green)'}">${maxMulti - usedMulti} <span style="font-size:0.8rem;opacity:0.5;">left</span></div>
+          <div class="cap-mini-bar"><div class="cap-mini-fill ${clsM}" style="width:${pctMulti}%"></div></div>
+          <div style="font-size:0.65rem;color:var(--muted);margin-top:0.3rem;">${usedMulti}/${maxMulti} slots used</div>
+        </div>
+      </div>
+
+      <div class="cap-toh">
+        <div>
+          <div class="cap-toh-label">Top of Hour</div>
+          <div style="font-size:0.72rem;color:var(--muted);margin-top:0.15rem;">Premium slot — 1 advertiser max</div>
+        </div>
+        <div class="cap-toh-val" style="color:${d.toh_sold ? 'var(--red)' : 'var(--green)'}">
+          ${d.toh_sold ? '🔴 SOLD' : '🟢 AVAILABLE'}
+        </div>
+      </div>
+
+      <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--border);display:flex;gap:1.5rem;flex-wrap:wrap;">
+        <div style="font-size:0.72rem;color:var(--muted);">Max additional multi: <span style="color:var(--white);font-weight:600;">${d.max_additional_multi ?? '—'}</span></div>
+        <div style="font-size:0.72rem;color:var(--muted);">Max additional single: <span style="color:var(--white);font-weight:600;">${d.max_additional_single ?? '—'}</span></div>
+        <div style="font-size:0.72rem;color:var(--muted);">Active single mux: <span style="color:var(--white);font-weight:600;">${d.active_single_inverclyde||0} / ${d.active_single_north_ayrshire||0} / ${d.active_single_s_lanarkshire||0}</span> <span style="opacity:0.4;">(INV/NA/SL)</span></div>
+      </div>
+    </div>`;
   } catch(e) {
-    out.innerHTML = `<p class="td-muted" style="padding:1rem;font-size:0.82rem;">Capacity data unavailable: ${escH(e.message)}</p>`;
+    out.innerHTML = `<p class="td-muted" style="padding:1rem;font-size:0.82rem;">Capacity unavailable: ${escH(e.message)}</p>`;
   }
 }
 
@@ -1373,7 +1652,7 @@ async function saveLeadStatus(id) {
 function renderNotesLog(notes) {
   const list = Array.isArray(notes) ? notes : [];
   if (!list.length) return '<div class="td-muted" style="font-size:0.82rem;padding:0.5rem 0;opacity:0.5;">No notes yet.</div>';
-  return list.slice().reverse().map(n => `
+  return list.map(n => `
     <div style="border-left:2px solid var(--border);padding:0.5rem 0.75rem;margin-bottom:0.5rem;background:rgba(255,255,255,0.02);border-radius:0 3px 3px 0;">
       <div style="font-size:0.82rem;line-height:1.6;color:var(--white);">${escH(n.text)}</div>
       <div style="font-size:0.7rem;color:var(--muted);margin-top:0.25rem;">
@@ -1895,6 +2174,435 @@ function copyToClipboard(text) {
   navigator.clipboard.writeText(text).then(() => toast('Copied: ' + text, 'ok'));
 }
 
+function badgeClass(status) {
+  const map = {
+    pending: 'badge-pending', confirmed: 'badge-confirmed', live: 'badge-live',
+    active: 'badge-live', cancelled: 'badge-cancelled', completed: 'badge-completed',
+    paid: 'badge-paid', invoiced: 'badge-invoiced', issued: 'badge-invoiced',
+    draft: 'badge-draft', overdue: 'badge-cancelled', expired: 'badge-expired',
+    approved: 'badge-approved', rejected: 'badge-cancelled', paused: 'badge-pending',
+    submitted: 'badge-pending'
+  };
+  return map[status] || 'badge-draft';
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => toast('Copied: ' + text, 'ok'));
+}
+
+/* ── EMAIL TEMPLATES ────────────────────────────────────────────── */
+function onEmailLeadChange() {
+  document.getElementById('email-compose-area').innerHTML =
+    '<div class="empty-state" style="padding:2rem;"><div class="empty-icon">✉️</div><div class="empty-text">Now choose a template on the left</div></div>';
+}
+
+function populateEmailLeadSelect() {
+  const sel = document.getElementById('email-lead-select');
+  if (!sel || !allLeads.length) return;
+  sel.innerHTML = '<option value="">— Choose lead —</option>' +
+    allLeads.map(l => {
+      const name = [l.first_name, l.last_name].filter(Boolean).join(' ');
+      return `<option value="${l.id}">${escH(l.company || name)} — ${escH(l.email)}</option>`;
+    }).join('');
+}
+
+function getSelectedLead() {
+  const id = document.getElementById('email-lead-select')?.value;
+  return allLeads.find(l => l.id === id) || null;
+}
+
+function loadTemplate(tpl) {
+  const lead = getSelectedLead();
+  if (!lead) { toast('Please select a lead first', 'err'); return; }
+
+  const name     = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || 'there';
+  const first    = lead.first_name || 'there';
+  const company  = lead.company || name;
+  const pkg      = lead.product_name || fmtProduct(lead.product_id);
+  const mux      = fmtMuxType(lead.mux_type) + (lead.selected_mux ? ' — ' + fmtMux(lead.selected_mux) : '');
+  const price    = lead.final_price_pence ? '£' + (lead.final_price_pence/100).toLocaleString('en-GB',{minimumFractionDigits:2}) : 'TBC';
+  const days     = lead.campaign_length_days || 28;
+  const start    = lead.start_date ? fmtDate(lead.start_date) : 'TBC';
+  const bolt     = lead.bolt_on_included ? '\n\nThis includes our production bolt-on — we\'ll be in touch to arrange your ad creative at no extra cost.' : '';
+  const rush     = lead.is_rush ? '\n\nAs requested, this is being processed as a rush booking.' : '';
+
+  const templates = {
+    enquiry_received: {
+      to: lead.email,
+      subject: `Your ROCK.SCOT Advertising Enquiry — ${company}`,
+      body: `Hi ${first},
+
+Thank you for your enquiry about advertising on ROCK.SCOT — Scotland's DAB+ rock station.
+
+We've received your submission for:
+• Package: ${pkg}
+• Coverage: ${mux}
+• Duration: ${days} days
+• Investment: ${price}
+• Requested Start: ${start}${bolt}${rush}
+
+We'll review your enquiry and be in touch within 1 business day to confirm availability and next steps.
+
+In the meantime, if you have any questions don't hesitate to reply to this email.
+
+Rock on,
+ROCK.SCOT Advertising Team
+advertise@rock.scot | rock.scot`
+    },
+    quote_followup: {
+      to: lead.email,
+      subject: `Following Up — ROCK.SCOT Advertising for ${company}`,
+      body: `Hi ${first},
+
+I just wanted to follow up on your recent advertising enquiry with ROCK.SCOT.
+
+We have availability for your requested campaign:
+• Package: ${pkg}
+• Coverage: ${mux}
+• Duration: ${days} days
+• Investment: ${price}
+• Proposed Start: ${start}
+
+We'd love to get your brand in front of Scotland's rock music audience across our DAB+ network.
+
+Are you happy to proceed? If so, I'll get a contract and invoice over to you right away.
+
+Rock on,
+ROCK.SCOT Advertising Team`
+    },
+    booking_confirmed: {
+      to: lead.email,
+      subject: `Booking Confirmed ✅ — ROCK.SCOT Advertising`,
+      body: `Hi ${first},
+
+Great news — your ROCK.SCOT advertising campaign is confirmed!
+
+Campaign Summary:
+• Advertiser: ${company}
+• Package: ${pkg}
+• Coverage: ${mux}
+• Duration: ${days} days
+• Start Date: ${start}
+• Total Investment: ${price}${bolt}
+
+What happens next:
+1. We'll send your invoice shortly
+2. ${lead.bolt_on_included ? 'Our production team will contact you to create your ad' : 'Please send your 30-second audio ad to creative@rock.scot'}
+3. Your campaign will go live on ${start}
+
+Thank you for choosing ROCK.SCOT. We're excited to amplify your brand across Scotland!
+
+Rock on,
+ROCK.SCOT Advertising Team`
+    },
+    creative_request: {
+      to: lead.email,
+      subject: `Creative Brief — Your ROCK.SCOT Campaign`,
+      body: `Hi ${first},
+
+Your ROCK.SCOT campaign is confirmed and we're now ready to get your ad created${lead.bolt_on_included ? ' by our production team' : ''}.
+
+${lead.bolt_on_included
+  ? `As you've included our production bolt-on, our team will create your 30-second ad. To get started, please send us:\n\n• Your business name and tagline\n• Key message (what you want listeners to do)\n• Any specific product/service to promote\n• Preferred tone (energetic, professional, humorous, etc.)\n• Any specific wording or phrases to include or avoid\n\nWe'll send you a draft for approval before your campaign goes live.`
+  : `Please send your 30-second audio ad (MP3, 44.1kHz, stereo) to creative@rock.scot\n\nRequirements:\n• Duration: exactly 30 seconds\n• Format: MP3 or WAV\n• Must comply with ASA/BCAP advertising standards\n• Must not contain offensive content\n• Must clearly identify the advertiser\n\nNeed help creating your ad? We can recommend local production studios.`}
+
+Your campaign start date is ${start} — please ensure creative is submitted at least 3 working days before.
+
+Rock on,
+ROCK.SCOT Advertising Team`
+    },
+    invoice_sent: {
+      to: lead.email,
+      subject: `Invoice — ROCK.SCOT Advertising Campaign`,
+      body: `Hi ${first},
+
+Please find attached your invoice for your ROCK.SCOT advertising campaign.
+
+Invoice Summary:
+• Advertiser: ${company}
+• Campaign: ${pkg} — ${mux}
+• Duration: ${days} days from ${start}
+• Amount Due: ${price}
+
+Payment can be made via:
+• Revolut Business: [REVOLUT LINK]
+• Bank Transfer: Sort Code: XX-XX-XX | Account: XXXXXXXX | Ref: ROCK-${company.toUpperCase().replace(/\s/g,'')}
+
+Payment is due within 14 days. Campaigns are confirmed once payment is received.
+
+If you have any questions about this invoice, please don't hesitate to get in touch.
+
+Rock on,
+ROCK.SCOT Advertising Team`
+    },
+    campaign_live: {
+      to: lead.email,
+      subject: `🎙️ Your ROCK.SCOT Campaign is LIVE!`,
+      body: `Hi ${first},
+
+Exciting news — your ROCK.SCOT advertising campaign is now live and broadcasting!
+
+Your ad is now being heard by Scotland's rock music fans across ${mux} DAB+.
+
+Campaign Details:
+• Package: ${pkg}
+• Start Date: ${start}
+• Duration: ${days} days
+• Estimated Reach: 10,000+ listeners
+
+Your campaign will run its full ${days}-day schedule. We'll be in touch when it completes.
+
+Thank you for advertising on ROCK.SCOT!
+
+Rock on,
+ROCK.SCOT Advertising Team`
+    },
+    campaign_complete: {
+      to: lead.email,
+      subject: `Campaign Complete 🏁 — ROCK.SCOT`,
+      body: `Hi ${first},
+
+Your ROCK.SCOT advertising campaign has now completed its full run.
+
+Campaign Summary:
+• Advertiser: ${company}
+• Package: ${pkg}
+• Coverage: ${mux}
+• Duration: ${days} days
+• Total Investment: ${price}
+
+We hope you saw great results from your campaign. Scotland's rock audience has been hearing your message throughout the run.
+
+Thinking about your next campaign? We'd love to have you back. Reply to this email to discuss renewal options — returning advertisers receive priority scheduling.
+
+Thank you for choosing ROCK.SCOT.
+
+Rock on,
+ROCK.SCOT Advertising Team`
+    },
+    contract_sent: {
+      to: lead.email,
+      subject: `Advertising Contract — ROCK.SCOT × ${company}`,
+      body: generateContract(lead, name, company, pkg, mux, price, days, start)
+    },
+    ai_contract: { ai: true, lead, name, company, pkg, mux, price, days, start }
+  };
+
+  const tplData = templates[tpl];
+  if (!tplData) return;
+
+  if (tplData.ai) {
+    renderAIContract(tplData);
+    return;
+  }
+
+  document.getElementById('email-compose-area').innerHTML = `
+    <div style="margin-bottom:1rem;">
+      <label style="font-family:var(--font-cond);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:0.4rem;">To</label>
+      <input class="field-input" value="${escH(tplData.to)}" id="email-to" style="width:100%;">
+    </div>
+    <div style="margin-bottom:1rem;">
+      <label style="font-family:var(--font-cond);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:0.4rem;">Subject</label>
+      <input class="field-input" value="${escH(tplData.subject)}" id="email-subject" style="width:100%;">
+    </div>
+    <div style="margin-bottom:1rem;">
+      <label style="font-family:var(--font-cond);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:0.4rem;">Body</label>
+      <textarea class="field-input" id="email-body" rows="18" style="width:100%;font-family:var(--font-body);font-size:0.85rem;line-height:1.7;resize:vertical;">${escH(tplData.body)}</textarea>
+    </div>
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="copyEmailBody()">📋 Copy Email Body</button>
+      <button class="btn btn-ghost" onclick="openMailto()">✉️ Open in Mail App</button>
+    </div>
+    <div style="margin-top:0.75rem;padding:0.75rem;background:rgba(255,85,0,0.06);border:1px solid rgba(255,85,0,0.2);border-radius:var(--radius);font-size:0.78rem;color:var(--muted);line-height:1.6;">
+      💡 Copy the body and paste into your email client, or click Open in Mail App to pre-fill automatically.
+    </div>`;
+}
+
+function generateContract(lead, name, company, pkg, mux, price, days, start) {
+  const today = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  return `ADVERTISING CONTRACT
+ROCK.SCOT DAB+ RADIO
+
+Date: ${today}
+Contract Ref: ROCK-${Date.now().toString(36).toUpperCase()}
+
+PARTIES
+-------
+Broadcaster: ROCK.SCOT ("the Station")
+Advertiser: ${company} ("the Advertiser")
+Contact: ${name}
+Email: ${lead.email}
+Phone: ${lead.phone || 'As provided'}
+
+CAMPAIGN DETAILS
+----------------
+Package: ${pkg}
+Coverage: ${mux}
+Campaign Duration: ${days} days
+Proposed Start Date: ${start}
+Total Fee: ${price} (excluding VAT where applicable)
+${lead.bolt_on_included ? 'Production: Included (Bolt-on)' : 'Production: Advertiser to supply'}
+${lead.is_rush ? 'Rush Processing: Yes (additional charge applied)' : ''}
+${lead.discount_code ? 'Discount Applied: ' + lead.discount_code : ''}
+
+TERMS AND CONDITIONS
+--------------------
+1. BOOKING & PAYMENT
+   Payment is due within 14 days of invoice. Campaigns will not go live until payment
+   is received in full. ROCK.SCOT reserves the right to cancel unconfirmed bookings
+   after 14 days without payment.
+
+2. CREATIVE REQUIREMENTS
+   The Advertiser is responsible for supplying broadcast-ready audio (30 seconds, MP3/WAV,
+   44.1kHz stereo) no less than 3 working days before the campaign start date, unless the
+   production bolt-on has been purchased. All creative must comply with the UK Code of
+   Broadcast Advertising (BCAP Code) and ASA guidelines.
+
+3. CONTENT APPROVAL
+   ROCK.SCOT reserves the right to reject any advertising creative that:
+   - Does not comply with BCAP/CAP/ASA standards
+   - Contains misleading, offensive or harmful content
+   - Promotes products/services restricted under broadcasting regulations
+   - Conflicts with existing advertisers or ROCK.SCOT's editorial values
+
+4. ADVERTISING STANDARDS
+   All advertising must comply with:
+   - ASA (Advertising Standards Authority) regulations
+   - BCAP Code (UK Code of Broadcast Advertising)
+   - Consumer Protection from Unfair Trading Regulations 2008
+   - Advertising must be legal, decent, honest and truthful
+
+5. RESTRICTED CATEGORIES
+   The following categories are subject to additional approval:
+   - Alcohol advertising (must follow BCAP rules)
+   - Gambling (prohibited unless licensed operator)
+   - Health/medical claims (evidence required)
+   - Financial services (FCA authorisation required)
+   - Political advertising (prohibited)
+
+6. MAKE-GOOD POLICY
+   If ROCK.SCOT fails to deliver the contracted number of spots due to technical fault,
+   we will provide equivalent make-good airtime at no additional charge. No cash refund
+   will be issued for spots missed due to technical or scheduling issues.
+
+7. CANCELLATION POLICY
+   - 14+ days notice: Full refund less 10% administration fee
+   - 7-13 days notice: 50% refund
+   - Less than 7 days: No refund
+   Production costs are non-refundable once work has commenced.
+
+8. INTELLECTUAL PROPERTY
+   The Advertiser warrants they own or have licensed all rights to the advertising creative
+   supplied. ROCK.SCOT accepts no liability for IP infringement in advertiser-supplied content.
+
+9. LIABILITY
+   ROCK.SCOT's liability is limited to the value of this contract. We accept no liability
+   for consequential loss arising from advertising campaigns. This limitation applies to
+   the fullest extent permitted by Scottish law.
+
+10. GOVERNING LAW
+    This agreement is governed by Scots Law. Any disputes shall be subject to the exclusive
+    jurisdiction of the Scottish Courts. In the first instance, disputes should be referred
+    to ROCK.SCOT management for resolution before legal proceedings are commenced.
+
+11. DATA PROTECTION
+    Both parties agree to handle personal data in accordance with UK GDPR and the Data
+    Protection Act 2018.
+
+ACCEPTANCE
+----------
+By proceeding with payment, the Advertiser confirms they have read, understood and
+agree to these terms and conditions in full.
+
+Advertiser: ${name} / ${company}
+Date: ${today}
+
+ROCK.SCOT
+advertise@rock.scot | rock.scot
+Scotland's DAB+ Rock Radio Station
+
+---
+Regulated by Ofcom. Advertising standards enforced by ASA/BCAP.
+This contract is subject to ROCK.SCOT's full Terms of Service at rock.scot/terms`;
+}
+
+async function renderAIContract(data) {
+  const out = document.getElementById('email-compose-area');
+  out.innerHTML = `<div style="padding:1.5rem;text-align:center;">
+    <div class="spinner" style="margin:0 auto 1rem;"></div>
+    <div class="td-muted" style="font-size:0.85rem;">Generating personalised contract with AI…</div>
+  </div>`;
+  try {
+    const prompt = `Generate a professional advertising contract for ROCK.SCOT DAB+ radio station in Scotland.
+
+Client details:
+- Company: ${data.company}
+- Contact: ${data.name}
+- Email: ${data.lead.email}
+- Phone: ${data.lead.phone || 'Not provided'}
+- Package: ${data.pkg}
+- Coverage: ${data.mux}
+- Duration: ${data.days} days
+- Start Date: ${data.start}
+- Total Fee: ${data.price}
+- Production included: ${data.lead.bolt_on_included ? 'Yes' : 'No'}
+- Rush booking: ${data.lead.is_rush ? 'Yes' : 'No'}
+
+The contract must include:
+1. Parties and campaign details
+2. Payment terms (14 days, no live without payment)
+3. Creative requirements and BCAP/ASA compliance
+4. Content approval rights
+5. Make-good policy for missed spots
+6. Cancellation policy (14+ days = 10% fee, 7-13 = 50% refund, <7 = no refund)
+7. Intellectual property warranties
+8. Liability limitation under Scots Law
+9. Governing law — Scots Law, Scottish Courts
+10. UK GDPR compliance
+
+Format as a clean, professional contract. Use plain text formatting suitable for email.`;
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const result = await resp.json();
+    const text = result.content?.map(c => c.text||'').join('') || 'Contract generation failed.';
+
+    out.innerHTML = `
+      <div style="margin-bottom:1rem;">
+        <label style="font-family:var(--font-cond);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:0.4rem;">AI-Generated Contract — ${data.company}</label>
+        <textarea class="field-input" id="email-body" rows="24" style="width:100%;font-family:var(--font-body);font-size:0.82rem;line-height:1.7;resize:vertical;">${escH(text)}</textarea>
+      </div>
+      <div style="display:flex;gap:0.75rem;">
+        <button class="btn btn-primary" onclick="copyEmailBody()">📋 Copy Contract</button>
+      </div>
+      <div style="margin-top:0.75rem;padding:0.75rem;background:rgba(68,136,255,0.06);border:1px solid rgba(68,136,255,0.2);border-radius:var(--radius);font-size:0.78rem;color:var(--muted);line-height:1.6;">
+        🤖 AI-generated — please review before sending. Verify all details are correct.
+      </div>`;
+  } catch(e) {
+    out.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠</div><div class="empty-text">AI generation failed: ${escH(e.message)}</div></div>`;
+  }
+}
+
+function copyEmailBody() {
+  const body = document.getElementById('email-body')?.value;
+  if (body) navigator.clipboard.writeText(body).then(() => toast('Copied to clipboard', 'ok'));
+}
+
+function openMailto() {
+  const to      = document.getElementById('email-to')?.value || '';
+  const subject = document.getElementById('email-subject')?.value || '';
+  const body    = document.getElementById('email-body')?.value || '';
+  window.location.href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+/* ── BOOT ───────────────────────────────────────────────────────── */
 /* ── BOOT ───────────────────────────────────────────────────────── */
 init();
 </script>
