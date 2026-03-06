@@ -52,7 +52,7 @@
     #auth-gate {
       position: fixed; inset: 0; background: var(--black);
       display: flex; align-items: center; justify-content: center;
-      z-index: 9999; flex-direction: column; gap: 1.5rem;
+      z-index: 9999; flex-direction: column; gap: 1.25rem;
     }
     #auth-gate img { height: 52px; opacity: 0.85; }
     #auth-gate-msg {
@@ -67,10 +67,29 @@
     #auth-error {
       display: none; color: var(--red); font-family: var(--font-cond);
       font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em;
-      text-align: center; max-width: 340px;
+      text-align: center; max-width: 340px; padding: 0 1rem;
     }
     #auth-login-form {
       display: none; flex-direction: column; gap: 0.75rem; width: 320px;
+    }
+    #btn-github {
+      display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+      background: #24292e; color: #fff; border: 1px solid #444;
+      font-family: var(--font-cond); font-size: 0.95rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 0.8rem 1rem; border-radius: var(--radius);
+      cursor: pointer; transition: background 0.2s, border-color 0.2s;
+      width: 100%;
+    }
+    #btn-github:hover { background: #333; border-color: #666; }
+    #btn-github svg { flex-shrink: 0; }
+    .auth-divider {
+      display: flex; align-items: center; gap: 0.75rem;
+      font-family: var(--font-cond); font-size: 0.65rem; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase; color: rgba(242,242,242,0.2);
+    }
+    .auth-divider::before, .auth-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border2);
     }
     #auth-login-form input {
       background: var(--panel); border: 1px solid var(--border2);
@@ -79,14 +98,14 @@
       transition: border-color 0.2s;
     }
     #auth-login-form input:focus { border-color: var(--orange); }
-    #auth-login-form button {
+    #btn-email-login {
       background: var(--orange); color: #000;
       font-family: var(--font-cond); font-size: 0.9rem; font-weight: 900;
       letter-spacing: 0.12em; text-transform: uppercase;
       padding: 0.75rem; border-radius: var(--radius);
-      transition: background 0.2s;
+      transition: background 0.2s; cursor: pointer; border: none; width: 100%;
     }
-    #auth-login-form button:hover { background: var(--orange2); }
+    #btn-email-login:hover { background: var(--orange2); }
 
     /* ── APP SHELL ──────────────────────────────────────────────── */
     #app { display: none; min-height: 100vh; }
@@ -498,9 +517,14 @@
   <div id="auth-gate-msg">Verifying access…</div>
   <div id="auth-error"></div>
   <div id="auth-login-form">
+    <button id="btn-github" onclick="doGithubLogin()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      Sign in with GitHub
+    </button>
+    <div class="auth-divider">or use email &amp; password</div>
     <input type="email" id="login-email" placeholder="Email address" autocomplete="email">
     <input type="password" id="login-password" placeholder="Password" autocomplete="current-password">
-    <button onclick="doLogin()">Sign In to Admin</button>
+    <button id="btn-email-login" onclick="doLogin()">Sign In with Email</button>
   </div>
 </div>
 
@@ -896,8 +920,35 @@ async function sbRpc(fn, params, token) {
 }
 
 /* ── AUTH ───────────────────────────────────────────────────────── */
+
+// The page URL when Supabase redirects back after GitHub OAuth
+const REDIRECT_URL = window.location.href.split('?')[0].split('#')[0];
+
 async function init() {
-  // Try to get existing session from localStorage
+  // 1. Check for OAuth callback tokens in the URL hash (#access_token=...)
+  const hash = window.location.hash;
+  if (hash && hash.includes('access_token=')) {
+    const params = new URLSearchParams(hash.replace('#', ''));
+    const access_token = params.get('access_token');
+    const expires_at   = Math.floor(Date.now()/1000) + parseInt(params.get('expires_in') || 3600);
+    if (access_token) {
+      // Get user info
+      try {
+        const userResp = await fetch(SUPABASE_URL + '/auth/v1/user', {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + access_token }
+        });
+        const user = await userResp.json();
+        const sess = { access_token, user, expires_at };
+        localStorage.setItem('sb-session', JSON.stringify(sess));
+        // Clean the URL hash so it doesn't show tokens
+        history.replaceState(null, '', window.location.pathname);
+        await validateSession(sess);
+        return;
+      } catch(e) { showLoginForm('OAuth callback failed: ' + e.message); return; }
+    }
+  }
+
+  // 2. Try stored session
   try {
     const stored = localStorage.getItem('sb-session');
     if (stored) {
@@ -908,30 +959,31 @@ async function init() {
       }
     }
   } catch(e) {}
+
   showLoginForm();
 }
 
 async function validateSession(sess) {
   try {
-    // Get user profile and check role
     const profiles = await sbGet(
       '/rest/v1/user_profiles?user_id=eq.' + sess.user.id + '&select=role,display_name',
       sess.access_token
     );
     if (!profiles.length || !ALLOWED_ROLES.includes(profiles[0].role)) {
-      throw new Error('Access denied. Admin role required.');
+      throw new Error('Access denied — admin or super_admin role required.');
     }
     currentSession = sess;
     currentRole    = profiles[0].role;
     showApp(sess.user.email, currentRole);
   } catch(e) {
+    localStorage.removeItem('sb-session');
     showLoginForm(e.message);
   }
 }
 
 function showLoginForm(errMsg) {
-  document.getElementById('auth-spinner').style.display = 'none';
-  document.getElementById('auth-gate-msg').textContent  = 'Admin Sign In';
+  document.getElementById('auth-spinner').style.display  = 'none';
+  document.getElementById('auth-gate-msg').textContent   = 'Admin Sign In';
   document.getElementById('auth-login-form').style.display = 'flex';
   if (errMsg) {
     const el = document.getElementById('auth-error');
@@ -940,11 +992,21 @@ function showLoginForm(errMsg) {
   }
 }
 
+// GitHub OAuth — redirects to GitHub, then back to this page
+function doGithubLogin() {
+  const btn = document.getElementById('btn-github');
+  btn.textContent = 'Redirecting…';
+  btn.disabled = true;
+  const authUrl = SUPABASE_URL + '/auth/v1/authorize?provider=github&redirect_to=' + encodeURIComponent(REDIRECT_URL);
+  window.location.href = authUrl;
+}
+
+// Email + password login (fallback)
 async function doLogin() {
   const email    = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
   const errEl    = document.getElementById('auth-error');
-  const btn      = document.querySelector('#auth-login-form button');
+  const btn      = document.getElementById('btn-email-login');
   if (!email || !password) { errEl.style.display='block'; errEl.textContent='Enter email and password.'; return; }
   btn.textContent = 'Signing in…';
   errEl.style.display = 'none';
@@ -960,7 +1022,7 @@ async function doLogin() {
     localStorage.setItem('sb-session', JSON.stringify(sess));
     await validateSession(sess);
   } catch(e) {
-    btn.textContent = 'Sign In to Admin';
+    btn.textContent = 'Sign In with Email';
     errEl.style.display = 'block';
     errEl.textContent = e.message;
   }
@@ -1136,14 +1198,15 @@ function renderLeadsTable(leads, containerId, compact) {
     const tags  = [l.is_rush && '<span class="badge badge-live">Rush</span>',
                    l.bolt_on_included && '<span class="badge badge-invoiced">+Bolt</span>']
                    .filter(Boolean).join(' ');
+    const name  = [l.first_name, l.last_name].filter(Boolean).join(' ') || '—';
     return `<tr onclick="openLead('${l.id}')" style="cursor:pointer;">
       <td>
-        <div class="td-mono" style="font-size:0.85rem;">${escH(l.company_name || l.contact_name || '—')}</div>
-        <div class="td-muted">${escH(l.email || '')}</div>
+        <div class="td-mono" style="font-size:0.85rem;">${escH(l.company || name)}</div>
+        <div class="td-muted">${escH(name !== '—' && l.company ? name : '')} ${escH(l.email || '')}</div>
       </td>
-      ${!compact ? `<td class="td-muted">${escH(fmtMux(l.mux_type))}</td>` : ''}
+      ${!compact ? `<td class="td-muted">${escH(fmtMux(l.selected_mux || l.mux_type))}</td>` : ''}
       ${!compact ? `<td class="td-muted">${escH(fmtProduct(l.product_id))}</td>` : ''}
-      <td><span class="badge ${badgeClass(l.status)}">${escH(l.status || '—')}</span> ${tags}</td>
+      <td><span class="badge ${badgeClass(l.status)}">${escH(l.status || 'pending')}</span> ${tags}</td>
       <td class="td-mono">${price}</td>
       <td class="td-muted">${fmtDate(l.created_at)}</td>
     </tr>`;
@@ -1171,15 +1234,16 @@ async function openLead(id) {
   const body    = document.getElementById('lm-body');
   const actions = document.getElementById('lm-actions');
 
+  const name = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || '—';
   document.getElementById('lm-title').textContent =
-    (lead.company_name || lead.contact_name || 'Lead') + ' — ' + fmtDate(lead.created_at);
+    (lead.company || name) + ' — ' + fmtDate(lead.created_at);
 
   body.innerHTML = `
     <div class="modal-section">
       <div class="modal-section-title">Contact</div>
       <div class="modal-row">
-        <div class="modal-field"><label>Company</label><div class="field-val">${escH(lead.company_name || '—')}</div></div>
-        <div class="modal-field"><label>Name</label><div class="field-val">${escH(lead.contact_name || '—')}</div></div>
+        <div class="modal-field"><label>Company</label><div class="field-val">${escH(lead.company || '—')}</div></div>
+        <div class="modal-field"><label>Name</label><div class="field-val">${escH(name)}</div></div>
         <div class="modal-field"><label>Email</label><div class="field-val">${escH(lead.email || '—')}</div></div>
         <div class="modal-field"><label>Phone</label><div class="field-val">${escH(lead.phone || '—')}</div></div>
       </div>
@@ -1187,13 +1251,13 @@ async function openLead(id) {
     <div class="modal-section">
       <div class="modal-section-title">Booking</div>
       <div class="modal-row">
-        <div class="modal-field"><label>Package</label><div class="field-val">${escH(fmtProduct(lead.product_id))}</div></div>
-        <div class="modal-field"><label>Mux</label><div class="field-val">${escH(fmtMux(lead.mux_type))}</div></div>
+        <div class="modal-field"><label>Package</label><div class="field-val">${escH(lead.product_name || fmtProduct(lead.product_id))}</div></div>
+        <div class="modal-field"><label>Mux Type</label><div class="field-val">${escH(fmtMuxType(lead.mux_type))} ${lead.selected_mux ? '— ' + escH(fmtMux(lead.selected_mux)) : ''}</div></div>
         <div class="modal-field"><label>Start Date</label><div class="field-val">${fmtDate(lead.start_date)}</div></div>
-        <div class="modal-field"><label>End Date</label><div class="field-val">${fmtDate(lead.end_date)}</div></div>
+        <div class="modal-field"><label>Campaign Length</label><div class="field-val">${lead.campaign_length_days || 28} days</div></div>
         <div class="modal-field"><label>Rush?</label><div class="field-val">${lead.is_rush ? '✅ Yes (+£50)' : 'No'}</div></div>
-        <div class="modal-field"><label>Bolt-on?</label><div class="field-val">${lead.bolt_on_included ? '✅ Yes (+£150)' : 'No'}</div></div>
-        <div class="modal-field"><label>Discount Code</label><div class="field-val">${escH(lead.discount_code || '—')}</div></div>
+        <div class="modal-field"><label>Bolt-on Production?</label><div class="field-val">${lead.bolt_on_included ? '✅ Yes — £' + ((lead.bolt_on_cost_pence||0)/100).toFixed(0) : 'No'}</div></div>
+        <div class="modal-field"><label>Discount Code</label><div class="field-val">${escH(lead.discount_code || '—')}${lead.discount_amount_pence ? ' (−£' + (lead.discount_amount_pence/100).toFixed(0) + ')' : ''}</div></div>
         <div class="modal-field"><label>Final Price</label><div class="field-val" style="color:var(--orange);font-family:var(--font-display);font-size:1.4rem;">${lead.final_price_pence ? '£'+(lead.final_price_pence/100).toLocaleString('en-GB',{minimumFractionDigits:2}) : '—'}</div></div>
       </div>
     </div>
@@ -1204,16 +1268,20 @@ async function openLead(id) {
           <label>Current Status</label>
           <select class="field-input" id="lm-status-select">
             ${['pending','confirmed','live','completed','cancelled'].map(s =>
-              `<option value="${s}" ${lead.status===s?'selected':''}>${s}</option>`
+              `<option value="${s}" ${(lead.status||'pending')===s?'selected':''}>${s}</option>`
             ).join('')}
           </select>
         </div>
         <div class="modal-field"><label>Lead ID</label><div class="field-val td-muted" style="font-size:0.72rem;word-break:break-all;">${lead.id}</div></div>
       </div>
     </div>
+    ${lead.message ? `<div class="modal-section">
+      <div class="modal-section-title">Message from Client</div>
+      <div class="field-val td-muted" style="font-size:0.88rem;line-height:1.7;">${escH(lead.message)}</div>
+    </div>` : ''}
     ${lead.meta ? `<div class="modal-section">
-      <div class="modal-section-title">Additional Notes</div>
-      <div class="field-val td-muted" style="font-size:0.82rem;white-space:pre-wrap;">${escH(typeof lead.meta === 'object' ? JSON.stringify(lead.meta, null, 2) : lead.meta)}</div>
+      <div class="modal-section-title">Meta</div>
+      <div class="field-val td-muted" style="font-size:0.72rem;white-space:pre-wrap;">${escH(typeof lead.meta === 'object' ? JSON.stringify(lead.meta, null, 2) : lead.meta)}</div>
     </div>` : ''}`;
 
   actions.innerHTML = `
@@ -1248,12 +1316,14 @@ async function loadCampaigns() {
   document.getElementById('campaigns-table-output').innerHTML = '<div class="spinner"></div>';
   try {
     const token = currentSession?.access_token;
-    allCampaigns = await sbGet(
-      '/rest/v1/campaigns?select=*&order=created_at.desc&limit=200',
-      token
-    );
-    renderCampaignsTable(allCampaigns);
-    document.getElementById('nav-count-campaigns').textContent = allCampaigns.length;
+    // Load both campaigns and campaign_requests (what the booking form writes to)
+    const [campaigns, requests] = await Promise.all([
+      sbGet('/rest/v1/campaigns?select=*&order=created_at.desc&limit=200', token),
+      sbGet('/rest/v1/campaign_requests?select=*&order=submitted_at.desc&limit=200', token)
+    ]);
+    allCampaigns = campaigns;
+    renderCampaignsTable(campaigns, requests);
+    document.getElementById('nav-count-campaigns').textContent = campaigns.length + requests.length;
   } catch(e) {
     document.getElementById('campaigns-table-output').innerHTML =
       `<div class="empty-state"><div class="empty-icon">⚠</div><div class="empty-text">${escH(e.message)}</div></div>`;
@@ -1268,35 +1338,52 @@ function filterCampaigns() {
     const matchSt = !st || c.status === st;
     return matchQ && matchSt;
   });
-  renderCampaignsTable(f);
+  renderCampaignsTable(f, []);
 }
 
-function renderCampaignsTable(campaigns) {
+function renderCampaignsTable(campaigns, requests) {
   const out = document.getElementById('campaigns-table-output');
-  if (!campaigns.length) {
+  const reqs = requests || [];
+
+  if (!campaigns.length && !reqs.length) {
     out.innerHTML = '<div class="empty-state"><div class="empty-icon">📡</div><div class="empty-text">No campaigns found</div></div>';
     return;
   }
+
+  const campaignRows = campaigns.map(c => `<tr>
+    <td>
+      <div class="td-mono">${escH(c.name || '—')}</div>
+      <div class="td-muted" style="font-size:0.72rem;">${escH(fmtPackage(c.package_type))} · ${c.total_plays||0} plays · ${c.plays_completed||0} done</div>
+    </td>
+    <td class="td-muted">${escH(fmtMuxType(c.mux_type))}${c.selected_mux ? ' — ' + escH(fmtMux(c.selected_mux)) : ''}</td>
+    <td class="td-muted">${fmtDate(c.start_date)} → ${fmtDate(c.end_date)}</td>
+    <td><span class="badge ${badgeClass(c.status)}">${escH(c.status||'—')}</span></td>
+    <td class="td-muted">${fmtDate(c.created_at)}</td>
+  </tr>`).join('');
+
+  const requestRows = reqs.map(r => {
+    const name = [r.first_name, r.last_name].filter(Boolean).join(' ');
+    return `<tr style="opacity:0.75;">
+      <td>
+        <div class="td-mono">${escH(r.company || name || '—')}</div>
+        <div class="td-muted" style="font-size:0.72rem;">${escH(r.product_name||'')} · ${escH(r.email||'')}</div>
+      </td>
+      <td class="td-muted">${escH(fmtMuxType(r.mux_type))}${r.selected_mux ? ' — ' + escH(fmtMux(r.selected_mux)) : ''}</td>
+      <td class="td-muted">${fmtDate(r.start_date)} · ${r.campaign_length_days||28}d</td>
+      <td><span class="badge badge-pending">${escH(r.status||'pending')}</span> <span style="font-size:0.65rem;color:var(--muted);">request</span></td>
+      <td class="td-muted">${fmtDate(r.submitted_at)}</td>
+    </tr>`;
+  }).join('');
+
   out.innerHTML = `<table>
     <thead><tr>
-      <th>Campaign</th>
+      <th>Campaign / Request</th>
       <th>Mux</th>
       <th>Dates</th>
       <th>Status</th>
-      <th>Created</th>
+      <th>Date</th>
     </tr></thead>
-    <tbody>
-      ${campaigns.map(c => `<tr>
-        <td>
-          <div class="td-mono">${escH(c.name || c.campaign_name || c.id?.substring(0,8) || '—')}</div>
-          ${c.advertiser_email ? `<div class="td-muted">${escH(c.advertiser_email)}</div>` : ''}
-        </td>
-        <td class="td-muted">${escH(fmtMux(c.mux_type))}</td>
-        <td class="td-muted">${fmtDate(c.start_date)} → ${fmtDate(c.end_date)}</td>
-        <td><span class="badge ${badgeClass(c.status)}">${escH(c.status||'—')}</span></td>
-        <td class="td-muted">${fmtDate(c.created_at)}</td>
-      </tr>`).join('')}
-    </tbody>
+    <tbody>${campaignRows}${requestRows}</tbody>
   </table>`;
 }
 
@@ -1337,25 +1424,29 @@ function renderInvoicesTable(invoices) {
   out.innerHTML = `<table>
     <thead><tr>
       <th>Invoice #</th>
-      <th>Client</th>
       <th>Amount</th>
+      <th>VAT</th>
       <th>Status</th>
       <th>Due</th>
+      <th>Payment</th>
       <th>Issued</th>
     </tr></thead>
     <tbody>
       ${invoices.map(i => {
-        const amount = i.amount_pence ? '£'+(i.amount_pence/100).toLocaleString('en-GB',{minimumFractionDigits:2}) : '—';
+        const total   = i.total_pence   ? '£'+(i.total_pence/100).toLocaleString('en-GB',{minimumFractionDigits:2}) : '—';
+        const vat     = i.vat_pence     ? '£'+(i.vat_pence/100).toLocaleString('en-GB',{minimumFractionDigits:2}) : '£0';
+        const subtotal= i.subtotal_pence? '£'+(i.subtotal_pence/100).toLocaleString('en-GB',{minimumFractionDigits:2}) : '—';
         return `<tr>
-          <td class="td-mono">${escH(i.invoice_number || i.id?.substring(0,8) || '—')}</td>
+          <td class="td-mono" style="color:var(--gold);">${escH(i.invoice_number || i.id?.substring(0,8) || '—')}</td>
           <td>
-            <div>${escH(i.company_name || i.client_name || '—')}</div>
-            ${i.email ? `<div class="td-muted">${escH(i.email)}</div>` : ''}
+            <div class="td-mono">${total}</div>
+            <div class="td-muted" style="font-size:0.72rem;">${subtotal} + ${vat} VAT</div>
           </td>
-          <td class="td-mono" style="color:var(--gold)">${amount}</td>
+          <td class="td-muted">${vat}</td>
           <td><span class="badge ${badgeClass(i.status)}">${escH(i.status||'draft')}</span></td>
           <td class="td-muted">${fmtDate(i.due_date)}</td>
-          <td class="td-muted">${fmtDate(i.created_at)}</td>
+          <td class="td-muted">${escH(i.payment_method||'—')}${i.revolut_payment_link ? ' <a href="'+escH(i.revolut_payment_link)+'" target="_blank" style="color:var(--orange);font-size:0.72rem;">link ↗</a>' : ''}</td>
+          <td class="td-muted">${fmtDate(i.invoice_date || i.created_at)}</td>
         </tr>`;
       }).join('')}
     </tbody>
@@ -1387,10 +1478,11 @@ function renderPaymentsTable(payments) {
   }
   out.innerHTML = `<table>
     <thead><tr>
-      <th>Reference</th>
-      <th>Lead ID</th>
+      <th>Transaction ID</th>
+      <th>Invoice</th>
       <th>Amount</th>
       <th>Provider</th>
+      <th>Ref</th>
       <th>Status</th>
       <th>Date</th>
     </tr></thead>
@@ -1398,12 +1490,13 @@ function renderPaymentsTable(payments) {
       ${payments.map(p => {
         const amount = p.amount_pence ? '£'+(p.amount_pence/100).toLocaleString('en-GB',{minimumFractionDigits:2}) : '—';
         return `<tr>
-          <td class="td-mono">${escH(p.reference || p.id?.substring(0,8) || '—')}</td>
-          <td class="td-muted" style="font-size:0.72rem;">${escH(p.lead_id?.substring(0,8) || '—')}…</td>
+          <td class="td-muted" style="font-size:0.72rem;">${escH(p.id?.substring(0,8)||'—')}…</td>
+          <td class="td-muted" style="font-size:0.72rem;">${escH(p.invoice_id?.substring(0,8)||'—')}…</td>
           <td class="td-mono" style="color:var(--green)">${amount}</td>
-          <td class="td-muted">${escH(p.provider || 'Revolut')}</td>
+          <td class="td-muted">${escH(p.provider||'—')}</td>
+          <td class="td-muted" style="font-size:0.72rem;">${escH(p.provider_reference || p.provider_transaction_id || '—')}</td>
           <td><span class="badge ${badgeClass(p.status)}">${escH(p.status||'—')}</span></td>
-          <td class="td-muted">${fmtDate(p.created_at)}</td>
+          <td class="td-muted">${fmtDate(p.completed_at || p.created_at)}</td>
         </tr>`;
       }).join('')}
     </tbody>
@@ -1440,18 +1533,21 @@ function renderPendingDiscounts(items) {
     return;
   }
   out.innerHTML = `<table>
-    <thead><tr><th>Code</th><th>Type</th><th>Value</th><th>Requested By</th><th>Actions</th></tr></thead>
+    <thead><tr><th>Code</th><th>Value</th><th>Max Uses</th><th>Expires</th><th>Actions</th></tr></thead>
     <tbody>
-      ${items.map(d => `<tr>
-        <td class="td-mono">${escH(d.code||'—')}</td>
-        <td class="td-muted">${escH(d.discount_type||'—')}</td>
-        <td class="td-mono">${escH(String(d.value||'—'))}${d.discount_type==='percentage'?'%':''}${d.discount_type==='fixed'?'p':''}</td>
-        <td class="td-muted">${escH(d.created_by||'—')}</td>
-        <td>
-          <button class="btn btn-primary btn-sm" onclick="approveDiscount('${d.id}')">Approve</button>
-          <button class="btn btn-danger btn-sm" onclick="rejectDiscount('${d.id}')">Reject</button>
-        </td>
-      </tr>`).join('')}
+      ${items.map(d => {
+        const val = d.percent_off ? d.percent_off + '%' : d.amount_pence ? '£'+(d.amount_pence/100).toFixed(0)+' off' : '—';
+        return `<tr>
+          <td class="td-mono" style="color:var(--gold)">${escH(d.code||'—')}</td>
+          <td class="td-mono">${val}</td>
+          <td class="td-muted">${d.max_uses||'∞'}</td>
+          <td class="td-muted">${fmtDate(d.expires_at)}</td>
+          <td>
+            <button class="btn btn-primary btn-sm" onclick="approveDiscount('${d.id}')">Approve</button>
+            <button class="btn btn-danger btn-sm" onclick="rejectDiscount('${d.id}')">Reject</button>
+          </td>
+        </tr>`;
+      }).join('')}
     </tbody>
   </table>`;
 }
@@ -1465,29 +1561,25 @@ function renderDiscountsTable(codes) {
   out.innerHTML = `<table>
     <thead><tr>
       <th>Code</th>
-      <th>Type</th>
       <th>Value</th>
       <th>Uses</th>
       <th>Expires</th>
-      <th>Status</th>
+      <th>Active</th>
+      <th>Note</th>
       <th>Created</th>
     </tr></thead>
     <tbody>
       ${codes.map(d => {
-        const val = d.discount_type === 'percentage'
-          ? (d.value + '%')
-          : d.discount_type === 'fixed'
-          ? '£' + (d.value/100).toFixed(0)
-          : (d.value || '—');
+        const val     = d.percent_off ? d.percent_off + '%' : d.amount_pence ? '£'+(d.amount_pence/100).toFixed(0)+' off' : '—';
         const expired = d.expires_at && new Date(d.expires_at) < new Date();
-        const status  = expired ? 'expired' : (d.status || 'active');
+        const status  = expired ? 'expired' : d.is_active ? 'active' : 'inactive';
         return `<tr>
           <td class="td-mono" style="color:var(--gold);letter-spacing:.1em;">${escH(d.code||'—')}</td>
-          <td class="td-muted">${escH(d.discount_type||'—')}</td>
           <td class="td-mono">${val}</td>
-          <td class="td-muted">${d.used_count||0} / ${d.max_uses||'∞'}</td>
+          <td class="td-muted">${d.use_count||0} / ${d.max_uses||'∞'}</td>
           <td class="td-muted">${fmtDate(d.expires_at)}</td>
           <td><span class="badge ${badgeClass(status)}">${status}</span></td>
+          <td class="td-muted" style="font-size:0.78rem;">${escH(d.note||'—')}</td>
           <td class="td-muted">${fmtDate(d.created_at)}</td>
         </tr>`;
       }).join('')}
@@ -1506,21 +1598,43 @@ async function createDiscount() {
   const code    = document.getElementById('dc-code').value.trim().toUpperCase();
   const type    = document.getElementById('dc-type').value;
   const value   = parseFloat(document.getElementById('dc-value').value);
-  const maxUses = parseInt(document.getElementById('dc-max-uses').value) || 0;
+  const maxUses = parseInt(document.getElementById('dc-max-uses').value) || null;
   const expires = document.getElementById('dc-expires').value;
   const notes   = document.getElementById('dc-notes').value.trim();
 
   if (!code || isNaN(value)) { toast('Code and value required', 'err'); return; }
 
+  // Build the correct payload matching the discounts schema
+  const payload = {
+    code,
+    max_uses:   maxUses || null,
+    expires_at: expires ? new Date(expires).toISOString() : null,
+    note:       notes || null,
+    created_by: currentSession?.user?.id,
+    is_active:  true
+  };
+  if (type === 'percentage') {
+    payload.percent_off = Math.round(value);
+  } else {
+    payload.amount_pence = Math.round(value * 100);
+  }
+
   try {
-    await sbRpc('create_discount_code', {
-      p_code: code, p_discount_type: type,
-      p_value: type === 'fixed' ? Math.round(value * 100) : value,
-      p_max_uses: maxUses,
-      p_expires_at: expires ? new Date(expires).toISOString() : null,
-      p_notes: notes || null
-    }, currentSession?.access_token);
-    toast('Discount code ' + code + ' created', 'ok');
+    // Try RPC first, fall back to direct insert
+    try {
+      await sbRpc('create_discount_code', {
+        p_code: code,
+        p_percent_off: type === 'percentage' ? Math.round(value) : null,
+        p_amount_pence: type === 'fixed' ? Math.round(value * 100) : null,
+        p_max_uses: maxUses || null,
+        p_expires_at: expires ? new Date(expires).toISOString() : null,
+        p_note: notes || null
+      }, currentSession?.access_token);
+    } catch(rpcErr) {
+      // RPC signature may differ — fall back to direct insert
+      await sbPost('/rest/v1/discounts', payload, currentSession?.access_token);
+    }
+    toast('Discount code ' + code + ' created ✓', 'ok');
     closeModal('discount-modal');
     allDiscounts = [];
     loadDiscounts();
@@ -1635,10 +1749,21 @@ function timeAgo(d) {
 function fmtMux(m) {
   const map = {
     inverclyde: 'Inverclyde', north_ayrshire: 'North Ayrshire',
-    south_lanarkshire: 'South Lanarkshire', multi_regional: 'Multi-Regional',
-    top_of_hour: 'Top of Hour'
+    south_lanarkshire: 'South Lanarkshire'
   };
   return map[m] || m || '—';
+}
+
+function fmtMuxType(m) {
+  const map = { single: 'Single Mux', multi: 'Multi-Regional', toh: 'Top of Hour' };
+  return map[m] || m || '—';
+}
+
+function fmtPackage(p) {
+  const map = {
+    regional: 'Regional', multi_regional: 'Multi-Regional', top_of_hour: 'Top of Hour'
+  };
+  return map[p] || p || '—';
 }
 
 function fmtProduct(p) {
