@@ -117,7 +117,7 @@
       z-index: 500; display: flex; align-items: center;
       padding: 0 1.25rem; gap: 1.25rem;
     }
-    #topbar-logo { height: 38px; width: auto; }
+    #topbar-logo { height: 38px; width: auto; flex-shrink: 0; }
     #topbar-title {
       font-family: var(--font-cond); font-size: 0.72rem; font-weight: 700;
       letter-spacing: 0.3em; text-transform: uppercase; color: var(--orange);
@@ -126,19 +126,28 @@
     #topbar-user {
       margin-left: auto; display: flex; align-items: center; gap: 0.75rem;
       font-family: var(--font-cond); font-size: 0.8rem; letter-spacing: 0.08em;
+      flex-shrink: 0;
     }
     #topbar-role {
       background: rgba(255,85,0,0.12); color: var(--orange);
       font-size: 0.62rem; font-weight: 900; letter-spacing: 0.2em;
       text-transform: uppercase; padding: 0.2rem 0.55rem; border-radius: 2px;
+      flex-shrink: 0;
     }
     #topbar-signout {
       color: var(--muted); font-family: var(--font-cond); font-size: 0.78rem;
       font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
       padding: 0.35rem 0.75rem; border: 1px solid var(--border2); border-radius: var(--radius);
-      transition: border-color 0.2s, color 0.2s;
+      transition: border-color 0.2s, color 0.2s; flex-shrink: 0;
     }
     #topbar-signout:hover { border-color: var(--orange); color: var(--orange); }
+    @media (max-width: 900px) {
+      #topbar { padding: 0 0.75rem; gap: 0.75rem; }
+      #topbar-title { display: none; }
+      #topbar-email { display: none !important; }
+      #topbar-signout { display: none; }
+      #topbar-role { font-size: 0.55rem; padding: 0.15rem 0.4rem; }
+    }
 
     /* ── SIDEBAR ────────────────────────────────────────────────── */
     #sidebar {
@@ -682,6 +691,7 @@
       #sidebar-overlay.visible { opacity: 1; pointer-events: all; }
       #hamburger { display: flex; }
       #main { margin-left: 0; padding: 1.25rem 1rem; }
+      #nav-signout-mobile { display: block !important; }
       .overview-grid { grid-template-columns: 1fr; }
       .modal-row { grid-template-columns: 1fr; }
       .discount-form-grid { grid-template-columns: 1fr; }
@@ -734,15 +744,15 @@
 
   <!-- TOPBAR -->
   <div id="topbar">
-    <button id="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
     <img id="topbar-logo" src="/rock/assets/images/logo.png" alt="ROCK.SCOT">
     <div id="topbar-title">Admin Dashboard</div>
     <div id="topbar-user">
       <span id="topbar-email" class="td-muted"></span>
       <span id="topbar-role">Admin</span>
       <button id="topbar-signout" onclick="signOut()">Sign Out</button>
+      <button id="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
 
@@ -792,6 +802,9 @@
     </div>
     <div class="nav-item" data-panel="guide" onclick="showPanel('guide')">
       📖 Admin Guide
+    </div>
+    <div style="padding:1.25rem;margin-top:auto;border-top:1px solid var(--border);display:none;" id="nav-signout-mobile">
+      <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="signOut()">Sign Out</button>
     </div>
   </aside>
 
