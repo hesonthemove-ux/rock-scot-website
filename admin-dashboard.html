@@ -1125,7 +1125,7 @@
               ['📄', 'Send Contract', 'pending', 'Use the <em>Contract & T&Cs</em> email template — this auto-generates a personalised advertising contract with the client\'s details, package info, and ROCK.SCOT terms. Send this before confirming.'],
               ['✅', 'Confirm Booking', 'confirmed', 'Once the client has agreed and you\'re happy, change status to <strong>confirmed</strong> and click Save Status. Send the <em>Booking Confirmed</em> email. The confirmed revenue figure on the dashboard will update.'],
               ['🎙️', 'Request Creative', 'confirmed', 'Send the <em>Creative Brief Request</em> email — this asks the client for their audio ad or briefs them on production. If they\'ve taken the bolt-on, production is included.'],
-              ['🧾', 'Send Invoice', 'confirmed', 'Create the invoice in the Invoices panel and send via Revolut or bank transfer. Send the <em>Invoice Sent</em> email template. Note payment in the payments panel once received.'],
+              ['🧾', 'Send Invoice', 'confirmed', 'Create the invoice in the Invoices panel and send with Tide bank transfer details. Send the <em>Invoice Sent</em> email template. Note payment in the payments panel once received.'],
               ['📡', 'Campaign Live', 'live', 'Once the ad is approved and broadcasting, change status to <strong>live</strong>. Send the <em>Campaign Now Live</em> email. The confirmed revenue stays, capacity units are now consumed.'],
               ['🏁', 'Campaign Complete', 'completed', 'When the campaign run ends, change status to <strong>completed</strong>. Send the <em>Campaign Complete</em> email — this is a great opportunity to upsell renewal. Revenue moves to Completed Revenue on the dashboard.'],
             ].map(([icon, title, badge, desc], i) => `
@@ -2038,7 +2038,7 @@ function renderInvoicesTable(invoices) {
           <td class="td-muted">${vat}</td>
           <td><span class="badge ${badgeClass(i.status)}">${escH(i.status||'draft')}</span></td>
           <td class="td-muted">${fmtDate(i.due_date)}</td>
-          <td class="td-muted">${escH(i.payment_method||'—')}${i.revolut_payment_link ? ' <a href="'+escH(i.revolut_payment_link)+'" target="_blank" style="color:var(--orange);font-size:0.72rem;">link ↗</a>' : ''}</td>
+          <td class="td-muted">${escH(i.payment_method||'Tide')}${i.revolut_payment_link ? ' <a href="'+escH(i.revolut_payment_link)+'" target="_blank" style="color:var(--orange);font-size:0.72rem;">pay link ↗</a>' : ''}</td>
           <td class="td-muted">${fmtDate(i.invoice_date || i.created_at)}</td>
         </tr>`;
       }).join('')}
@@ -2534,8 +2534,11 @@ Invoice Summary:
 • Amount Due: ${price}
 
 Payment can be made via:
-• Revolut Business: [REVOLUT LINK]
-• Bank Transfer: Sort Code: XX-XX-XX | Account: XXXXXXXX | Ref: ROCK-${company.toUpperCase().replace(/\s/g,'')}
+• Bank Transfer (Tide):
+  Caledonia TX Ltd
+  Sort Code: 04-06-05
+  Account: 15193265
+  Reference: ROCK-${company.toUpperCase().replace(/\s/g,'').substring(0,12)}
 
 Payment is due within 14 days. Campaigns are confirmed once payment is received.
 
@@ -2661,6 +2664,10 @@ TERMS AND CONDITIONS
    is received in full. ROCK.SCOT reserves the right to cancel unconfirmed bookings
    after 14 days without payment.
 
+   Payment by bank transfer to:
+   Caledonia TX Ltd | Sort Code: 04-06-05 | Account: 15193265
+   Please use your company name as the payment reference.
+
 2. CREATIVE REQUIREMENTS
    The Advertiser is responsible for supplying broadcast-ready audio (30 seconds, MP3/WAV,
    44.1kHz stereo) no less than 3 working days before the campaign start date, unless the
@@ -2737,12 +2744,13 @@ This contract is subject to ROCK.SCOT's full Terms of Service at rock.scot/terms
 
 async function renderAIContract(data) {
   const out = document.getElementById('email-compose-area');
+
   out.innerHTML = `<div style="padding:1.5rem;text-align:center;">
     <div class="spinner" style="margin:0 auto 1rem;"></div>
-    <div class="td-muted" style="font-size:0.85rem;">Generating personalised contract with AI…</div>
+    <div class="td-muted" style="font-size:0.85rem;">Generating AI contract for ${escH(data.company)}…</div>
   </div>`;
-  try {
-    const prompt = `Generate a professional advertising contract for ROCK.SCOT DAB+ radio station in Scotland.
+
+  const prompt = `Generate a professional advertising contract for ROCK.SCOT DAB+ radio station in Scotland.
 
 Client details:
 - Company: ${data.company}
@@ -2757,47 +2765,60 @@ Client details:
 - Production included: ${data.lead.bolt_on_included ? 'Yes' : 'No'}
 - Rush booking: ${data.lead.is_rush ? 'Yes' : 'No'}
 
-The contract must include:
-1. Parties and campaign details
-2. Payment terms (14 days, no live without payment)
-3. Creative requirements and BCAP/ASA compliance
-4. Content approval rights
-5. Make-good policy for missed spots
-6. Cancellation policy (14+ days = 10% fee, 7-13 = 50% refund, <7 = no refund)
-7. Intellectual property warranties
-8. Liability limitation under Scots Law
-9. Governing law — Scots Law, Scottish Courts
-10. UK GDPR compliance
+Payment: Caledonia TX Ltd | Sort Code: 04-06-05 | Account: 15193265 (Tide Business)
 
-Format as a clean, professional contract. Use plain text formatting suitable for email.`;
+Include: parties & campaign details, payment terms (14 days to Tide account above, no campaign live without payment), BCAP/ASA compliance, content approval rights, make-good policy for missed spots, cancellation policy (14+ days = 10% admin fee, 7-13 days = 50% refund, under 7 days = no refund), IP warranties, liability limitation, Scots Law jurisdiction, UK GDPR. Write as a polished professional contract in plain text, specific to this client — not generic boilerplate.`;
 
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const result = await resp.json();
-    const text = result.content?.map(c => c.text||'').join('') || 'Contract generation failed.';
-
+  try {
+    const text = await aiCall(prompt, 'contract');
     out.innerHTML = `
       <div style="margin-bottom:1rem;">
-        <label style="font-family:var(--font-cond);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:0.4rem;">AI-Generated Contract — ${data.company}</label>
+        <label style="font-family:var(--font-cond);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:0.4rem;">
+          🤖 AI Contract — ${escH(data.company)}
+        </label>
         <textarea class="field-input" id="email-body" rows="24" style="width:100%;font-family:var(--font-body);font-size:0.82rem;line-height:1.7;resize:vertical;">${escH(text)}</textarea>
       </div>
       <div style="display:flex;gap:0.75rem;">
         <button class="btn btn-primary" onclick="copyEmailBody()">📋 Copy Contract</button>
       </div>
       <div style="margin-top:0.75rem;padding:0.75rem;background:rgba(68,136,255,0.06);border:1px solid rgba(68,136,255,0.2);border-radius:var(--radius);font-size:0.78rem;color:var(--muted);line-height:1.6;">
-        🤖 AI-generated — please review before sending. Verify all details are correct.
+        🤖 AI-generated via secure server — review before sending.
       </div>`;
   } catch(e) {
-    out.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠</div><div class="empty-text">AI generation failed: ${escH(e.message)}</div></div>`;
+    const templateText = generateContract(data.lead, data.name, data.company, data.pkg, data.mux, data.price, data.days, data.start);
+    out.innerHTML = `
+      <div style="margin-bottom:0.75rem;padding:0.65rem 0.85rem;background:rgba(221,17,17,0.08);border:1px solid rgba(221,17,17,0.2);border-radius:var(--radius);font-size:0.78rem;color:var(--red);">
+        ⚠ AI unavailable: ${escH(e.message)} — showing template contract instead.
+      </div>
+      <label style="font-family:var(--font-cond);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:0.4rem;">Contract — ${escH(data.company)} (template)</label>
+      <textarea class="field-input" id="email-body" rows="24" style="width:100%;font-family:var(--font-body);font-size:0.82rem;line-height:1.7;resize:vertical;">${escH(templateText)}</textarea>
+      <button class="btn btn-primary" style="margin-top:0.75rem;" onclick="copyEmailBody()">📋 Copy Contract</button>`;
   }
 }
+/* ── AI PROXY (via Supabase Edge Function) ──────────────────────── */
+const AI_PROXY = 'https://pwzeapvopeeoahpyicdm.supabase.co/functions/v1/ai-proxy';
+
+async function aiCall(prompt, feature) {
+  const token = currentSession?.access_token;
+  if (!token) throw new Error('Not authenticated — please sign in first');
+  const resp = await fetch(AI_PROXY, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ prompt, feature })
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${resp.status}`);
+  }
+  const result = await resp.json();
+  return result.text || '';
+}
+
+function saveApiKey() { toast('API key no longer needed — AI runs via secure server', 'ok'); }
+function saveApiKeyFromIntel() { runIntelligence(); }
 
 function copyEmailBody() {
   const body = document.getElementById('email-body')?.value;
@@ -3086,19 +3107,7 @@ Using web search, produce a JSON response with this EXACT structure (respond wit
   }
 }`;
 
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
-        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-
-    const result = await resp.json();
-    const text   = result.content?.filter(c => c.type === 'text').map(c => c.text).join('') || '';
+    const text = await aiCall(prompt, 'intelligence');
 
     let data;
     try {
