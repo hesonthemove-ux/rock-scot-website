@@ -373,13 +373,11 @@ async function loadStories(showRefreshFeedback = false) {
 
         if (data && data.length > 0) {
             allStories = data;
-            filteredStories = [...allStories];
-            filterStories();
+            renderStories(allStories);
             if (statusEl) statusEl.textContent = data.length + ' Stories Live';
         } else {
             allStories = generatePlaceholderStories();
-            filteredStories = [...allStories];
-            renderStories(filteredStories);
+            renderStories(allStories);
             if (statusEl) statusEl.textContent = 'Stories Loading';
         }
     } catch (err) {
