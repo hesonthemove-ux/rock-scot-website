@@ -47,7 +47,6 @@
     }
   }
   </script>
-<script src="/rock/js/header.js"></script>
 </head>
 <body>
 
@@ -356,11 +355,13 @@ async function loadStories(showRefreshFeedback = false) {
     if (loadingEl && showRefreshFeedback) loadingEl.style.display = 'block';
 
     try {
-        const url = SUPABASE_URL + '/rest/v1/wire_news?select=id,title,summary,source_url,source_name,genre,created_at&order=created_at.desc&limit=100';
+        // Use header.js SUPA_KEY which is confirmed working
+        const key = (typeof SUPA_KEY !== 'undefined' ? SUPA_KEY : SUPABASE_KEY);
+        const url = SUPABASE_URL + '/rest/v1/wire_news?select=id,title,summary,source_url,source_name,genre,created_at&order=created_at.desc&limit=200';
         const res = await fetch(url, {
             headers: {
-                'apikey': SUPABASE_KEY,
-                'Authorization': 'Bearer ' + SUPABASE_KEY,
+                'apikey': key,
+                'Authorization': 'Bearer ' + key,
                 'Content-Type': 'application/json'
             }
         });
