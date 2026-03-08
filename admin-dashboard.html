@@ -1708,28 +1708,50 @@ async function loadLeads() {
   try {
     const token = currentSession?.access_token;
     if (!token) throw new Error('No session token — try signing out and back in');
-    const requests = await sbGet(
-      '/rest/v1/campaign_requests?select=*&order=submitted_at.desc&limit=500',
-      token
-    );
-    if (!Array.isArray(requests)) throw new Error('Unexpected response: ' + JSON.stringify(requests).substring(0, 200));
+
+    // Race the fetch against a 10s timeout
+    const fetchWithTimeout = (url, opts, ms=10000) => {
+      const controller = new AbortController();
+      const tid = setTimeout(() => controller.abort(), ms);
+      return fetch(url, {...opts, signal: controller.signal}).finally(() => clearTimeout(tid));
+    };
+
+    const r = await fetchWithTimeout(SUPABASE_URL + '/rest/v1/campaign_requests?select=*&order=submitted_at.desc&limit=500', {
+      headers: authHeaders(token)
+    });
+
+    if (!r.ok) {
+      const txt = await r.text();
+      throw new Error(`HTTP ${r.status}: ${txt.substring(0,200)}`);
+    }
+
+    const requests = await r.json();
+
+    if (!Array.isArray(requests)) throw new Error('Unexpected response type: ' + typeof requests);
+
     allLeads = requests.map(r => ({
       ...r,
       created_at: r.submitted_at,
       _status: r.status || 'pending',
       _req: r
     }));
+
     if (allLeads.length === 0) {
       document.getElementById('leads-table-output').innerHTML =
         '<div class="empty-state"><div class="empty-icon">📥</div><div class="empty-text">No leads yet</div></div>';
       document.getElementById('nav-count-leads').textContent = '0';
       return;
     }
+
     renderLeadsTable(allLeads, 'leads-table-output', false);
     document.getElementById('nav-count-leads').textContent = allLeads.length;
+
   } catch(e) {
+    const msg = e.name === 'AbortError' ? 'Request timed out after 10s — check network/Supabase' : e.message;
     document.getElementById('leads-table-output').innerHTML =
-      `<div class="empty-state"><div class="empty-icon">⚠</div><div class="empty-text">Error loading leads:<br><span style="font-size:0.78rem;color:var(--red);">${escH(e.message)}</span></div></div>`;
+      `<div class="empty-state"><div class="empty-icon">⚠</div>
+       <div class="empty-text">Error loading leads:<br>
+       <span style="font-size:0.78rem;color:var(--red);font-family:monospace;">${escH(msg)}</span></div></div>`;
   }
 }
 
