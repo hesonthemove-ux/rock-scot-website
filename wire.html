@@ -89,16 +89,11 @@ function openModal(id) {
     document.getElementById('story-modal').style.display = 'flex';
 }
 
-function closeModal() { document.getElementById('story-modal').style.display = 'none'; }
-
-function render() {
-    const out = document.getElementById('wire-output');
-    const load = document.getElementById('wire-loading');
-    if (load) load.style.display = 'none';
-    if (!out) return;
-
-    out.innerHTML = allStories.map(s => `
-        <div class="wire-card" onclick="openModal(${s.id})">
+function closeModal() {
+    const modal = document.getElementById('story-modal');
+    if (modal) modal.style.display = 'none';
+    document.body.style.overflow = '';
+}
             <img onerror="this.src='/assets/images/hero.png'" class="wire-card-img" src="/assets/images/hero.png">
             <div class="wire-card-content">
                 <div class="wire-card-genre">${s.genre || 'ROCK'}</div>
@@ -189,16 +184,11 @@ function openModal(id) {
     document.getElementById('story-modal').style.display = 'flex';
 }
 
-function closeModal() { document.getElementById('story-modal').style.display = 'none'; }
-
-function render() {
-    const out = document.getElementById('wire-output');
-    const load = document.getElementById('wire-loading');
-    if (load) load.style.display = 'none';
-    if (!out) return;
-
-    out.innerHTML = allStories.map(s => `
-        <div class="wire-card" onclick="openModal(${s.id})">
+function closeModal() {
+    const modal = document.getElementById('story-modal');
+    if (modal) modal.style.display = 'none';
+    document.body.style.overflow = '';
+}
             <img onerror="this.src='/assets/images/hero.png'" class="wire-card-img" src="/assets/images/hero.png">
             <div class="wire-card-content">
                 <div class="wire-card-genre">${s.genre || 'ROCK'}</div>
@@ -573,16 +563,11 @@ function openModal(id) {
     document.getElementById('story-modal').style.display = 'flex';
 }
 
-function closeModal() { document.getElementById('story-modal').style.display = 'none'; }
-
-function render() {
-    const out = document.getElementById('wire-output');
-    const load = document.getElementById('wire-loading');
-    if (load) load.style.display = 'none';
-    if (!out) return;
-
-    out.innerHTML = allStories.map(s => `
-        <div class="wire-card" onclick="openModal(${s.id})">
+function closeModal() {
+    const modal = document.getElementById('story-modal');
+    if (modal) modal.style.display = 'none';
+    document.body.style.overflow = '';
+}
             <img onerror="this.src='/assets/images/hero.png'" class="wire-card-img" src="/assets/images/hero.png">
             <div class="wire-card-content">
                 <div class="wire-card-genre">${s.genre || 'ROCK'}</div>
@@ -672,16 +657,11 @@ function openModal(id) {
     document.getElementById('story-modal').style.display = 'flex';
 }
 
-function closeModal() { document.getElementById('story-modal').style.display = 'none'; }
-
-function render() {
-    const out = document.getElementById('wire-output');
-    const load = document.getElementById('wire-loading');
-    if (load) load.style.display = 'none';
-    if (!out) return;
-
-    out.innerHTML = allStories.map(s => `
-        <div class="wire-card" onclick="openModal(${s.id})">
+function closeModal() {
+    const modal = document.getElementById('story-modal');
+    if (modal) modal.style.display = 'none';
+    document.body.style.overflow = '';
+}
             <img onerror="this.src='/assets/images/hero.png'" class="wire-card-img" src="/assets/images/hero.png">
             <div class="wire-card-content">
                 <div class="wire-card-genre">${s.genre || 'ROCK'}</div>
