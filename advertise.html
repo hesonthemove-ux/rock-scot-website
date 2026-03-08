@@ -38,8 +38,8 @@
     <meta name="twitter:description" content="Reach 410,000+ rock fans across Scotland on DAB+ digital radio. Packages from £495. Professional production available.">
     <meta name="twitter:image" content="https://rock.scot/assets/images/hero-graffiti-main.jpg">
 
-    <!-- Schema — Advertising Service -->
-    <script type="application/ld+json">
+    <!-- Schema — Advertising Service (prices injected dynamically by JS) -->
+    <script type="application/ld+json" id="schema-service">
     {
       "@context": "https://schema.org",
       "@type": "Service",
@@ -63,29 +63,29 @@
           {
             "@type": "Offer",
             "name": "Regional DAB+ Radio Advertising",
-            "price": "495",
+            "price": "PRICE_REGIONAL",
             "priceCurrency": "GBP",
-            "priceSpecification": {"@type": "UnitPriceSpecification", "price": "495", "priceCurrency": "GBP"},
+            "priceSpecification": {"@type": "UnitPriceSpecification", "price": "PRICE_REGIONAL", "priceCurrency": "GBP"},
             "description": "134 plays over 28 days, single region coverage across DAB+ broadcast area"
           },
           {
             "@type": "Offer",
             "name": "Multi-Regional DAB+ Radio Advertising",
-            "price": "995",
+            "price": "PRICE_MULTI",
             "priceCurrency": "GBP",
             "description": "134 plays over 28 days across all current ROCK.SCOT broadcast areas"
           },
           {
             "@type": "Offer",
             "name": "Top of Hour Premium Advertising",
-            "price": "2495",
+            "price": "PRICE_TOH",
             "priceCurrency": "GBP",
             "description": "Premium top-of-hour positioning for maximum impact and recall"
           },
           {
             "@type": "Offer",
             "name": "Professional Radio Advert Production",
-            "price": "250",
+            "price": "PRICE_BOLT",
             "priceCurrency": "GBP",
             "description": "Professional 30-second radio-ready advert including 3 redrafts. Available with any advertising package."
           }
@@ -353,8 +353,8 @@
     ]
   }
   </script>
-  <!-- AEO: FAQ for advertise page -->
-  <script type="application/ld+json">
+  <!-- AEO: FAQ for advertise page (prices injected dynamically by JS) -->
+  <script type="application/ld+json" id="schema-faq">
   {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -364,7 +364,7 @@
         "name": "How much does it cost to advertise on Scottish DAB+ radio?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "ROCK.SCOT DAB+ radio advertising starts at £495 +VAT for a Regional campaign (134 plays over 28 days). Multi-Regional coverage across all broadcast areas costs £995 +VAT. Top of Hour premium positioning is £2,495 +VAT. Professional advert production is available from £250."
+          "text": "ROCK.SCOT DAB+ radio advertising starts at £PRICE_REGIONAL +VAT for a Regional campaign (134 plays over 28 days). Multi-Regional coverage across all broadcast areas costs £PRICE_MULTI +VAT. Top of Hour premium positioning is £PRICE_TOH +VAT. Professional advert production is available from £PRICE_BOLT."
         }
       },
       {
@@ -380,7 +380,7 @@
         "name": "What is Top of Hour radio advertising?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Top of Hour advertising on ROCK.SCOT places your advert as a station ident at the top of every hour, 24 hours a day. This gives 672 plays over 28 days at the premium listening moment when audiences are most attentive. Priced at £2,495 +VAT."
+          "text": "Top of Hour advertising on ROCK.SCOT places your advert as a station ident at the top of every hour, 24 hours a day. This gives 672 plays over 28 days at the premium listening moment when audiences are most attentive. Priced at £PRICE_TOH +VAT."
         }
       }
     ]
@@ -413,7 +413,8 @@
             <div class="packages-grid">
                 <div class="package-card">
                     <div class="package-name">Regional</div>
-                    <div class="package-price">£495</div>
+                    <div class="package-price" id="card-price-regional">£495</div>
+                    <div style="font-size:0.85rem;color:rgba(255,255,255,0.5);margin-top:-0.75rem;margin-bottom:0.5rem;" id="card-incvat-regional"></div>
                     <div class="package-plays">134 plays over 28 days</div>
                     <ul class="package-features">
                         <li>Single region coverage</li>
@@ -428,7 +429,8 @@
                 <div class="package-card" style="border-color: var(--gold); transform: scale(1.05);">
                     <div style="background: var(--gold); color: var(--black); padding: 0.5rem 1rem; border-radius: 20px; display: inline-block; margin-bottom: 1rem; font-weight: 700; font-size: 0.9rem;">MOST POPULAR</div>
                     <div class="package-name">Multi-Regional</div>
-                    <div class="package-price">£995</div>
+                    <div class="package-price" id="card-price-multi">£1,245</div>
+                    <div style="font-size:0.85rem;color:rgba(255,255,255,0.5);margin-top:-0.75rem;margin-bottom:0.5rem;" id="card-incvat-multi"></div>
                     <div class="package-plays">134 plays over 28 days</div>
                     <ul class="package-features">
                         <li>All 3 regions coverage</li>
@@ -443,7 +445,8 @@
                 
                 <div class="package-card">
                     <div class="package-name">Top of Hour</div>
-                    <div class="package-price">£2,495</div>
+                    <div class="package-price" id="card-price-toh">£350</div>
+                    <div style="font-size:0.85rem;color:rgba(255,255,255,0.5);margin-top:-0.75rem;margin-bottom:0.5rem;" id="card-incvat-toh"></div>
                     <div class="package-plays">Exclusive positioning</div>
                     <ul class="package-features">
                         <li>Premium :00 slot placement</li>
@@ -500,8 +503,8 @@
                             <select id="package" required onchange="onPackageChange()">
                                 <option value="">Select package...</option>
                                 <option value="regional">Regional — Single Mux (£495)</option>
-                                <option value="multi-regional">Multi-Regional — All 3 Mux (£995)</option>
-                                <option value="top-of-hour">Top of Hour — Station Ident (£2,495)</option>
+                                <option value="multi-regional">Multi-Regional — All 3 Mux (£1,245)</option>
+                                <option value="top-of-hour">Top of Hour — Station Ident (£350)</option>
                             </select>
                         </div>
                     </div>
@@ -540,13 +543,13 @@
                     </div>
 
                     <div class="form-group" id="bolt-on-group">
-                        <label><input type="checkbox" id="bolt-on" onchange="calculateQuote()"> Add professional production (+£250)</label>
+                        <label><input type="checkbox" id="bolt-on" onchange="calculateQuote()"> Add professional production (<span id="bolt-on-price">+£150</span>)</label>
                         <p style="color:#999;font-size:0.85rem;margin-top:0.25rem;">30-second radio-ready advert, 3 redrafts. Available with Regional and Multi-Regional.</p>
                     </div>
                     
                     <div class="surcharge-warning" id="surcharge-warning">
                         <strong>⚠️ Rush Order Surcharge Applied</strong>
-                        <p>Campaign starting within 27 days: +£50 surcharge</p>
+                        <p>Campaign starting within 27 days: <span id="rush-price">+£75</span> surcharge</p>
                     </div>
                     
                     <div class="form-group">
@@ -606,7 +609,7 @@
                 
                 <div style="background: rgba(255, 255, 255, 0.03); padding: 2rem; border-radius: 15px; border-left: 4px solid var(--orange);">
                     <h3 style="color: var(--orange); margin-bottom: 1rem;">💰 Great Value</h3>
-                    <p>From just £299 for 28 days of coverage</p>
+                    <p>From just <span id="footer-price-from">£495</span> for 28 days of coverage</p>
                 </div>
             </div>
         </div>
@@ -622,7 +625,7 @@
             </div>
             <div class="footer-section">
                 <h4>Advertising</h4>
-                <p>Regional: £299<br>Multi-Regional: £449<br>Top of Hour: £2,495</p>
+                <p>Regional: <span id="footer-price-regional">£495</span><br>Multi-Regional: <span id="footer-price-multi">£1,245</span><br>Top of Hour: <span id="footer-price-toh">£350</span></p>
             </div>
             <div class="footer-section">
                 <h4>Coverage</h4>
@@ -689,8 +692,6 @@
     }
 
     // ── LIVE RATES FROM site_settings ────────────────────────────
-    // Fetches current prices from Supabase and updates all display
-    // elements. Falls back to hardcoded defaults if fetch fails.
     async function loadLiveRates() {
         try {
             const resp = await fetch(
@@ -704,45 +705,103 @@
             const r = {};
             rows.forEach(row => { r[row.key] = parseFloat(row.value) || 0; });
 
-            // Update PACKAGES prices in place
-            PACKAGES['regional'].pricePence        = Math.round((r.single_inverclyde || 495) * 100);
-            PACKAGES['multi-regional'].pricePence  = Math.round((r.multi_regional    || 1245) * 100);
-            PACKAGES['top-of-hour'].pricePence     = Math.round((r.top_of_hour       || 350) * 100);
-            BOLT_ON_PENCE_LIVE                     = Math.round((r.production_bolt_on || 150) * 100);
-            RUSH_PENCE_LIVE                        = Math.round((r.rush_fee           || 75) * 100);
-            VAT_RATE_LIVE                          = (r.vat_rate || 20) / 100;
+            // ── Update PACKAGES in place ──────────────────────────
+            PACKAGES['regional'].pricePence       = Math.round((r.single_inverclyde  || 495)  * 100);
+            PACKAGES['multi-regional'].pricePence = Math.round((r.multi_regional     || 1245) * 100);
+            PACKAGES['top-of-hour'].pricePence    = Math.round((r.top_of_hour        || 350)  * 100);
+            BOLT_ON_PENCE_LIVE                    = Math.round((r.production_bolt_on || 150)  * 100);
+            RUSH_PENCE_LIVE                       = Math.round((r.rush_fee           || 75)   * 100);
+            VAT_RATE_LIVE                         = (r.vat_rate || 20) / 100;
 
-            // Update visible package card prices
-            const cards = document.querySelectorAll('.package-card');
-            const fmt = p => '£' + (p/100).toLocaleString('en-GB');
-            if (cards[0]) cards[0].querySelector('.package-price').textContent = fmt(PACKAGES['regional'].pricePence);
-            if (cards[1]) cards[1].querySelector('.package-price').textContent = fmt(PACKAGES['multi-regional'].pricePence);
-            if (cards[2]) cards[2].querySelector('.package-price').textContent = fmt(PACKAGES['top-of-hour'].pricePence);
+            // ── Helpers ───────────────────────────────────────────
+            const fmtEx  = p => '£' + (p/100).toLocaleString('en-GB', {minimumFractionDigits:0});
+            const fmtInc = p => '£' + (p/100 * (1 + VAT_RATE_LIVE)).toLocaleString('en-GB', {minimumFractionDigits:0});
+            const vatPct = Math.round(VAT_RATE_LIVE * 100);
 
-            // Update dropdown option labels
+            const regEx  = PACKAGES['regional'].pricePence;
+            const mulEx  = PACKAGES['multi-regional'].pricePence;
+            const tohEx  = PACKAGES['top-of-hour'].pricePence;
+            const boltEx = BOLT_ON_PENCE_LIVE;
+            const rushEx = RUSH_PENCE_LIVE;
+
+            // ── Package cards — ex-VAT headline, inc-VAT sub ──────
+            const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+            set('card-price-regional', fmtEx(regEx));
+            set('card-incvat-regional', `${fmtInc(regEx)} inc. VAT`);
+            set('card-price-multi',    fmtEx(mulEx));
+            set('card-incvat-multi',   `${fmtInc(mulEx)} inc. VAT`);
+            set('card-price-toh',      fmtEx(tohEx));
+            set('card-incvat-toh',     `${fmtInc(tohEx)} inc. VAT`);
+
+            // ── Dropdown options ──────────────────────────────────
             const pkgSelect = document.getElementById('package');
             if (pkgSelect) {
                 Array.from(pkgSelect.options).forEach(opt => {
-                    if (opt.value === 'regional')      opt.text = `Regional — Single Mux (${fmt(PACKAGES['regional'].pricePence)})`;
-                    if (opt.value === 'multi-regional') opt.text = `Multi-Regional — All 3 Mux (${fmt(PACKAGES['multi-regional'].pricePence)})`;
-                    if (opt.value === 'top-of-hour')   opt.text = `Top of Hour — Station Ident (${fmt(PACKAGES['top-of-hour'].pricePence)})`;
+                    if (opt.value === 'regional')       opt.text = `Regional — Single Mux (${fmtEx(regEx)} +VAT)`;
+                    if (opt.value === 'multi-regional') opt.text = `Multi-Regional — All 3 Mux (${fmtEx(mulEx)} +VAT)`;
+                    if (opt.value === 'top-of-hour')    opt.text = `Top of Hour — Station Ident (${fmtEx(tohEx)} +VAT)`;
                 });
             }
 
-            // Update bolt-on label
-            const boltLabel = document.querySelector('label[for="bolt-on"], label:has(#bolt-on)');
-            if (boltLabel) boltLabel.innerHTML = boltLabel.innerHTML.replace(/\+£[\d,]+/, `+${fmt(BOLT_ON_PENCE_LIVE)}`);
+            // ── Bolt-on and rush labels ───────────────────────────
+            set('bolt-on-price', `+${fmtEx(boltEx)} +VAT`);
+            set('rush-price',    `+${fmtEx(rushEx)} +VAT`);
 
-            // Update rush surcharge text
-            const rushWarn = document.getElementById('surcharge-warning');
-            if (rushWarn) rushWarn.innerHTML = rushWarn.innerHTML.replace(/\+£[\d,]+/, `+${fmt(RUSH_PENCE_LIVE)}`);
+            // ── Footer prices ─────────────────────────────────────
+            set('footer-price-from',     fmtEx(regEx));
+            set('footer-price-regional', fmtEx(regEx));
+            set('footer-price-multi',    fmtEx(mulEx));
+            set('footer-price-toh',      fmtEx(tohEx));
+
+            // ── Meta tags (title, description, og, twitter) ───────
+            document.title = document.title.replace(/£[\d,]+/, fmtEx(regEx));
+            document.querySelector('meta[name="description"]')?.setAttribute('content',
+                `Reach 410,000+ dedicated rock fans across Scotland on DAB+ digital radio. Advertising packages from ${fmtEx(regEx)} +VAT. Regional, Multi-Regional & Top of Hour spots. Professional production available.`);
+            document.querySelector('meta[property="og:title"]')?.setAttribute('content',
+                `Advertise on ROCK.SCOT — Reach Scotland's Rock Audience from ${fmtEx(regEx)} +VAT`);
+            document.querySelector('meta[property="og:description"]')?.setAttribute('content',
+                `410,000+ dedicated rock fans. DAB+ digital radio advertising across Inverclyde, North Ayrshire & South Lanarkshire. Packages from ${fmtEx(regEx)} +VAT + professional production.`);
+            document.querySelector('meta[name="twitter:title"]')?.setAttribute('content',
+                `Advertise on ROCK.SCOT — Scottish DAB+ Radio Advertising from ${fmtEx(regEx)} +VAT`);
+            document.querySelector('meta[name="twitter:description"]')?.setAttribute('content',
+                `Reach 410,000+ rock fans across Scotland on DAB+ digital radio. Packages from ${fmtEx(regEx)} +VAT. Professional production available.`);
+
+            // ── JSON-LD schema — replace price tokens ─────────────
+            const updateSchema = (id, replacements) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                let json = el.textContent;
+                Object.entries(replacements).forEach(([token, val]) => {
+                    json = json.split(token).join(val);
+                });
+                el.textContent = json;
+            };
+            const tokens = {
+                'PRICE_REGIONAL': (regEx/100).toFixed(2),
+                'PRICE_MULTI':    (mulEx/100).toFixed(2),
+                'PRICE_TOH':      (tohEx/100).toFixed(2),
+                'PRICE_BOLT':     (boltEx/100).toFixed(2),
+            };
+            updateSchema('schema-service', tokens);
+
+            // FAQ schema uses formatted strings in text
+            const faqEl = document.getElementById('schema-faq');
+            if (faqEl) {
+                let faqJson = faqEl.textContent;
+                faqJson = faqJson
+                    .split('PRICE_REGIONAL').join((regEx/100).toFixed(0))
+                    .split('PRICE_MULTI').join((mulEx/100).toFixed(0))
+                    .split('PRICE_TOH').join((tohEx/100).toFixed(0))
+                    .split('PRICE_BOLT').join((boltEx/100).toFixed(0));
+                faqEl.textContent = faqJson;
+            }
 
         } catch(e) {
             console.warn('Live rates unavailable, using defaults:', e.message);
         }
     }
 
-    // Mutable live rate vars (overridden by loadLiveRates, fallback to hardcoded)
+    // Live rate vars — overridden by loadLiveRates, fallback to hardcoded defaults
     let BOLT_ON_PENCE_LIVE = BOLT_ON_PENCE;
     let RUSH_PENCE_LIVE    = RUSH_PENCE;
     let VAT_RATE_LIVE      = 0.20;
