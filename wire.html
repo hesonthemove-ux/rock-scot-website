@@ -52,18 +52,16 @@
 
 <!-- WIRE HERO -->
 <div class="wire-hero" style="margin-top: 98px;">
-    <div style="width: 100%; overflow: hidden; line-height: 0;">
+    <div class="wire-hero-inner" style="display:flex;align-items:center;gap:1rem;padding:1.25rem 1.25rem 0;">
         <img src="assets/images/burst.png"
              alt="ROCK.SCOT — Scotland's DAB+ Rock Station"
              loading="eager"
-             style="width: 100%; max-height: 260px; object-fit: contain; object-position: center; background: #000; display: block; padding: 1rem 0;">
-    </div>
-    <div class="wire-hero-inner">
-        <div>
+             style="width:110px;max-width:28%;height:auto;object-fit:contain;flex-shrink:0;">
+        <div style="flex:1;min-width:0;">
             <h1 class="wire-title">THE<br><span>WIRE</span></h1>
             <p class="wire-subtitle">Real-time Scottish rock news — powered by <strong>ROCK.SCOT</strong><br>Updated continuously from 40+ Scottish music sources</p>
         </div>
-        <div class="wire-stats">
+        <div class="wire-stats" style="flex-shrink:0;text-align:center;">
             <div class="wire-count" id="story-count">—</div>
             <div class="wire-count-label">Stories Live</div>
         </div>
@@ -134,22 +132,22 @@
     <div class="footer-col">
       <h4>Contact</h4>
       <a href="tel:01414597625" class="orange">0141 459 ROCK</a>
-      <a href="mailto:studio@rock.scot">studio@rock.scot</a>
-      <a href="mailto:advertise@rock.scot">advertise@rock.scot</a>
+      <a href="/cdn-cgi/l/email-protection#dfacabaabbb6b09fadb0bcb4f1acbcb0ab"><span class="__cf_email__" data-cfemail="8dfef9f8e9e4e2cdffe2eee6a3feeee2f9">[email&#160;protected]</span></a>
+      <a href="/cdn-cgi/l/email-protection#29484d5f4c5b5d405a4c695b464a42075a4a465d"><span class="__cf_email__" data-cfemail="09686d7f6c7b7d607a6c497b666a62277a6a667d">[email&#160;protected]</span></a>
       <a href="https://bsky.app/profile/rockscot.bsky.social" target="_blank" rel="noopener">Bluesky ↗</a>
     </div>
   </div>
   <div class="footer-bottom">© 2026 ROCK.SCOT · Scotland's Rock Station · Caledonia TX Ltd · SC646223 · VAT 491589639 · Ofcom Licensed</div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ================================================================
 // ROCK.SCOT — THE WIRE
 // Supabase-powered live news feed
 // ================================================================
 
 const SUPABASE_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5NDcyMzMsImV4cCI6MjA1NjUyMzIzM30.R4oKTMIjSEJBonVSEApJNS57cEBFwFQCLmFEY9HPSrg';
 
 // Wire data loaded via direct Supabase REST API (see loadStories)
 
@@ -425,15 +423,4 @@ function escAttr(str) {
     return String(str).replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
 }
 
-// ── INIT ──────────────────────────────────────────────────
-// Attempt immediate load — works if SDK already loaded (cached)
-loadStories();
-setInterval(() => loadStories(), 15 * 60 * 1000);
-
-// Boot the wire
-subscribeRealtime();
-</script>
-
-<script src="js/header.js"></script>
-</body>
-</html>
+// ── INIT ────�
