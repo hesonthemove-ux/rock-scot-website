@@ -223,7 +223,7 @@ function injectHeader() {
   /* Wire data — fetch directly via REST API (no SDK needed, Brave-safe) */
   var wireCache=[];
   function fetchWireREST(){
-    var url=SUPA_URL+'/rest/v1/wire_news?select=id,title,summary,genre,source_name,source_url,created_at&is_live=eq.true&order=created_at.desc&limit=25';
+    var url=SUPA_URL+'/rest/v1/wire_news?select=id,title,summary,genre,source_name,source_url,created_at&order=created_at.desc&limit=25';
     fetch(url,{
       headers:{
         'apikey': SUPA_KEY,
