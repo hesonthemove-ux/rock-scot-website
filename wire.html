@@ -142,274 +142,88 @@
 </footer>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-// ================================================================
-// ROCK.SCOT — THE WIRE
-// Supabase-powered live news feed
-// ================================================================
-
-const SUPABASE_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
 const SUPABASE_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
 
-// Wire data loaded via direct Supabase REST API (see loadStories)
-
-let allStories  = [];
-let filteredStories = [];
-let isLoading   = false;
-
-// ── HEADER SCROLL ─────────────────────────────────────────
-/* Scroll handled by header.js */
-
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
-/* Player handled by header.js */
-
-// ── TIME FORMATTER ─────────────────────────────────────────
-// Extract first paragraph from summary text
-function getFirstParagraph(text) {
-    if (!text || text.length < 5) return '';
-    // Split on double newline, or take first ~200 chars ending at sentence
-    const parts = text.split(/
-
-+/);
-    if (parts.length > 1) return parts[0].trim();
-    // Single block - take up to first sentence break around 200 chars
-    if (text.length <= 220) return text;
-    const cutoff = text.substring(0, 220);
-    const lastDot = Math.max(cutoff.lastIndexOf('. '), cutoff.lastIndexOf('! '), cutoff.lastIndexOf('? '));
-    return lastDot > 80 ? text.substring(0, lastDot + 1) : cutoff.trim() + '…';
-}
-
-function timeAgo(dateStr) {
-    if (!dateStr) return '';
-    const date  = new Date(dateStr);
-    const now   = new Date();
-    const diffS = Math.floor((now - date) / 1000);
-    if (diffS < 60)     return 'Just now';
-    if (diffS < 3600)   return `${Math.floor(diffS/60)}m ago`;
-    if (diffS < 86400)  return `${Math.floor(diffS/3600)}h ago`;
-    if (diffS < 604800) return `${Math.floor(diffS/86400)}d ago`;
-    return date.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'2-digit' });
-}
-
-function genreClass(genre) {
-    // Returns modifier class that pairs with .wire-genre-tag in style.css
-    return (genre || 'rock').toLowerCase().replace(/[^a-z]/g,'');
-}
-
-
-
-// ── RENDER STORIES ─────────────────────────────────────────
+let allStories = [];
 const STORIES_PER_PAGE = 20;
 let shownCount = 0;
+let isLoading = false;
+
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#x27;'); }
+
+function timeAgo(d) {
+    const s = Math.floor((Date.now() - new Date(d)) / 1000);
+    if (s < 3600) return Math.floor(s / 60) + 'm ago';
+    if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+    return Math.floor(s / 86400) + 'd ago';
+}
 
 function renderStories(stories) {
     const output = document.getElementById('wire-output');
-    document.getElementById('wire-loading').style.display = 'none';
+    const statusEl = document.getElementById('wire-status-text');
+    const loading = document.getElementById('wire-loading');
+    
+    if (loading) loading.style.display = 'none';
+    if (!output) return;
 
     if (!stories || stories.length === 0) {
-        output.innerHTML = `
-            <div class="wire-empty">
-                <div class="wire-empty-icon">📡</div>
-                <h3 style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--orange);margin-bottom:0.75rem;">No Stories Found</h3>
-                <p style="color:rgba(255,255,255,0.5);margin-bottom:1.5rem;">Try a different search or genre filter, or refresh to load the latest stories.</p>
-                <button class="wire-refresh-btn" onclick="loadStories(true)">↻ Load Stories</button>
-            </div>`;
-        document.getElementById('story-count').textContent = '0';
-        shownCount = 0;
+        output.innerHTML = '<div style="text-align:center;padding:3rem;opacity:0.5;">No stories found.</div>';
         return;
     }
 
-    document.getElementById('story-count').textContent = stories.length;
     shownCount = Math.min(STORIES_PER_PAGE, stories.length);
+    const items = stories.slice(0, shownCount).map(s => `
+        <div class="wire-card" style="cursor:pointer;padding:1.25rem;border-bottom:1px solid #1e1e1e;" onclick="window.open('${escAttr(s.source_url)}','_blank')">
+            <div class="wire-card-genre" style="color:#ff6b00;font-size:0.7rem;text-transform:uppercase;font-weight:800;">${escHtml(s.genre || 'ROCK')}</div>
+            <div class="wire-card-title" style="font-size:1.1rem;font-weight:700;margin:0.4rem 0;color:#fff;">${escHtml(s.title)}</div>
+            <div class="wire-card-meta" style="font-size:0.8rem;color:rgba(255,255,255,0.4);">${escHtml(s.source_name)} &bull; ${timeAgo(s.created_at)}</div>
+        </div>
+    `).join('');
 
-    output.innerHTML = '';
-
-    const list = document.createElement('div');
-    list.className = 'wire-stories-list';
-    list.id = 'stories-list';
-
-    stories.slice(0, shownCount).forEach((story, i) => {
-        list.appendChild(buildRow(story, i));
-    });
-
-    output.appendChild(list);
+    output.innerHTML = items;
 
     if (stories.length > shownCount) {
-        const moreBtn = document.createElement('button');
-        moreBtn.className = 'wire-refresh-btn';
-        moreBtn.id = 'load-more-btn';
-        moreBtn.style.cssText = 'display:block;margin:1.5rem auto 0;padding:0.75rem 2rem;font-size:0.9rem;';
-        moreBtn.textContent = `↓ Show More (${stories.length - shownCount} remaining)`;
-        moreBtn.onclick = loadMore;
-        output.appendChild(moreBtn);
-    }
-}
-
-function buildRow(story, i) {
-    const row = document.createElement('article');
-    row.className = 'wire-story-row';
-    row.setAttribute('tabindex', '0');
-    row.setAttribute('role', 'button');
-    row.setAttribute('aria-label', story.title || 'Wire story');
-    row.onclick = () => openModal(i);
-    row.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(i); } };
-
-    // Show first paragraph only on the row
-    const firstPara = getFirstParagraph(story.summary);
-    row.innerHTML = `
-        <div class="wire-row-top">
-            <span class="wire-genre-tag ${genreClass(story.genre)}">${escHtml(story.genre || 'Rock')}</span>
-            <span class="wire-card-time">${timeAgo(story.created_at)}</span>
-        </div>
-        <h2 class="wire-card-title">${escHtml(story.title || '')}</h2>
-        ${firstPara ? `<p class="wire-card-para">${escHtml(firstPara)}</p>` : ''}
-        <div class="wire-card-meta">
-            <span class="wire-card-source">📰 ${escHtml(story.source_name || 'ROCK.SCOT')}</span>
-            <span class="wire-read-more">Read more ↓</span>
-        </div>`;
-    return row;
-}
-
-function loadMore() {
-    const list = document.getElementById('stories-list');
-    if (!list) return;
-    const newCount = Math.min(shownCount + STORIES_PER_PAGE, filteredStories.length);
-    for (let i = shownCount; i < newCount; i++) {
-        list.appendChild(buildRow(filteredStories[i], i));
-    }
-    shownCount = newCount;
-    const btn = document.getElementById('load-more-btn');
-    if (btn) {
-        const remaining = filteredStories.length - shownCount;
-        if (remaining <= 0) btn.remove();
-        else btn.textContent = `↓ Show More (${remaining} remaining)`;
-    }
-}
-
-// ── MODAL ─────────────────────────────────────────────────
-function openModal(index) {
-    const story = filteredStories[index];
-    if (!story) return;
-
-    document.getElementById('modal-genre').innerHTML = `<span class="wire-genre-tag ${genreClass(story.genre)}">${escHtml(story.genre || 'Rock')}</span>`;
-    document.getElementById('modal-title').textContent = story.title || '';
-    document.getElementById('modal-meta').textContent  = `${escHtml(story.source_name || 'ROCK.SCOT')} · ${timeAgo(story.created_at)}`;
-    document.getElementById('modal-summary').textContent = story.summary || 'No summary available. Click below to read the full story at source.';
-
-    const linkEl = document.getElementById('modal-link');
-    const hasLink = story.source_url && story.source_url.startsWith('http');
-    if (hasLink) {
-        linkEl.onclick = (e) => {
-            e.preventDefault();
-            window.open(story.source_url, 'rockscot_source',
-                'width=1100,height=700,scrollbars=yes,resizable=yes,toolbar=no,menubar=no');
+        const btn = document.createElement('button');
+        btn.style = "width:100%;padding:1rem;background:transparent;border:none;color:#ff6b00;font-weight:bold;cursor:pointer;";
+        btn.textContent = `Load More (${stories.length - shownCount} remaining)`;
+        btn.onclick = () => {
+            shownCount = Math.min(shownCount + STORIES_PER_PAGE, stories.length);
+            renderStories(stories);
         };
-        linkEl.href = story.source_url;
-        linkEl.textContent = `Read Full Story at ${escHtml(story.source_name || 'Source')} ↗`;
-        linkEl.classList.remove('hidden');
-    } else {
-        linkEl.classList.add('hidden');
+        output.appendChild(btn);
     }
 
-    document.getElementById('story-modal').classList.add('open');
-    document.body.style.overflow = 'hidden';
+    if (statusEl) statusEl.textContent = stories.length + ' Stories Live';
 }
 
-function closeModal() {
-    document.getElementById('story-modal').classList.remove('open');
-    document.body.style.overflow = '';
-}
-
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-document.getElementById('story-modal').addEventListener('click', e => {
-    if (e.target === document.getElementById('story-modal')) closeModal();
-});
-
-
-// ── LOAD STORIES ──────────────────────────────────────────
-async function loadStories(showRefreshFeedback = false) {
+async function loadStories() {
     if (isLoading) return;
     isLoading = true;
-
+    
     const statusEl = document.getElementById('wire-status-text');
-    const loadingEl = document.getElementById('wire-loading');
-
-    if (statusEl) statusEl.textContent = showRefreshFeedback ? 'Refreshing...' : 'Connecting...';
-    if (loadingEl && showRefreshFeedback) loadingEl.style.display = 'block';
+    if (statusEl) statusEl.textContent = 'Updating...';
 
     try {
-        // Use header.js SUPA_KEY which is confirmed working
-        const key = (typeof SUPA_KEY !== 'undefined' ? SUPA_KEY : SUPABASE_KEY);
-        const url = SUPABASE_URL + '/rest/v1/wire_news?select=id,title,summary,source_url,source_name,genre,created_at&order=created_at.desc&limit=200';
-        const res = await fetch(url, {
-            headers: {
-                'apikey': key,
-                'Authorization': 'Bearer ' + key,
-                'Content-Type': 'application/json'
-            }
+        const key = (typeof SUPA_KEY !== 'undefined' && SUPA_KEY) ? SUPA_KEY : SUPABASE_KEY;
+        const res = await fetch(SUPABASE_URL + '/rest/v1/wire_news?select=*&order=created_at.desc&limit=200', {
+            headers: { 'apikey': key, 'Authorization': 'Bearer ' + key }
         });
-
-        if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
-
-        if (data && data.length > 0) {
-            allStories = data;
-            renderStories(allStories);
-            if (statusEl) statusEl.textContent = data.length + ' Stories Live';
-        } else {
-            allStories = generatePlaceholderStories();
-            renderStories(allStories);
-            if (statusEl) statusEl.textContent = 'Stories Loading';
-        }
-    } catch (err) {
-        console.warn('Wire load error:', err.message);
-        allStories = generatePlaceholderStories();
+        allStories = data;
         renderStories(allStories);
-        if (statusEl) statusEl.textContent = 'Live';
+    } catch (e) {
+        console.error(e);
+        if (statusEl) statusEl.textContent = 'Offline';
     } finally {
         isLoading = false;
-        if (loadingEl) loadingEl.style.display = 'none';
     }
 }
 
-// Placeholder stories while RSS is being populated or Supabase not yet configured
-function generatePlaceholderStories() {
-    return [
-        { id:1, title:'Biffy Clyro Announce Massive Scottish Tour Dates For 2026', summary:'Scotland\'s own rock icons are set to tour extensively across their home nation this year, with dates confirmed for Glasgow, Edinburgh, Dundee and Aberdeen.', source_name:'ROCK.SCOT', source_url:'https://rock.scot', genre:'Rock', created_at: new Date(Date.now()-3600000).toISOString() },
-        { id:2, title:'Twin Atlantic Release Surprise New EP — Stream It Now', summary:'The Glasgow rockers have dropped a surprise 5-track EP featuring raw, live-in-studio recordings that capture their signature anthemic sound.', source_name:'NME', source_url:'https://nme.com', genre:'Rock', created_at: new Date(Date.now()-7200000).toISOString() },
-        { id:3, title:'King Tut\'s Wah Wah Hut Announces Landmark Anniversary Shows', summary:'Glasgow\'s legendary venue celebrates a milestone with a series of special shows featuring some of Scotland\'s most iconic acts.', source_name:'The Skinny', source_url:'https://theskinny.co.uk', genre:'Indie', created_at: new Date(Date.now()-14400000).toISOString() },
-        { id:4, title:'New Scottish Metal Band Crannog Signs To Major Label', summary:'Stirling-based progressive metal outfit Crannog have signed a multi-album deal following their breakthrough performance at Download Festival.', source_name:'Loudersound', source_url:'https://loudersound.com', genre:'Metal', created_at: new Date(Date.now()-21600000).toISOString() },
-        { id:5, title:'Frightened Rabbit Tribute Concert Raises £50K For Mental Health Charities', summary:'An emotional evening of music at the Barrowland Ballroom raised significant funds for Scottish mental health services in honour of the late Scott Hutchison.', source_name:'Glasgow Times', source_url:'https://glasgowtimes.co.uk', genre:'Indie', created_at: new Date(Date.now()-28800000).toISOString() },
-        { id:6, title:'The Twilight Sad Confirm First Album In Five Years', summary:'The Kilmarnock post-rock outfit have confirmed work is underway on their long-awaited fifth album, expected later this year.', source_name:'SNACK Music', source_url:'https://snackmag.co.uk', genre:'Alternative', created_at: new Date(Date.now()-36000000).toISOString() },
-        { id:7, title:'Slam Dunk Scotland Returns With Biggest Lineup Yet', summary:'The punk and rock festival confirms its Scottish leg with a headline slot from a Grammy-winning American punk act alongside 30+ Scottish bands.', source_name:'reSOUND Online', source_url:'https://re-sound.co.uk', genre:'Punk', created_at: new Date(Date.now()-43200000).toISOString() },
-        { id:8, title:'Mogwai Score New BBC Documentary On Scottish Landscape', summary:'The Glasgow post-rock legends have composed an original score for an upcoming BBC Scotland nature documentary, set to air this spring.', source_name:'The Guardian', source_url:'https://theguardian.com', genre:'Alternative', created_at: new Date(Date.now()-50400000).toISOString() },
-        { id:9, title:'Record Store Day Scotland: Best Releases And Where To Get Them', summary:'A guide to the most exciting Scottish-specific releases for this year\'s Record Store Day, including exclusive vinyl from CHVRCHES, Franz Ferdinand and Idlewild.', source_name:'Gigs in Scotland', source_url:'https://gigsinscotland.com', genre:'Indie', created_at: new Date(Date.now()-57600000).toISOString() },
-    ];
-}
-
-// ── REALTIME SUBSCRIPTION ──────────────────────────────────
-function subscribeRealtime() {
-    // Poll every 30s as realtime fallback (works without SDK)
-    setInterval(() => loadStories(), 30 * 1000);
-}
-
-// ── HTML HELPERS ──────────────────────────────────────────
-function escHtml(str) {
-    return String(str)
-        .replace(/&/g,'&amp;')
-        .replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;')
-        .replace(/"/g,'&quot;');
-}
-function escAttr(str) {
-    return String(str).replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
-}
-
-// ── INIT ──────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    loadStories();
-    subscribeRealtime();
+    setTimeout(loadStories, 200);
+    setInterval(loadStories, 300000);
 });
 </script>
 </body>
