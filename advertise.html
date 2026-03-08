@@ -688,6 +688,67 @@
         console.warn('Supabase client failed to initialise. Quote UI will still work; live capacity checks may be skipped.');
     }
 
+    // ── LIVE RATES FROM site_settings ────────────────────────────
+    // Fetches current prices from Supabase and updates all display
+    // elements. Falls back to hardcoded defaults if fetch fails.
+    async function loadLiveRates() {
+        try {
+            const resp = await fetch(
+                SUPABASE_URL + '/rest/v1/site_settings?select=key,value',
+                { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+            );
+            if (!resp.ok) throw new Error('rates fetch failed');
+            const rows = await resp.json();
+            if (!Array.isArray(rows) || !rows.length) throw new Error('no rates returned');
+
+            const r = {};
+            rows.forEach(row => { r[row.key] = parseFloat(row.value) || 0; });
+
+            // Update PACKAGES prices in place
+            PACKAGES['regional'].pricePence        = Math.round((r.single_inverclyde || 495) * 100);
+            PACKAGES['multi-regional'].pricePence  = Math.round((r.multi_regional    || 1245) * 100);
+            PACKAGES['top-of-hour'].pricePence     = Math.round((r.top_of_hour       || 350) * 100);
+            BOLT_ON_PENCE_LIVE                     = Math.round((r.production_bolt_on || 150) * 100);
+            RUSH_PENCE_LIVE                        = Math.round((r.rush_fee           || 75) * 100);
+            VAT_RATE_LIVE                          = (r.vat_rate || 20) / 100;
+
+            // Update visible package card prices
+            const cards = document.querySelectorAll('.package-card');
+            const fmt = p => '£' + (p/100).toLocaleString('en-GB');
+            if (cards[0]) cards[0].querySelector('.package-price').textContent = fmt(PACKAGES['regional'].pricePence);
+            if (cards[1]) cards[1].querySelector('.package-price').textContent = fmt(PACKAGES['multi-regional'].pricePence);
+            if (cards[2]) cards[2].querySelector('.package-price').textContent = fmt(PACKAGES['top-of-hour'].pricePence);
+
+            // Update dropdown option labels
+            const pkgSelect = document.getElementById('package');
+            if (pkgSelect) {
+                Array.from(pkgSelect.options).forEach(opt => {
+                    if (opt.value === 'regional')      opt.text = `Regional — Single Mux (${fmt(PACKAGES['regional'].pricePence)})`;
+                    if (opt.value === 'multi-regional') opt.text = `Multi-Regional — All 3 Mux (${fmt(PACKAGES['multi-regional'].pricePence)})`;
+                    if (opt.value === 'top-of-hour')   opt.text = `Top of Hour — Station Ident (${fmt(PACKAGES['top-of-hour'].pricePence)})`;
+                });
+            }
+
+            // Update bolt-on label
+            const boltLabel = document.querySelector('label[for="bolt-on"], label:has(#bolt-on)');
+            if (boltLabel) boltLabel.innerHTML = boltLabel.innerHTML.replace(/\+£[\d,]+/, `+${fmt(BOLT_ON_PENCE_LIVE)}`);
+
+            // Update rush surcharge text
+            const rushWarn = document.getElementById('surcharge-warning');
+            if (rushWarn) rushWarn.innerHTML = rushWarn.innerHTML.replace(/\+£[\d,]+/, `+${fmt(RUSH_PENCE_LIVE)}`);
+
+        } catch(e) {
+            console.warn('Live rates unavailable, using defaults:', e.message);
+        }
+    }
+
+    // Mutable live rate vars (overridden by loadLiveRates, fallback to hardcoded)
+    let BOLT_ON_PENCE_LIVE = BOLT_ON_PENCE;
+    let RUSH_PENCE_LIVE    = RUSH_PENCE;
+    let VAT_RATE_LIVE      = 0.20;
+
+    loadLiveRates();
+
     // ── BROADCAST CONSTANTS (mirrors broadcast_constants table) ──
     const BC = {
         playsStandard:  134,   // single + multi campaigns
@@ -904,11 +965,11 @@
         const start    = new Date(startDate);
         const daysOut  = Math.ceil((start - today) / 86400000);
         const isRush   = daysOut >= 0 && daysOut < 27;
-        const rushAmt  = isRush ? RUSH_PENCE : 0;
-        const boltAmt  = (hasBoltOn && pkg.boltOnAvail) ? BOLT_ON_PENCE : 0;
+        const rushAmt  = isRush ? RUSH_PENCE_LIVE : 0;
+        const boltAmt  = (hasBoltOn && pkg.boltOnAvail) ? BOLT_ON_PENCE_LIVE : 0;
 
         const netPence = pkg.pricePence + rushAmt + boltAmt;
-        const vatPence = Math.round(netPence * 0.20);
+        const vatPence = Math.round(netPence * VAT_RATE_LIVE);
         const totPence = netPence + vatPence;
 
         // Show/hide rush warning
@@ -935,10 +996,10 @@
             <p><strong>Plays:</strong> ${playsText}</p>
             <p><strong>Break times:</strong> :20 and :40 past each hour</p>
             <p><strong>Base price:</strong> £${(pkg.pricePence/100).toLocaleString()}</p>
-            ${isRush   ? `<p><strong>Rush surcharge:</strong> £${(RUSH_PENCE/100).toLocaleString()}</p>` : ''}
-            ${boltAmt  ? `<p><strong>Production add-on:</strong> £${(BOLT_ON_PENCE/100).toLocaleString()}</p>` : ''}
-            <p><strong>Net:</strong> £${(netPence/100).toLocaleString()}</p>
-            <p><strong>VAT (20%):</strong> £${(vatPence/100).toLocaleString()}</p>
+            ${isRush   ? `<p><strong>Rush surcharge:</strong> £${(RUSH_PENCE_LIVE/100).toLocaleString()}</p>` : ''}
+            ${boltAmt  ? `<p><strong>Production add-on:</strong> £${(BOLT_ON_PENCE_LIVE/100).toLocaleString()}</p>` : ''}
+            <p><strong>Net (ex-VAT):</strong> £${(netPence/100).toLocaleString()}</p>
+            <p><strong>VAT (${Math.round(VAT_RATE_LIVE*100)}%):</strong> £${(vatPence/100).toLocaleString()}</p>
             <p style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(255,255,255,0.2);">
                 <strong>Total inc. VAT:</strong> £${(totPence/100).toLocaleString()}
             </p>
@@ -990,8 +1051,8 @@
         const start   = new Date(startDate);
         const daysOut = Math.ceil((start - today) / 86400000);
         const isRush  = daysOut >= 0 && daysOut < 27;
-        const rushAmt = isRush ? RUSH_PENCE : 0;
-        const boltAmt = (hasBoltOn && pkg.boltOnAvail) ? BOLT_ON_PENCE : 0;
+        const rushAmt = isRush ? RUSH_PENCE_LIVE : 0;
+        const boltAmt = (hasBoltOn && pkg.boltOnAvail) ? BOLT_ON_PENCE_LIVE : 0;
         const netPence = pkg.pricePence + rushAmt + boltAmt;
 
         // Validate: single-mux must have selected_mux
