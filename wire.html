@@ -434,24 +434,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 </body>
-</html><script>
-// Pull stories directly using confirmed working key from header.js
-(function tryLoad() {
-    const key = (typeof SUPA_KEY !== 'undefined') ? SUPA_KEY : null;
-    if (!key) { setTimeout(tryLoad, 100); return; }
-    fetch('https://pwzeapvopeeoahpyicdm.supabase.co/rest/v1/wire_news?select=id,title,summary,source_url,source_name,genre,created_at&order=created_at.desc&limit=200', {
-        headers: { 'apikey': key, 'Authorization': 'Bearer ' + key }
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-            allStories = data;
-            filteredStories = [...data];
-            renderStories(filteredStories);
-            const s = document.getElementById('wire-status-text');
-            if (s) s.textContent = data.length + ' Stories Live';
-        }
-    })
-    .catch(e => console.warn('wire fallback failed', e));
-})();
-</script>
+</html>
