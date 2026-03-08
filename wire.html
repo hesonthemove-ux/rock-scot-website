@@ -1,157 +1,38 @@
 <!DOCTYPE html>
-<html lang="en-GB">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>The Wire | ROCK.SCOT — Real-Time Scottish Rock News</title>
-    <meta name="description" content="The Wire — real-time Scottish rock music news, gig listings, and scene updates powered by ROCK.SCOT. Metal, Punk, Indie and Alternative stories updated live.">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://rock.scot/wire.html">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="The Wire — Real-Time Scottish Rock News | ROCK.SCOT">
-    <meta property="og:description" content="Live Scottish rock, metal, punk and indie news powered by ROCK.SCOT on DAB+ digital radio.">
-    <meta property="og:image" content="https://rock.scot/assets/images/hero-graffiti-main.jpg">
-    <meta name="twitter:card" content="summary_large_image">
-    <link rel="icon" type="image/png" href="/assets/images/logo.png">
-    <meta name="theme-color" content="#FF6600">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=13">
-    
-      
-    <!-- AEO: NewsMediaOrganization + BreadcrumbList -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "@id": "https://rock.scot/wire.html",
-    "name": "The Wire — Scottish Rock News",
-    "description": "Real-time Scottish rock music news aggregated from 40+ sources including NME Scotland, The Skinny, Glasgow Music, and Scottish music publications. All stories credited to and linked from their original sources.",
-    "url": "https://rock.scot/wire.html",
-    "publisher": {
-      "@type": "RadioStation",
-      "@id": "https://rock.scot/#radiostation",
-      "name": "ROCK.SCOT"
-    },
-    "about": {
-      "@type": "Thing",
-      "name": "Scottish Rock Music News"
-    },
-    "breadcrumb": {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type":"ListItem","position":1,"name":"ROCK.SCOT","item":"https://rock.scot/"},
-        {"@type":"ListItem","position":2,"name":"The Wire","item":"https://rock.scot/wire.html"}
-      ]
-    }
-  }
-  </script>
-<script src="/rock/js/header.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Wire | ROCK.SCOT</title>
+    <style>
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; }
+        .wire-container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .wire-card { padding: 1.5rem; border-bottom: 1px solid #222; cursor: pointer; transition: background 0.2s; }
+        .wire-card:hover { background: #111; }
+        .wire-card-genre { color: #ff6b00; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .wire-card-title { font-size: 1.2rem; font-weight: 700; margin: 0.5rem 0; line-height: 1.3; }
+        .wire-card-meta { font-size: 0.85rem; color: rgba(255,255,255,0.4); }
+        #wire-status-text { color: #ff6b00; font-weight: bold; font-size: 0.9rem; }
+        .load-more-btn { width: 100%; padding: 1.2rem; background: #1a1a1a; border: 1px solid #333; color: #ff6b00; font-weight: 800; text-transform: uppercase; cursor: pointer; margin-top: 20px; border-radius: 4px; }
+    </style>
 </head>
 <body>
+    <div class="wire-container">
+        <h1 style="color:#ff6b00;">THE WIRE</h1>
+        <p style="opacity:0.7;">Real-time Scottish rock news. <span id="wire-status-text">Connecting...</span></p>
+        
+        <div id="wire-output"></div>
+        <div id="wire-loading" style="text-align:center; padding: 2rem;">Loading news feed...</div>
+    </div>
 
-<!-- WIRE HERO -->
-<div class="wire-hero" style="margin-top: 98px;">
-    <div class="wire-hero-inner" style="display:flex;align-items:center;gap:1rem;padding:1.25rem 1.25rem 0;">
-        <img src="assets/images/burst.png"
-             alt="ROCK.SCOT — Scotland's DAB+ Rock Station"
-             loading="eager"
-             style="width:110px;max-width:28%;height:auto;object-fit:contain;flex-shrink:0;">
-        <div style="flex:1;min-width:0;">
-            <h1 class="wire-title">THE<br><span>WIRE</span></h1>
-            <p class="wire-subtitle">Real-time Scottish rock news — powered by <strong>ROCK.SCOT</strong><br>Updated continuously from 40+ Scottish music sources</p>
-        </div>
-        <div class="wire-stats" style="flex-shrink:0;text-align:center;">
-            <div class="wire-count" id="story-count">—</div>
-            <div class="wire-count-label">Stories Live</div>
-        </div>
-    </div>
-</div>
-
-<!-- CONTROLS: compact pill row, not sticky -->
-<div class="wire-controls-slim">
-    <div class="wire-genre-pills">
-        <button class="wire-pill active" onclick="setPillFilter('',this)">All</button>
-        <button class="wire-pill" onclick="setPillFilter('Rock',this)">Rock</button>
-        <button class="wire-pill" onclick="setPillFilter('Metal',this)">Metal</button>
-        <button class="wire-pill" onclick="setPillFilter('Punk',this)">Punk</button>
-        <button class="wire-pill" onclick="setPillFilter('Indie',this)">Indie</button>
-        <button class="wire-pill" onclick="setPillFilter('Alternative',this)">Alt</button>
-    </div>
-    <div class="wire-controls-right">
-        <div class="wire-status">
-            <div class="wire-live-dot" aria-hidden="true"></div>
-            <span id="wire-status-text">Connecting...</span>
-        </div>
-        <button class="wire-refresh-btn-sm" onclick="loadStories(true)" aria-label="Refresh">↻</button>
-    </div>
-</div>
-
-<!-- STORIES OUTPUT -->
-<div id="wire-output">
-    <div class="wire-loading" id="wire-loading">
-        <div class="wire-spinner" aria-hidden="true"></div>
-        <p>Loading Scottish rock news...</p>
-    </div>
-</div>
-
-<!-- STORY MODAL -->
-<div class="wire-modal-overlay" id="story-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div class="wire-modal">
-        <button class="wire-modal-close" onclick="closeModal()" aria-label="Close">✕</button>
-        <div id="modal-genre" class="wire-modal-genre"></div>
-        <h2 class="wire-modal-title" id="modal-title"></h2>
-        <p class="wire-modal-meta" id="modal-meta"></p>
-        <p class="wire-modal-summary" id="modal-summary"></p>
-        <p style="font-size:0.75rem;color:rgba(242,242,242,0.35);margin-bottom:0.75rem;font-style:italic;">Summary by ROCK.SCOT — original story credited below</p>
-        <a href="#" id="modal-link" class="wire-modal-cta" target="_blank" rel="noopener noreferrer">Read Full Story at Source ↗</a>
-    </div>
-</div>
-
-<!-- FOOTER -->
-<footer>
-  <div class="footer-grid">
-    <div class="footer-brand">
-      <img src="assets/images/logo.png" alt="ROCK.SCOT" style="height:44px;width:auto;">
-      <p>Scotland's rock station on DAB+ digital radio. Broadcasting Metal, Alt, Punk and Classic Rock 24/7 across West Scotland.</p>
-      <p style="margin-top:0.75rem;">Ofcom Licensed · SC646223 · VAT 491589639</p>
-    </div>
-    <div class="footer-col">
-      <h4>The Wire</h4>
-      <p>Real-time Scottish rock news</p>
-      <p>Updated continuously</p>
-      <a href="wire.html">Read The Wire →</a>
-    </div>
-    <div class="footer-col">
-      <h4>Navigate</h4>
-      <a href="index.html">Home</a>
-      <a href="wire.html">The Wire</a>
-      <a href="coverage.html">Coverage</a>
-      <a href="advertise.html" class="orange">Advertise</a>
-    </div>
-    <div class="footer-col">
-      <h4>Contact</h4>
-      <a href="tel:01414597625" class="orange">0141 459 ROCK</a>
-      <a href="/cdn-cgi/l/email-protection#dfacabaabbb6b09fadb0bcb4f1acbcb0ab"><span class="__cf_email__" data-cfemail="8dfef9f8e9e4e2cdffe2eee6a3feeee2f9">[email&#160;protected]</span></a>
-      <a href="/cdn-cgi/l/email-protection#29484d5f4c5b5d405a4c695b464a42075a4a465d"><span class="__cf_email__" data-cfemail="09686d7f6c7b7d607a6c497b666a62277a6a667d">[email&#160;protected]</span></a>
-      <a href="https://bsky.app/profile/rockscot.bsky.social" target="_blank" rel="noopener">Bluesky ↗</a>
-    </div>
-  </div>
-  <div class="footer-bottom">© 2026 ROCK.SCOT · Scotland's Rock Station · Caledonia TX Ltd · SC646223 · VAT 491589639 · Ofcom Licensed</div>
-</footer>
-
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 const SUPABASE_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
 
 let allStories = [];
-const STORIES_PER_PAGE = 20;
-let shownCount = 0;
-let isLoading = false;
+let shownCount = 20;
 
-function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function escAttr(s) { return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#x27;'); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function timeAgo(d) {
     const s = Math.floor((Date.now() - new Date(d)) / 1000);
@@ -160,69 +41,46 @@ function timeAgo(d) {
     return Math.floor(s / 86400) + 'd ago';
 }
 
-function renderStories(stories) {
-    const output = document.getElementById('wire-output');
-    const statusEl = document.getElementById('wire-status-text');
-    const loading = document.getElementById('wire-loading');
-    
-    if (loading) loading.style.display = 'none';
-    if (!output) return;
-
-    if (!stories || stories.length === 0) {
-        output.innerHTML = '<div style="text-align:center;padding:3rem;opacity:0.5;">No stories found.</div>';
-        return;
+async function loadStories() {
+    const status = document.getElementById('wire-status-text');
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/wire_news?select=*&order=created_at.desc&limit=100', {
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        });
+        allStories = await res.json();
+        render();
+        if (status) status.textContent = allStories.length + ' Stories Live';
+    } catch (e) {
+        console.error(e);
+        if (status) status.textContent = 'Offline';
     }
+}
 
-    shownCount = Math.min(STORIES_PER_PAGE, stories.length);
-    const items = stories.slice(0, shownCount).map(s => `
-        <div class="wire-card" style="cursor:pointer;padding:1.25rem;border-bottom:1px solid #1e1e1e;" onclick="window.open('${escAttr(s.source_url)}','_blank')">
-            <div class="wire-card-genre" style="color:#ff6b00;font-size:0.7rem;text-transform:uppercase;font-weight:800;">${escHtml(s.genre || 'ROCK')}</div>
-            <div class="wire-card-title" style="font-size:1.1rem;font-weight:700;margin:0.4rem 0;color:#fff;">${escHtml(s.title)}</div>
-            <div class="wire-card-meta" style="font-size:0.8rem;color:rgba(255,255,255,0.4);">${escHtml(s.source_name)} &bull; ${timeAgo(s.created_at)}</div>
+function render() {
+    const out = document.getElementById('wire-output');
+    const load = document.getElementById('wire-loading');
+    if (load) load.style.display = 'none';
+    if (!out) return;
+
+    out.innerHTML = allStories.slice(0, shownCount).map(s => `
+        <div class="wire-card" onclick="window.open('${s.source_url}','_blank')">
+            <div class="wire-card-genre">${esc(s.genre || 'ROCK')}</div>
+            <div class="wire-card-title">${esc(s.title)}</div>
+            <div class="wire-card-meta">${esc(s.source_name)} &bull; ${timeAgo(s.created_at)}</div>
         </div>
     `).join('');
 
-    output.innerHTML = items;
-
-    if (stories.length > shownCount) {
+    if (allStories.length > shownCount) {
         const btn = document.createElement('button');
-        btn.style = "width:100%;padding:1rem;background:transparent;border:none;color:#ff6b00;font-weight:bold;cursor:pointer;";
-        btn.textContent = `Load More (${stories.length - shownCount} remaining)`;
-        btn.onclick = () => {
-            shownCount = Math.min(shownCount + STORIES_PER_PAGE, stories.length);
-            renderStories(stories);
-        };
-        output.appendChild(btn);
-    }
-
-    if (statusEl) statusEl.textContent = stories.length + ' Stories Live';
-}
-
-async function loadStories() {
-    if (isLoading) return;
-    isLoading = true;
-    
-    const statusEl = document.getElementById('wire-status-text');
-    if (statusEl) statusEl.textContent = 'Updating...';
-
-    try {
-        const key = (typeof SUPA_KEY !== 'undefined' && SUPA_KEY) ? SUPA_KEY : SUPABASE_KEY;
-        const res = await fetch(SUPABASE_URL + '/rest/v1/wire_news?select=*&order=created_at.desc&limit=200', {
-            headers: { 'apikey': key, 'Authorization': 'Bearer ' + key }
-        });
-        const data = await res.json();
-        allStories = data;
-        renderStories(allStories);
-    } catch (e) {
-        console.error(e);
-        if (statusEl) statusEl.textContent = 'Offline';
-    } finally {
-        isLoading = false;
+        btn.className = 'load-more-btn';
+        btn.textContent = 'LOAD MORE STORIES';
+        btn.onclick = () => { shownCount += 20; render(); };
+        out.appendChild(btn);
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(loadStories, 200);
+    loadStories();
     setInterval(loadStories, 300000);
 });
 </script>
