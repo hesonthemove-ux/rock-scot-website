@@ -2406,21 +2406,6 @@ function fmtProduct(p) {
 function badgeClass(status) {
   const map = {
     pending: 'badge-pending', confirmed: 'badge-confirmed', live: 'badge-live',
-    active: 'badge-live', cancelled: 'badge-cancelled', completed: 'badge-draft',
-    paid: 'badge-paid', invoiced: 'badge-invoiced', issued: 'badge-invoiced',
-    draft: 'badge-draft', overdue: 'badge-cancelled', expired: 'badge-expired',
-    approved: 'badge-approved', rejected: 'badge-cancelled', paused: 'badge-pending'
-  };
-  return map[status] || 'badge-draft';
-}
-
-function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).then(() => toast('Copied: ' + text, 'ok'));
-}
-
-function badgeClass(status) {
-  const map = {
-    pending: 'badge-pending', confirmed: 'badge-confirmed', live: 'badge-live',
     active: 'badge-live', cancelled: 'badge-cancelled', completed: 'badge-completed',
     paid: 'badge-paid', invoiced: 'badge-invoiced', issued: 'badge-invoiced',
     draft: 'badge-draft', overdue: 'badge-cancelled', expired: 'badge-expired',
@@ -2903,25 +2888,81 @@ function markRatesDirty() {
 async function saveRates() {
   const token = currentSession?.access_token;
   const statusEl = document.getElementById('rates-status');
-  statusEl.textContent = 'Saving…';
-  statusEl.style.color = 'var(--muted)';
-  try {
-    const updates = RATE_FIELDS.map(f => ({
-      key: f.key,
-      value: document.getElementById('rate-' + f.key)?.value || '0',
-      updated_at: new Date().toISOString()
-    }));
-    await sbPost('/rest/v1/site_settings?on_conflict=key', updates, token);
-    updates.forEach(u => { currentRates[u.key] = u.value; });
-    statusEl.textContent = '✓ Saved';
-    statusEl.style.color = 'var(--green)';
-    toast('Rates saved — applies to all new quotes', 'ok');
-    setTimeout(() => { statusEl.textContent = ''; }, 3000);
-  } catch(e) {
-    statusEl.textContent = '⚠ Save failed';
-    statusEl.style.color = 'var(--red)';
-    toast('Save failed: ' + e.message, 'err');
+
+  // Collect new values
+  const updates = RATE_FIELDS.map(f => ({
+    key: f.key,
+    value: document.getElementById('rate-' + f.key)?.value || '0',
+    updated_at: new Date().toISOString()
+  }));
+
+  // Show confirmation dialog
+  const changes = RATE_FIELDS.map(f => {
+    const oldVal = currentRates[f.key] || '0';
+    const newVal = document.getElementById('rate-' + f.key)?.value || '0';
+    const changed = oldVal !== newVal;
+    const prefix = f.isPercent ? '' : '£';
+    const suffix = f.isPercent ? '%' : '';
+    return changed
+      ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid var(--border);">
+          <span style="font-size:0.82rem;color:var(--white);">${escH(f.label)}</span>
+          <span style="font-size:0.82rem;">
+            <span style="color:var(--muted);text-decoration:line-through;">${prefix}${escH(oldVal)}${suffix}</span>
+            <span style="color:var(--orange);margin-left:0.5rem;font-weight:700;">→ ${prefix}${escH(newVal)}${suffix}</span>
+          </span>
+        </div>`
+      : null;
+  }).filter(Boolean);
+
+  if (!changes.length) {
+    toast('No changes to save', 'ok');
+    return;
   }
+
+  // Build confirm modal
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem;';
+  overlay.innerHTML = `
+    <div style="background:var(--panel);border:1px solid var(--border);border-radius:4px;max-width:480px;width:100%;padding:1.5rem;">
+      <div style="font-family:var(--font-cond);font-size:0.68rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--orange);margin-bottom:0.5rem;">⚠ Confirm Rate Changes</div>
+      <div style="font-family:var(--font-display);font-size:1.4rem;margin-bottom:1rem;">Are you sure?</div>
+      <div style="font-size:0.8rem;color:var(--muted);line-height:1.6;margin-bottom:1rem;padding:0.75rem;background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:var(--radius);">
+        These changes will apply <strong style="color:var(--white);">immediately</strong> to all new quotes, invoices, and contracts across the site. Existing confirmed bookings and their correspondence are <strong style="color:var(--green);">not affected</strong>.
+      </div>
+      <div style="margin-bottom:1.25rem;">${changes.join('')}</div>
+      <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+        <button id="rates-cancel-btn" class="btn btn-ghost">Cancel</button>
+        <button id="rates-confirm-btn" class="btn btn-primary">✓ Commit to Site</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  document.getElementById('rates-cancel-btn').onclick = () => overlay.remove();
+
+  document.getElementById('rates-confirm-btn').onclick = async () => {
+    const confirmBtn = document.getElementById('rates-confirm-btn');
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Saving…';
+    try {
+      await sbPost('/rest/v1/site_settings?on_conflict=key', updates, token);
+      updates.forEach(u => { currentRates[u.key] = u.value; });
+      overlay.innerHTML = `
+        <div style="background:var(--panel);border:1px solid var(--border);border-radius:4px;max-width:480px;width:100%;padding:2rem;text-align:center;">
+          <div style="font-size:2.5rem;margin-bottom:0.75rem;">✅</div>
+          <div style="font-family:var(--font-display);font-size:1.4rem;margin-bottom:0.5rem;">Rates Updated</div>
+          <div style="font-size:0.85rem;color:var(--muted);line-height:1.6;margin-bottom:1.25rem;">Changes are live across the site. All future quotes, invoices and contracts will use the new rates. Existing bookings are unaffected.</div>
+          <button class="btn btn-primary" onclick="this.closest('[style*=fixed]').remove()">Done</button>
+        </div>`;
+      statusEl.textContent = '✓ Saved';
+      statusEl.style.color = 'var(--green)';
+      setTimeout(() => { statusEl.textContent = ''; }, 4000);
+    } catch(e) {
+      overlay.remove();
+      toast('Save failed: ' + e.message, 'err');
+      statusEl.textContent = '⚠ Save failed';
+      statusEl.style.color = 'var(--red)';
+    }
+  };
 }
 
 function getRate(key) {
