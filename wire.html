@@ -197,25 +197,7 @@ function genreClass(genre) {
     return (genre || 'rock').toLowerCase().replace(/[^a-z]/g,'');
 }
 
-// ── SEARCH / FILTER ────────────────────────────────────────
-let activeGenreFilter = '';
 
-function setPillFilter(genre, btn) {
-    activeGenreFilter = genre;
-    document.querySelectorAll('.wire-pill').forEach(p => p.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-    filterStories();
-}
-
-function filterStories() {
-    const genre = activeGenreFilter.toLowerCase();
-
-    filteredStories = allStories.filter(s => {
-        return !genre || (s.genre || '').toLowerCase() === genre;
-    });
-
-    renderStories(filteredStories);
-}
 
 // ── RENDER STORIES ─────────────────────────────────────────
 const STORIES_PER_PAGE = 20;
@@ -383,8 +365,7 @@ async function loadStories(showRefreshFeedback = false) {
     } catch (err) {
         console.warn('Wire load error:', err.message);
         allStories = generatePlaceholderStories();
-        filteredStories = [...allStories];
-        renderStories(filteredStories);
+        renderStories(allStories);
         if (statusEl) statusEl.textContent = 'Live';
     } finally {
         isLoading = false;
