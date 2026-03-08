@@ -48,6 +48,124 @@
   }
   </script>
 <script src="/rock/js/header.js"></script>
+
+<style>
+    /* Magazine Card Layout */
+    #wire-output {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        padding-top: 20px;
+    }
+    .wire-card {
+        background: #111;
+        border: 1px solid #222;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: transform 0.2s, border-color 0.2s;
+        display: flex;
+        flex-direction: column;
+    }
+    .wire-card:hover {
+        transform: translateY(-5px);
+        border-color: #ff6b00;
+    }
+    .wire-card-content { padding: 1.5rem; }
+    .wire-card-genre { color: #ff6b00; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .wire-card-title { font-size: 1.25rem; font-weight: 700; color: #fff; line-height: 1.2; margin-bottom: 1rem; }
+    .wire-card-meta { font-size: 0.8rem; color: #666; }
+
+    /* Pop-out Modal Style */
+    #story-modal {
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; padding: 20px;
+    }
+    .modal-content {
+        background: #111; border: 1px solid #333; width: 100%; max-width: 600px;
+        border-radius: 12px; padding: 2rem; position: relative; color: #fff;
+    }
+    .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2rem; color: #666; cursor: pointer; }
+    .modal-source-btn {
+        display: inline-block; margin-top: 2rem; padding: 12px 24px;
+        background: #ff6b00; color: #000; text-decoration: none; font-weight: 900; border-radius: 4px;
+    }
+</style>
+
+<div id="story-modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <div id="modal-genre" class="wire-card-genre"></div>
+        <h2 id="modal-title" style="margin-top:0;"></h2>
+        <p id="modal-summary" style="line-height:1.6; color:#ccc;"></p>
+        <div style="font-size:0.8rem; color:#555; margin-top:1rem;">Source: <span id="modal-source-name"></span></div>
+        <a id="modal-link" href="#" target="_blank" class="modal-source-btn">READ FULL STORY AT SOURCE</a>
+    </div>
+</div>
+
+<style>
+    #wire-output {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 25px;
+        padding: 20px 0;
+    }
+    .wire-card {
+        background: #111;
+        border: 1px solid #222;
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.3s, border-color 0.3s;
+        display: flex;
+        flex-direction: column;
+    }
+    .wire-card:hover {
+        transform: translateY(-8px);
+        border-color: #ff6b00;
+    }
+    .wire-card-img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        background: #000;
+    }
+    .wire-card-content { padding: 1.5rem; flex-grow: 1; }
+    .wire-card-genre { color: #ff6b00; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .wire-card-title { font-size: 1.2rem; font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 1rem; }
+    .wire-card-meta { font-size: 0.8rem; color: #555; display: flex; align-items: center; gap: 8px; }
+
+    /* Modal Styling */
+    #story-modal {
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.95); z-index: 99999; justify-content: center; align-items: center; padding: 20px;
+    }
+    .modal-box {
+        background: #0a0a0a; border: 1px solid #333; width: 100%; max-width: 650px;
+        border-radius: 16px; position: relative; color: #fff; overflow: hidden;
+    }
+    .modal-body { padding: 2rem; }
+    .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2.5rem; color: #ff6b00; cursor: pointer; z-index: 10; font-weight: bold; }
+    .modal-btn {
+        display: block; text-align: center; margin-top: 1.5rem; padding: 15px;
+        background: #ff6b00; color: #000; text-decoration: none; font-weight: 900; border-radius: 8px;
+    }
+</style>
+
+<div id="story-modal">
+    <div class="modal-box">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <img id="modal-img" src="" style="width:100%; height:250px; object-fit:cover;">
+        <div class="modal-body">
+            <div id="modal-genre" class="wire-card-genre"></div>
+            <h2 id="modal-title" style="margin: 0.5rem 0 1.5rem 0; line-height: 1.2;"></h2>
+            <p id="modal-summary" style="line-height:1.7; color:#bbb; font-size: 1.05rem;"></p>
+            <div style="margin-top:2rem; padding-top:1rem; border-top:1px solid #222; font-size:0.9rem; color:#666;">
+                Source: <span id="modal-source" style="color:#fff; font-weight:bold;"></span>
+            </div>
+            <a id="modal-link" href="#" target="_blank" class="modal-btn">READ FULL STORY AT SOURCE</a>
+        </div>
+    </div>
+</div>
 </head>
 <body>
 
@@ -82,7 +200,7 @@
     <div class="wire-controls-right">
         <div class="wire-status">
             <div class="wire-live-dot" aria-hidden="true"></div>
-            <span id="wire-status-text">Connecting...</span>
+            <span id="wire-status-text"></span>
         </div>
         <button class="wire-refresh-btn-sm" onclick="loadStories(true)" aria-label="Refresh">↻</button>
     </div>
@@ -144,40 +262,72 @@
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const SUPABASE_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
-let allStories = []; let shownCount = 20;
+
+let allStories = [];
+
+function getPlaceholder(source) {
+    const src = String(source).toLowerCase();
+    if (src.includes('nme')) return 'https://www.nme.com/wp-content/uploads/2016/09/NME_Logo.jpg';
+    if (src.includes('melody')) return 'https://upload.wikimedia.org/wikipedia/en/2/23/Melody_Maker_logo.png';
+    // Fallback to your hero image on the Pi
+    return '/assets/images/hero.png';
+}
+
 function timeAgo(d) {
     const s = Math.floor((Date.now() - new Date(d)) / 1000);
     if (s < 3600) return Math.floor(s / 60) + 'm ago';
     if (s < 86400) return Math.floor(s / 3600) + 'h ago';
     return Math.floor(s / 86400) + 'd ago';
 }
+
 async function loadStories() {
+    const status = document.getElementById('wire-status-text');
     try {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/wire_news?select=*&order=created_at.desc&limit=100', {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/wire_news?select=*&order=created_at.desc&limit=60', {
             headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
         });
         allStories = await res.json();
         render();
-    } catch (e) { console.error(e); }
-}
-function render() {
-    const out = document.getElementById('wire-output');
-    if (!out) return;
-    out.innerHTML = allStories.slice(0, shownCount).map(s => `
-        <div class="wire-card" style="cursor:pointer;padding:1.25rem;border-bottom:1px solid #1e1e1e;" onclick="window.open('${s.source_url}','_blank')">
-            <div class="wire-card-genre" style="color:#ff6b00;font-size:0.7rem;text-transform:uppercase;font-weight:800;">${s.genre || 'ROCK'}</div>
-            <div class="wire-card-title" style="font-size:1.1rem;font-weight:700;margin:0.4rem 0;color:#fff;">${s.title}</div>
-            <div class="wire-card-meta" style="font-size:0.8rem;color:rgba(255,255,255,0.4);">${s.source_name} &bull; ${timeAgo(s.created_at)}</div>
-        </div>`).join('');
-    if (allStories.length > shownCount) {
-        const btn = document.createElement('button');
-        btn.innerHTML = 'SHOW MORE';
-        btn.style = 'width:100%;padding:1rem;background:#ff6b00;color:#000;border:none;font-weight:bold;cursor:pointer;';
-        btn.onclick = () => { shownCount += 20; render(); };
-        out.appendChild(btn);
+        if (status) status.textContent = allStories.length + ' Stories Live';
+    } catch (e) {
+        if (status) status.textContent = 'Updating...';
     }
 }
+
+function openModal(id) {
+    const s = allStories.find(item => item.id === id);
+    if(!s) return;
+    document.getElementById('modal-title').textContent = s.title;
+    document.getElementById('modal-genre').textContent = s.genre || 'ROCK';
+    document.getElementById('modal-summary').textContent = s.summary || 'Click below to read the full story on the provider\'s website.';
+    document.getElementById('modal-source').textContent = s.source_name;
+    document.getElementById('modal-link').href = s.source_url;
+    document.getElementById('modal-img').src = getPlaceholder(s.source_name);
+    document.getElementById('story-modal').style.display = 'flex';
+}
+
+function closeModal() { document.getElementById('story-modal').style.display = 'none'; }
+
+function render() {
+    const out = document.getElementById('wire-output');
+    const load = document.getElementById('wire-loading');
+    if (load) load.style.display = 'none';
+    if (!out) return;
+
+    out.innerHTML = allStories.map(s => `
+        <div class="wire-card" onclick="openModal(${s.id})">
+            <img class="wire-card-img" src="${getPlaceholder(s.source_name)}">
+            <div class="wire-card-content">
+                <div class="wire-card-genre">${s.genre || 'ROCK'}</div>
+                <div class="wire-card-title">${s.title}</div>
+                <div class="wire-card-meta">${s.source_name} &bull; ${timeAgo(s.created_at)}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
 document.addEventListener('DOMContentLoaded', loadStories);
+window.onclick = function(e) { if (e.target == document.getElementById('story-modal')) closeModal(); }
 </script>
 </body>
 </html>
