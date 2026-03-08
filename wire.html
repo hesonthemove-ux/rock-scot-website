@@ -423,4 +423,11 @@ function escAttr(str) {
     return String(str).replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
 }
 
-// ── INIT ────�
+// ── INIT ──────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    loadStories();
+    subscribeRealtime();
+});
+</script>
+</body>
+</html>
