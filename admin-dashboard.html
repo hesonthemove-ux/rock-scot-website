@@ -1706,10 +1706,14 @@ function renderActivityRecent(items) {
 async function loadLeads() {
   document.getElementById('leads-table-output').innerHTML = '<div class="spinner"></div>';
   try {
-    const token = currentSession?.access_token;
-    if (!token) throw new Error('No session token — try signing out and back in');
+    // Get token — try currentSession first, then fall back to localStorage
+    let token = currentSession?.access_token;
+    if (!token) {
+      const key = Object.keys(localStorage).find(k => k.includes('supabase') && k.includes('auth'));
+      if (key) { try { token = JSON.parse(localStorage.getItem(key))?.access_token; } catch(e) {} }
+    }
+    if (!token) throw new Error('No session — please sign out and sign back in');
 
-    // Race the fetch against a 10s timeout
     const fetchWithTimeout = (url, opts, ms=10000) => {
       const controller = new AbortController();
       const tid = setTimeout(() => controller.abort(), ms);
@@ -1726,7 +1730,6 @@ async function loadLeads() {
     }
 
     const requests = await r.json();
-
     if (!Array.isArray(requests)) throw new Error('Unexpected response type: ' + typeof requests);
 
     allLeads = requests.map(r => ({
@@ -1747,13 +1750,14 @@ async function loadLeads() {
     document.getElementById('nav-count-leads').textContent = allLeads.length;
 
   } catch(e) {
-    const msg = e.name === 'AbortError' ? 'Request timed out after 10s — check network/Supabase' : e.message;
+    const msg = e.name === 'AbortError' ? 'Request timed out — check network/Supabase' : e.message;
     document.getElementById('leads-table-output').innerHTML =
       `<div class="empty-state"><div class="empty-icon">⚠</div>
        <div class="empty-text">Error loading leads:<br>
        <span style="font-size:0.78rem;color:var(--red);font-family:monospace;">${escH(msg)}</span></div></div>`;
   }
 }
+
 
 function filterLeads() {
   const q   = document.getElementById('leads-search')?.value.toLowerCase() || '';
@@ -3089,7 +3093,10 @@ function showPanel(name) {
   document.getElementById('panel-' + name)?.classList.add('active');
   document.querySelector('[data-panel="' + name + '"]')?.classList.add('active');
   closeMobileNav();
-  if (name === 'leads'        && !allLeads.length)     loadLeads();
+  if (name === 'leads') {
+    if (allLeads.length) renderLeadsTable(allLeads, 'leads-table-output', false);
+    else loadLeads();
+  }
   if (name === 'campaigns'    && !allCampaigns.length) loadCampaigns();
   if (name === 'invoices'     && !allInvoices.length)  loadInvoices();
   if (name === 'payments'     && !allPayments.length)  loadPayments();
