@@ -803,6 +803,9 @@
     <div class="nav-item" data-panel="guide" onclick="showPanel('guide')">
       📖 Admin Guide
     </div>
+    <div class="nav-item" data-panel="rates" onclick="showPanel('rates')">
+      💷 Rates & Pricing
+    </div>
     <div style="padding:1.25rem;margin-top:auto;border-top:1px solid var(--border);display:none;" id="nav-signout-mobile">
       <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="signOut()">Sign Out</button>
     </div>
@@ -1089,7 +1092,7 @@
             <button class="btn btn-ghost" style="text-align:left;justify-content:flex-start;" onclick="loadTemplate('invoice_sent')">🧾 Invoice Sent</button>
             <button class="btn btn-ghost" style="text-align:left;justify-content:flex-start;" onclick="loadTemplate('campaign_live')">📡 Campaign Now Live</button>
             <button class="btn btn-ghost" style="text-align:left;justify-content:flex-start;" onclick="loadTemplate('campaign_complete')">🏁 Campaign Complete</button>
-            <button class="btn btn-ghost" style="text-align:left;justify-content:flex-start;" onclick="loadTemplate('ai_contract')">🤖 AI Generate Contract</button>
+            <button class="btn btn-ghost" style="text-align:left;justify-content:flex-start;" onclick="loadTemplate('contract')">📄 Contract & T&Cs</button>
           </div>
         </div>
 
@@ -1276,6 +1279,24 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- ══ RATES & PRICING PANEL ══════════════════════════════════ -->
+    <div id="panel-rates" class="panel">
+      <div class="page-header">
+        <div>
+          <div class="page-label">ROCK.SCOT</div>
+          <div class="page-title">Rates &amp; Pricing</div>
+        </div>
+        <div style="display:flex;gap:0.75rem;align-items:center;">
+          <div id="rates-status" style="font-family:var(--font-cond);font-size:0.72rem;letter-spacing:0.1em;color:var(--muted);"></div>
+          <button class="btn btn-primary" onclick="saveRates()">💾 Save Rates</button>
+        </div>
+      </div>
+      <div style="margin-bottom:1rem;padding:0.85rem;background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:var(--radius);font-size:0.82rem;color:var(--muted);line-height:1.6;">
+        ⚠ Changes apply instantly to all new quotes, invoices, and contracts. Existing confirmed bookings are unaffected. All prices are <strong style="color:var(--white);">ex-VAT</strong>.
+      </div>
+      <div id="rates-form-output"><div class="spinner"></div></div>
     </div>
 
   </main>
@@ -1686,21 +1707,29 @@ async function loadLeads() {
   document.getElementById('leads-table-output').innerHTML = '<div class="spinner"></div>';
   try {
     const token = currentSession?.access_token;
+    if (!token) throw new Error('No session token — try signing out and back in');
     const requests = await sbGet(
       '/rest/v1/campaign_requests?select=*&order=submitted_at.desc&limit=500',
       token
     );
+    if (!Array.isArray(requests)) throw new Error('Unexpected response: ' + JSON.stringify(requests).substring(0, 200));
     allLeads = requests.map(r => ({
       ...r,
       created_at: r.submitted_at,
       _status: r.status || 'pending',
       _req: r
     }));
+    if (allLeads.length === 0) {
+      document.getElementById('leads-table-output').innerHTML =
+        '<div class="empty-state"><div class="empty-icon">📥</div><div class="empty-text">No leads yet</div></div>';
+      document.getElementById('nav-count-leads').textContent = '0';
+      return;
+    }
     renderLeadsTable(allLeads, 'leads-table-output', false);
     document.getElementById('nav-count-leads').textContent = allLeads.length;
   } catch(e) {
     document.getElementById('leads-table-output').innerHTML =
-      `<div class="empty-state"><div class="empty-icon">⚠</div><div class="empty-text">${escH(e.message)}</div></div>`;
+      `<div class="empty-state"><div class="empty-icon">⚠</div><div class="empty-text">Error loading leads:<br><span style="font-size:0.78rem;color:var(--red);">${escH(e.message)}</span></div></div>`;
   }
 }
 
@@ -2596,17 +2625,11 @@ ROCK.SCOT Advertising Team`
       to: lead.email,
       subject: `Advertising Contract — ROCK.SCOT × ${company}`,
       body: generateContract(lead, name, company, pkg, mux, price, days, start)
-    },
-    ai_contract: { ai: true, lead, name, company, pkg, mux, price, days, start }
+    }
   };
 
   const tplData = templates[tpl];
   if (!tplData) return;
-
-  if (tplData.ai) {
-    renderAIContract(tplData);
-    return;
-  }
 
   document.getElementById('email-compose-area').innerHTML = `
     <div style="margin-bottom:1rem;">
@@ -2623,6 +2646,7 @@ ROCK.SCOT Advertising Team`
     </div>
     <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
       <button class="btn btn-primary" onclick="copyEmailBody()">📋 Copy Email Body</button>
+      ${tpl === 'contract_sent' ? '<button class="btn btn-ghost" onclick="downloadContractPDF()">⬇ Download PDF</button>' : ''}
       <button class="btn btn-ghost" onclick="openMailto()">✉️ Open in Mail App</button>
     </div>
     <div style="margin-top:0.75rem;padding:0.75rem;background:rgba(255,85,0,0.06);border:1px solid rgba(255,85,0,0.2);border-radius:var(--radius);font-size:0.78rem;color:var(--muted);line-height:1.6;">
@@ -2631,170 +2655,140 @@ ROCK.SCOT Advertising Team`
 }
 
 function generateContract(lead, name, company, pkg, mux, price, days, start) {
-  const today = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const today   = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const ref     = 'ROCK-' + Date.now().toString(36).toUpperCase();
+  const vatRate = getVatRate();
+  const pence   = lead.final_price_pence || lead._req?.final_price_pence || 0;
+  const exVat   = pence ? '£' + (pence/100).toLocaleString('en-GB',{minimumFractionDigits:2}) : price;
+  const vatAmt  = pence ? '£' + (pence/100*vatRate).toLocaleString('en-GB',{minimumFractionDigits:2}) : 'TBC';
+  const incVat  = pence ? '£' + (pence/100*(1+vatRate)).toLocaleString('en-GB',{minimumFractionDigits:2}) : 'TBC';
+
   return `ADVERTISING CONTRACT
 ROCK.SCOT DAB+ RADIO
 
-Date: ${today}
-Contract Ref: ROCK-${Date.now().toString(36).toUpperCase()}
+Date:         ${today}
+Contract Ref: ${ref}
+Status:       PENDING PAYMENT
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 PARTIES
--------
-Broadcaster: ROCK.SCOT ("the Station")
-Advertiser: ${company} ("the Advertiser")
-Contact: ${name}
-Email: ${lead.email}
-Phone: ${lead.phone || 'As provided'}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Station:      ROCK.SCOT, operated by Caledonia TX Ltd ("the Station")
+Advertiser:   ${company} ("the Advertiser")
+Contact:      ${name}
+Email:        ${lead.email}
+Phone:        ${lead.phone || 'As provided'}
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CAMPAIGN DETAILS
-----------------
-Package: ${pkg}
-Coverage: ${mux}
-Campaign Duration: ${days} days
-Proposed Start Date: ${start}
-Total Fee: ${price} (excluding VAT where applicable)
-${lead.bolt_on_included ? 'Production: Included (Bolt-on)' : 'Production: Advertiser to supply'}
-${lead.is_rush ? 'Rush Processing: Yes (additional charge applied)' : ''}
-${lead.discount_code ? 'Discount Applied: ' + lead.discount_code : ''}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Package:      ${pkg}
+Coverage:     ${mux}
+Duration:     ${days} days
+Start Date:   ${start}
+Production:   ${lead.bolt_on_included ? 'Included (production bolt-on purchased)' : 'Advertiser to supply broadcast-ready audio'}
+${lead.is_rush ? 'Processing:   Rush (additional rush fee applied)\n' : ''}\
+${lead.discount_code ? 'Discount:     Code ' + lead.discount_code + ' applied\n' : ''}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FEES & PAYMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Fee (ex-VAT):    ${exVat}
+VAT @ ${Math.round(vatRate*100)}%:       ${vatAmt}
+TOTAL (inc-VAT): ${incVat}
 
+Payment due within 14 days of invoice. Campaign will not go live until
+cleared funds are received in full.
+
+Bank Transfer to:
+  Caledonia TX Ltd
+  Sort Code:      04-06-05
+  Account Number: 15193265
+  Reference:      ${ref}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 TERMS AND CONDITIONS
---------------------
-1. BOOKING & PAYMENT
-   Payment is due within 14 days of invoice. Campaigns will not go live until payment
-   is received in full. ROCK.SCOT reserves the right to cancel unconfirmed bookings
-   after 14 days without payment.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-   Payment by bank transfer to:
-   Caledonia TX Ltd | Sort Code: 04-06-05 | Account: 15193265
-   Please use your company name as the payment reference.
+1. PAYMENT & CONFIRMATION
+   This booking is provisional until payment is received. ROCK.SCOT
+   reserves the right to release the booked slots if payment is not
+   received within 14 days of invoice date.
 
 2. CREATIVE REQUIREMENTS
-   The Advertiser is responsible for supplying broadcast-ready audio (30 seconds, MP3/WAV,
-   44.1kHz stereo) no less than 3 working days before the campaign start date, unless the
-   production bolt-on has been purchased. All creative must comply with the UK Code of
-   Broadcast Advertising (BCAP Code) and ASA guidelines.
+   The Advertiser must supply broadcast-ready audio (30 seconds, MP3 or
+   WAV, 44.1kHz stereo) no less than 3 working days before the campaign
+   start date, unless a production bolt-on has been purchased. All
+   creative must comply with the BCAP Code and ASA guidelines.
 
 3. CONTENT APPROVAL
-   ROCK.SCOT reserves the right to reject any advertising creative that:
-   - Does not comply with BCAP/CAP/ASA standards
-   - Contains misleading, offensive or harmful content
-   - Promotes products/services restricted under broadcasting regulations
-   - Conflicts with existing advertisers or ROCK.SCOT's editorial values
+   ROCK.SCOT reserves the right to reject advertising creative that does
+   not comply with BCAP/ASA standards, contains misleading or harmful
+   content, promotes restricted products, or conflicts with the Station's
+   editorial values. Rejection does not entitle the Advertiser to a refund
+   if the Advertiser is unable to supply compliant alternative creative.
 
-4. ADVERTISING STANDARDS
-   All advertising must comply with:
-   - ASA (Advertising Standards Authority) regulations
-   - BCAP Code (UK Code of Broadcast Advertising)
-   - Consumer Protection from Unfair Trading Regulations 2008
-   - Advertising must be legal, decent, honest and truthful
+4. RESTRICTED CATEGORIES
+   Alcohol (BCAP rules apply), gambling (licensed operators only), health
+   or medical claims (evidence required), financial services (FCA
+   authorisation required), and political advertising (prohibited).
 
-5. RESTRICTED CATEGORIES
-   The following categories are subject to additional approval:
-   - Alcohol advertising (must follow BCAP rules)
-   - Gambling (prohibited unless licensed operator)
-   - Health/medical claims (evidence required)
-   - Financial services (FCA authorisation required)
-   - Political advertising (prohibited)
+5. MAKE-GOOD POLICY
+   If ROCK.SCOT fails to deliver contracted spots due to a technical fault
+   attributable to the Station, equivalent make-good airtime will be
+   provided at no charge. No cash refund is payable for technical or
+   scheduling issues.
 
-6. MAKE-GOOD POLICY
-   If ROCK.SCOT fails to deliver the contracted number of spots due to technical fault,
-   we will provide equivalent make-good airtime at no additional charge. No cash refund
-   will be issued for spots missed due to technical or scheduling issues.
+6. CANCELLATION & REFUNDS
+   - 14+ days written notice before start date: Full refund less 10% admin fee
+   - 7–13 days written notice:                  50% refund
+   - Less than 7 days notice:                   No refund
+   Production bolt-on costs are non-refundable once work has commenced.
+   All refunds are calculated on the ex-VAT amount; VAT is refunded in
+   full where a refund is due.
 
-7. CANCELLATION POLICY
-   - 14+ days notice: Full refund less 10% administration fee
-   - 7-13 days notice: 50% refund
-   - Less than 7 days: No refund
-   Production costs are non-refundable once work has commenced.
+7. INTELLECTUAL PROPERTY
+   The Advertiser warrants that they own or hold valid licences to all
+   intellectual property in the creative supplied. ROCK.SCOT accepts no
+   liability for any third-party IP infringement in advertiser-supplied
+   material.
 
-8. INTELLECTUAL PROPERTY
-   The Advertiser warrants they own or have licensed all rights to the advertising creative
-   supplied. ROCK.SCOT accepts no liability for IP infringement in advertiser-supplied content.
+8. LIABILITY
+   ROCK.SCOT's total liability under this agreement shall not exceed the
+   total fee paid (ex-VAT). The Station accepts no liability for indirect
+   or consequential losses arising from the advertising campaign.
 
-9. LIABILITY
-   ROCK.SCOT's liability is limited to the value of this contract. We accept no liability
-   for consequential loss arising from advertising campaigns. This limitation applies to
-   the fullest extent permitted by Scottish law.
+9. GOVERNING LAW
+   This agreement is governed exclusively by Scots Law. Any disputes shall
+   be referred in the first instance to ROCK.SCOT management. Unresolved
+   disputes shall be subject to the jurisdiction of the Scottish Courts.
 
-10. GOVERNING LAW
-    This agreement is governed by Scots Law. Any disputes shall be subject to the exclusive
-    jurisdiction of the Scottish Courts. In the first instance, disputes should be referred
-    to ROCK.SCOT management for resolution before legal proceedings are commenced.
+10. DATA PROTECTION
+    Both parties shall handle personal data in compliance with UK GDPR
+    and the Data Protection Act 2018.
 
-11. DATA PROTECTION
-    Both parties agree to handle personal data in accordance with UK GDPR and the Data
-    Protection Act 2018.
-
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ACCEPTANCE
-----------
-By proceeding with payment, the Advertiser confirms they have read, understood and
-agree to these terms and conditions in full.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Payment of the invoice constitutes acceptance of these terms in full.
 
-Advertiser: ${name} / ${company}
-Date: ${today}
+For and on behalf of the Advertiser:
 
-ROCK.SCOT
-advertise@rock.scot | rock.scot
-Scotland's DAB+ Rock Radio Station
+Name: ${name}
+Company: ${company}
+Date: ___________________    Signature: ___________________
 
----
-Regulated by Ofcom. Advertising standards enforced by ASA/BCAP.
-This contract is subject to ROCK.SCOT's full Terms of Service at rock.scot/terms`;
+For and on behalf of ROCK.SCOT:
+
+Authorised signatory
+Date: ___________________    Signature: ___________________
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ROCK.SCOT | Caledonia TX Ltd | advertise@rock.scot | rock.scot
+Regulated by Ofcom. Advertising standards: ASA/BCAP.
+Registered in Scotland. Scots Law applies.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
 }
 
-async function renderAIContract(data) {
-  const out = document.getElementById('email-compose-area');
-
-  out.innerHTML = `<div style="padding:1.5rem;text-align:center;">
-    <div class="spinner" style="margin:0 auto 1rem;"></div>
-    <div class="td-muted" style="font-size:0.85rem;">Generating AI contract for ${escH(data.company)}…</div>
-  </div>`;
-
-  const prompt = `Generate a professional advertising contract for ROCK.SCOT DAB+ radio station in Scotland.
-
-Client details:
-- Company: ${data.company}
-- Contact: ${data.name}
-- Email: ${data.lead.email}
-- Phone: ${data.lead.phone || 'Not provided'}
-- Package: ${data.pkg}
-- Coverage: ${data.mux}
-- Duration: ${data.days} days
-- Start Date: ${data.start}
-- Total Fee: ${data.price}
-- Production included: ${data.lead.bolt_on_included ? 'Yes' : 'No'}
-- Rush booking: ${data.lead.is_rush ? 'Yes' : 'No'}
-
-Payment: Caledonia TX Ltd | Sort Code: 04-06-05 | Account: 15193265 (Tide Business)
-
-Include: parties & campaign details, payment terms (14 days to Tide account above, no campaign live without payment), BCAP/ASA compliance, content approval rights, make-good policy for missed spots, cancellation policy (14+ days = 10% admin fee, 7-13 days = 50% refund, under 7 days = no refund), IP warranties, liability limitation, Scots Law jurisdiction, UK GDPR. Write as a polished professional contract in plain text, specific to this client — not generic boilerplate.`;
-
-  try {
-    const text = await aiCall(prompt, 'contract');
-    out.innerHTML = `
-      <div style="margin-bottom:1rem;">
-        <label style="font-family:var(--font-cond);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:0.4rem;">
-          🤖 AI Contract — ${escH(data.company)}
-        </label>
-        <textarea class="field-input" id="email-body" rows="24" style="width:100%;font-family:var(--font-body);font-size:0.82rem;line-height:1.7;resize:vertical;">${escH(text)}</textarea>
-      </div>
-      <div style="display:flex;gap:0.75rem;">
-        <button class="btn btn-primary" onclick="copyEmailBody()">📋 Copy Contract</button>
-      </div>
-      <div style="margin-top:0.75rem;padding:0.75rem;background:rgba(68,136,255,0.06);border:1px solid rgba(68,136,255,0.2);border-radius:var(--radius);font-size:0.78rem;color:var(--muted);line-height:1.6;">
-        🤖 AI-generated via secure server — review before sending.
-      </div>`;
-  } catch(e) {
-    const templateText = generateContract(data.lead, data.name, data.company, data.pkg, data.mux, data.price, data.days, data.start);
-    out.innerHTML = `
-      <div style="margin-bottom:0.75rem;padding:0.65rem 0.85rem;background:rgba(221,17,17,0.08);border:1px solid rgba(221,17,17,0.2);border-radius:var(--radius);font-size:0.78rem;color:var(--red);">
-        ⚠ AI unavailable: ${escH(e.message)} — showing template contract instead.
-      </div>
-      <label style="font-family:var(--font-cond);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:0.4rem;">Contract — ${escH(data.company)} (template)</label>
-      <textarea class="field-input" id="email-body" rows="24" style="width:100%;font-family:var(--font-body);font-size:0.82rem;line-height:1.7;resize:vertical;">${escH(templateText)}</textarea>
-      <button class="btn btn-primary" style="margin-top:0.75rem;" onclick="copyEmailBody()">📋 Copy Contract</button>`;
-  }
-}
 /* ── AI PROXY (via Supabase Edge Function) ──────────────────────── */
 const AI_PROXY = 'https://pwzeapvopeeoahpyicdm.supabase.co/functions/v1/ai-proxy';
 
@@ -2817,8 +2811,178 @@ async function aiCall(prompt, feature) {
   return result.text || '';
 }
 
-function saveApiKey() { toast('API key no longer needed — AI runs via secure server', 'ok'); }
+/* ── RATES & PRICING ────────────────────────────────────────────── */
+const RATE_FIELDS = [
+  { key: 'single_inverclyde',      label: 'Single Mux — Inverclyde',        group: 'Single Mux (28-day base)' },
+  { key: 'single_north_ayrshire',  label: 'Single Mux — North Ayrshire',    group: 'Single Mux (28-day base)' },
+  { key: 'single_s_lanarkshire',   label: 'Single Mux — S. Lanarkshire',     group: 'Single Mux (28-day base)' },
+  { key: 'multi_regional',         label: 'Multi-Regional (all 3 muxes)',    group: 'Multi-Regional (28-day base)' },
+  { key: 'top_of_hour',            label: 'Top of Hour (28-day base)',       group: 'Premium' },
+  { key: 'production_bolt_on',     label: 'Production Bolt-on',              group: 'Add-ons' },
+  { key: 'rush_fee',               label: 'Rush Processing Fee',             group: 'Add-ons' },
+  { key: 'vat_rate',               label: 'VAT Rate (%)',                    group: 'Tax', isPercent: true },
+];
+
+let currentRates = {};
+
+async function loadRates() {
+  const out = document.getElementById('rates-form-output');
+  try {
+    const token = currentSession?.access_token;
+    const rows = await sbGet('/rest/v1/site_settings?select=key,value', token);
+    rows.forEach(r => { currentRates[r.key] = r.value; });
+    renderRatesForm();
+  } catch(e) {
+    out.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠</div><div class="empty-text">Could not load rates: ${escH(e.message)}<br><span style="font-size:0.78rem;">Run the SQL setup first — see below.</span></div></div>
+    <div style="margin-top:1rem;padding:1rem;background:var(--dark);border-radius:var(--radius);font-size:0.78rem;color:var(--muted);">
+      <div style="font-family:var(--font-cond);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--orange);margin-bottom:0.5rem;">Run this SQL in Supabase → SQL Editor:</div>
+      <pre style="white-space:pre-wrap;font-size:0.72rem;line-height:1.6;">CREATE TABLE IF NOT EXISTS public.site_settings (
+  key text PRIMARY KEY,
+  value text NOT NULL,
+  updated_at timestamptz DEFAULT now()
+);
+ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Admins manage settings" ON public.site_settings
+  USING (auth.uid() = '190babc3-3748-4bf1-803b-b54baa8acaec' OR auth.role() = 'service_role')
+  WITH CHECK (auth.uid() = '190babc3-3748-4bf1-803b-b54baa8acaec' OR auth.role() = 'service_role');
+
+INSERT INTO public.site_settings (key, value) VALUES
+  ('single_inverclyde',     '495'),
+  ('single_north_ayrshire', '495'),
+  ('single_s_lanarkshire',  '495'),
+  ('multi_regional',        '1245'),
+  ('top_of_hour',           '350'),
+  ('production_bolt_on',    '150'),
+  ('rush_fee',              '75'),
+  ('vat_rate',              '20')
+ON CONFLICT (key) DO NOTHING;</pre>
+    </div>`;
+  }
+}
+
+function renderRatesForm() {
+  const out = document.getElementById('rates-form-output');
+  const groups = [...new Set(RATE_FIELDS.map(f => f.group))];
+  out.innerHTML = groups.map(g => {
+    const fields = RATE_FIELDS.filter(f => f.group === g);
+    return `<div style="margin-bottom:1.5rem;">
+      <div style="font-family:var(--font-cond);font-size:0.72rem;font-weight:900;letter-spacing:0.2em;text-transform:uppercase;color:var(--orange);margin-bottom:0.75rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border);">${escH(g)}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0.75rem;">
+        ${fields.map(f => {
+          const val = currentRates[f.key] || '';
+          const prefix = f.isPercent ? '' : '£';
+          const suffix = f.isPercent ? '%' : '';
+          return `<div>
+            <label style="font-family:var(--font-cond);font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:0.3rem;">${escH(f.label)}</label>
+            <div style="display:flex;align-items:center;gap:0.4rem;">
+              ${prefix ? `<span style="color:var(--muted);font-family:var(--font-cond);">${prefix}</span>` : ''}
+              <input type="number" id="rate-${f.key}" value="${escH(val)}" min="0" step="${f.isPercent ? '0.1' : '1'}"
+                class="field-input" style="width:100%;font-size:0.95rem;font-weight:700;" oninput="markRatesDirty()">
+              ${suffix ? `<span style="color:var(--muted);font-family:var(--font-cond);">${suffix}</span>` : ''}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('') + `<div style="margin-top:1rem;padding:0.75rem;background:rgba(0,204,136,0.06);border:1px solid rgba(0,204,136,0.2);border-radius:var(--radius);font-size:0.78rem;color:var(--muted);">
+    💡 Prices are stored ex-VAT. The dashboard automatically calculates and displays inc-VAT prices using the VAT rate above.
+  </div>`;
+}
+
+function markRatesDirty() {
+  document.getElementById('rates-status').textContent = '● Unsaved changes';
+  document.getElementById('rates-status').style.color = 'var(--gold)';
+}
+
+async function saveRates() {
+  const token = currentSession?.access_token;
+  const statusEl = document.getElementById('rates-status');
+  statusEl.textContent = 'Saving…';
+  statusEl.style.color = 'var(--muted)';
+  try {
+    const updates = RATE_FIELDS.map(f => ({
+      key: f.key,
+      value: document.getElementById('rate-' + f.key)?.value || '0',
+      updated_at: new Date().toISOString()
+    }));
+    await sbPost('/rest/v1/site_settings?on_conflict=key', updates, token);
+    updates.forEach(u => { currentRates[u.key] = u.value; });
+    statusEl.textContent = '✓ Saved';
+    statusEl.style.color = 'var(--green)';
+    toast('Rates saved — applies to all new quotes', 'ok');
+    setTimeout(() => { statusEl.textContent = ''; }, 3000);
+  } catch(e) {
+    statusEl.textContent = '⚠ Save failed';
+    statusEl.style.color = 'var(--red)';
+    toast('Save failed: ' + e.message, 'err');
+  }
+}
+
+function getRate(key) {
+  return parseFloat(currentRates[key] || 0);
+}
+
+function getVatRate() {
+  return parseFloat(currentRates['vat_rate'] || 20) / 100;
+}
+
+function fmtExVat(pence) {
+  return '£' + (pence / 100).toLocaleString('en-GB', { minimumFractionDigits: 2 });
+}
+
+function fmtIncVat(pence) {
+  const vat = getVatRate();
+  return '£' + (pence / 100 * (1 + vat)).toLocaleString('en-GB', { minimumFractionDigits: 2 });
+}
+
+function fmtPriceWithVat(pence) {
+  if (!pence) return '—';
+  const exVat = (pence / 100).toLocaleString('en-GB', { minimumFractionDigits: 2 });
+  const incVat = (pence / 100 * (1 + getVatRate())).toLocaleString('en-GB', { minimumFractionDigits: 2 });
+  return `£${exVat} ex-VAT (£${incVat} inc-VAT)`;
+}
+
 function saveApiKeyFromIntel() { runIntelligence(); }
+
+function downloadContractPDF() {
+  const body = document.getElementById('email-body')?.value;
+  if (!body) { toast('No contract to download', 'err'); return; }
+  const company = body.match(/Advertiser:\s*(.+)/)?.[1]?.trim() || 'Contract';
+  const ref     = body.match(/Contract Ref:\s*(\S+)/)?.[1] || 'ROCK';
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
+  <title>ROCK.SCOT Contract — ${company}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;600&family=Barlow+Condensed:wght@700;900&display=swap');
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Barlow',sans-serif; font-size:11pt; line-height:1.7; color:#111; padding:2.5cm 2cm; }
+    .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:2rem; padding-bottom:1rem; border-bottom:3px solid #ff5500; }
+    .header-title { font-family:'Barlow Condensed',sans-serif; font-size:28pt; font-weight:900; letter-spacing:0.05em; color:#ff5500; }
+    .header-sub { font-family:'Barlow Condensed',sans-serif; font-size:10pt; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:#666; margin-top:0.2rem; }
+    .header-ref { text-align:right; font-size:9pt; color:#666; line-height:1.8; }
+    .header-ref strong { color:#111; }
+    pre { font-family:'Barlow',sans-serif; font-size:11pt; white-space:pre-wrap; line-height:1.8; }
+    .footer { margin-top:3rem; padding-top:1rem; border-top:1px solid #ddd; font-size:8pt; color:#999; text-align:center; }
+    @media print { body { padding:1.5cm; } }
+  </style>
+  </head><body>
+  <div class="header">
+    <div>
+      <div class="header-title">ROCK.SCOT</div>
+      <div class="header-sub">DAB+ Radio — Advertising Contract</div>
+    </div>
+    <div class="header-ref">
+      <strong>Ref: ${escH(ref)}</strong><br>
+      Caledonia TX Ltd<br>
+      rock.scot
+    </div>
+  </div>
+  <pre>${escH(body)}</pre>
+  <div class="footer">ROCK.SCOT is operated by Caledonia TX Ltd. This contract is governed by Scots Law.</div>
+  <script>window.onload = function(){ window.print(); }<\/script>
+  </body></html>`);
+  win.document.close();
+}
 
 function copyEmailBody() {
   const body = document.getElementById('email-body')?.value;
@@ -2865,6 +3029,7 @@ function showPanel(name) {
   if (name === 'emails')                               populateEmailLeadSelect();
   if (name === 'intelligence')                         populateIntelLeadSelect();
   if (name === 'planner')                              renderPlanner();
+  if (name === 'rates'  )                              loadRates();
 }
 
 function renderPlanner() {
