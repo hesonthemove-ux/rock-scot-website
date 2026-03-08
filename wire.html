@@ -147,7 +147,7 @@
 // ================================================================
 
 const SUPABASE_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5NDcyMzMsImV4cCI6MjA1NjUyMzIzM30.R4oKTMIjSEJBonVSEApJNS57cEBFwFQCLmFEY9HPSrg';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
 
 // Wire data loaded via direct Supabase REST API (see loadStories)
 
@@ -355,7 +355,7 @@ async function loadStories(showRefreshFeedback = false) {
     if (loadingEl && showRefreshFeedback) loadingEl.style.display = 'block';
 
     try {
-        const url = SUPABASE_URL + '/rest/v1/wire_news?select=id,title,summary,source_url,source_name,genre,created_at&is_live=eq.true&order=created_at.desc&limit=100';
+        const url = SUPABASE_URL + '/rest/v1/wire_news?select=id,title,summary,source_url,source_name,genre,created_at&order=created_at.desc&limit=100';
         const res = await fetch(url, {
             headers: {
                 'apikey': SUPABASE_KEY,
