@@ -1748,6 +1748,8 @@ function filterLeads() {
 
 function renderLeadsTable(leads, containerId, compact) {
   const out = document.getElementById(containerId);
+  if (!out) return;
+  try {
   document.getElementById('leads-count') &&
     (document.getElementById('leads-count').textContent = leads.length + ' leads');
 
@@ -1788,6 +1790,10 @@ function renderLeadsTable(leads, containerId, compact) {
     </tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
+  } catch(e) {
+    out.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠</div><div class="empty-text">Render error: ${escH(e.message)}</div></div>`;
+    console.error('renderLeadsTable error:', e);
+  }
 }
 
 /* ── LEAD MODAL ─────────────────────────────────────────────────── */
