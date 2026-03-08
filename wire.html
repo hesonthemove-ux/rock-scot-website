@@ -99,7 +99,7 @@ function render() {
 
     out.innerHTML = allStories.map(s => `
         <div class="wire-card" onclick="openModal(${s.id})">
-            <img onerror="this.src='/assets/images/hero.png'" class="wire-card-img" src="/assets/images/${getPlaceholder(s.source_name)}">
+            <img onerror="this.src='/assets/images/hero.png'" class="wire-card-img" src="/assets/images/hero.png">
             <div class="wire-card-content">
                 <div class="wire-card-genre">${s.genre || 'ROCK'}</div>
                 <div class="wire-card-title">${s.title}</div>
@@ -199,7 +199,7 @@ function render() {
 
     out.innerHTML = allStories.map(s => `
         <div class="wire-card" onclick="openModal(${s.id})">
-            <img onerror="this.src='/assets/images/hero.png'" class="wire-card-img" src="/assets/images/${getPlaceholder(s.source_name)}">
+            <img onerror="this.src='/assets/images/hero.png'" class="wire-card-img" src="/assets/images/hero.png">
             <div class="wire-card-content">
                 <div class="wire-card-genre">${s.genre || 'ROCK'}</div>
                 <div class="wire-card-title">${s.title}</div>
@@ -327,7 +327,7 @@ window.onclick = function(e) { if (e.target == document.getElementById('story-mo
 <div id="story-modal">
     <div class="modal-box">
         <span class="close-modal" onclick="closeModal()">&times;</span>
-        <img onerror="this.src='/assets/images/hero.png'" id="modal-img" src="/assets/images/" style="width:100%; height:250px; object-fit:cover;">
+        <img onerror="this.src='/assets/images/hero.png'" id="modal-img" src="/assets/images/hero.png" style="width:100%; height:250px; object-fit:cover;">
         <div class="modal-body">
             <div id="modal-genre" class="wire-card-genre"></div>
             <h2 id="modal-title" style="margin: 0.5rem 0 1.5rem 0; line-height: 1.2;"></h2>
@@ -416,12 +416,12 @@ window.onclick = function(e) { if (e.target == document.getElementById('story-mo
     }
 </style>
 </head>
-<body>
+<body><div id="header"></div>
 
 <!-- WIRE HERO -->
 <div class="wire-hero" style="margin-top: 98px;">
     <div class="wire-hero-inner" style="display:flex;align-items:center;gap:1rem;padding:1.25rem 1.25rem 0;">
-        <img onerror="this.src='/assets/images/hero.png'" onerror="this.src='/images/hero.png'" src="/assets/images/assets/images/burst.png"
+        <img onerror="this.src='/assets/images/hero.png'" onerror="this.src='/images/hero.png'" src="/assets/images/hero.png"
              alt="ROCK.SCOT — Scotland's DAB+ Rock Station"
              loading="eager"
              style="width:110px;max-width:28%;height:auto;object-fit:contain;flex-shrink:0;">
@@ -480,7 +480,7 @@ window.onclick = function(e) { if (e.target == document.getElementById('story-mo
 <footer>
   <div class="footer-grid">
     <div class="footer-brand">
-      <img onerror="this.src='/assets/images/hero.png'" onerror="this.src='/images/hero.png'" src="/assets/images/assets/images/logo.png" alt="ROCK.SCOT" style="height:44px;width:auto;">
+      <img onerror="this.src='/assets/images/hero.png'" onerror="this.src='/images/hero.png'" src="/assets/images/hero.png" alt="ROCK.SCOT" style="height:44px;width:auto;">
       <p>Scotland's rock station on DAB+ digital radio. Broadcasting Metal, Alt, Punk and Classic Rock 24/7 across West Scotland.</p>
       <p style="margin-top:0.75rem;">Ofcom Licensed · SC646223 · VAT 491589639</p>
     </div>
@@ -586,7 +586,7 @@ function render() {
 
     out.innerHTML = allStories.map(s => `
         <div class="wire-card" onclick="openModal(${s.id})">
-            <img onerror="this.src='/assets/images/hero.png'" class="wire-card-img" src="/assets/images/${getPlaceholder(s.source_name)}">
+            <img onerror="this.src='/assets/images/hero.png'" class="wire-card-img" src="/assets/images/hero.png">
             <div class="wire-card-content">
                 <div class="wire-card-genre">${s.genre || 'ROCK'}</div>
                 <div class="wire-card-title">${s.title}</div>
@@ -685,7 +685,7 @@ function render() {
 
     out.innerHTML = allStories.map(s => `
         <div class="wire-card" onclick="openModal(${s.id})">
-            <img onerror="this.src='/assets/images/hero.png'" class="wire-card-img" src="/assets/images/${getPlaceholder(s.source_name)}">
+            <img onerror="this.src='/assets/images/hero.png'" class="wire-card-img" src="/assets/images/hero.png">
             <div class="wire-card-content">
                 <div class="wire-card-genre">${s.genre || 'ROCK'}</div>
                 <div class="wire-card-title">${s.title}</div>
@@ -711,7 +711,7 @@ window.onclick = function(e) { if (e.target == document.getElementById('story-mo
 <div id="story-modal">
     <div class="modal-box">
         <span class="close-modal" onclick="closeModal()">&times;</span>
-        <img onerror="this.src='/assets/images/hero.png'" id="modal-img" src="/assets/images/" style="width:100%; height:250px; object-fit:cover; object-position: top;">
+        <img onerror="this.src='/assets/images/hero.png'" id="modal-img" src="/assets/images/hero.png" style="width:100%; height:250px; object-fit:cover; object-position: top;">
         <div class="modal-body">
             <div id="modal-genre" class="wire-card-genre"></div>
             <h2 id="modal-title" style="margin: 0.5rem 0 1.5rem 0; line-height: 1.2;"></h2>
