@@ -191,12 +191,60 @@ const GENRE_PALETTES = {
   classic: ['#141008','#22180c','#2c2010'],
 };
 
+// Royalty-free fallback photo pools per genre (Unsplash)
+const GENRE_PHOTOS = {
+  rock:    [
+    'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80', // concert crowd
+    'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=600&q=80', // guitar close-up
+    'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80', // stage lights
+    'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=600&q=80', // concert stage
+    'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=600&q=80', // live show crowd
+    'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=600&q=80', // guitar amp stack
+  ],
+  metal:   [
+    'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=600&q=80', // dark stage
+    'https://images.unsplash.com/photo-1504898770365-14faca6a7320?w=600&q=80', // guitar neck
+    'https://images.unsplash.com/photo-1519892300165-cb5542fb47c7?w=600&q=80', // drum kit
+    'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=600&q=80', // stage smoke
+  ],
+  punk:    [
+    'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=600&q=80', // mosh pit energy
+    'https://images.unsplash.com/photo-1501386761578-eaa54b915bce?w=600&q=80', // crowd hands
+    'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=600&q=80', // concert chaos
+  ],
+  indie:   [
+    'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=600&q=80', // intimate gig
+    'https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=600&q=80', // vinyl records
+    'https://images.unsplash.com/photo-1461784121038-f088ca1e7714?w=600&q=80', // record store
+  ],
+  alt:     [
+    'https://images.unsplash.com/photo-1468164016595-6108e4c60753?w=600&q=80', // moody stage
+    'https://images.unsplash.com/photo-1485579149621-3123dd979885?w=600&q=80', // guitar silhouette
+    'https://images.unsplash.com/photo-1526142684086-7ebd69df27a5?w=600&q=80', // bass guitar
+  ],
+  classic: [
+    'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=600&q=80', // classic guitar
+    'https://images.unsplash.com/photo-1571935441834-df3ae5b61b8b?w=600&q=80', // vintage amp
+    'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&q=80', // old concert
+  ],
+};
+
 function genrePalette(genre) {
   const g = (genre || '').toLowerCase();
   for (const [k, v] of Object.entries(GENRE_PALETTES)) {
     if (g.includes(k)) return v;
   }
   return ['#0d0d0d','#161616','#1e1e1e'];
+}
+
+function genrePhoto(genre, seed) {
+  const g = (genre || '').toLowerCase();
+  for (const [k, v] of Object.entries(GENRE_PHOTOS)) {
+    if (g.includes(k)) return v[seed % v.length];
+  }
+  // default: rock pool
+  const pool = GENRE_PHOTOS.rock;
+  return pool[seed % pool.length];
 }
 
 function timeAgo(d) {
@@ -240,7 +288,10 @@ async function getArtwork(story) {
     }
   } catch(e) {}
 
-  return null;
+  // 3. Genre photo fallback — royalty-free concert/guitar/stage shot
+  const fallback = genrePhoto(story.genre, Math.abs(key.charCodeAt(0) + key.charCodeAt(1)));
+  artCache[key] = fallback;
+  return fallback;
 }
 
 function renderStories(stories) {
@@ -363,7 +414,7 @@ async function loadStories() {
   const statusEl = document.getElementById('wire-status-text');
   if (statusEl) statusEl.textContent = 'Connecting...';
   try {
-    const res = await fetch(SUPABASE_URL + '/rest/v1/wire_news?select=id,title,summary,source_url,source_name,genre,created_at&order=created_at.desc&limit=200', {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/wire_news?select=id,title,summary,source_url,source_name,genre,created_at&order=created_at.desc&limit=60', {
       headers: {'apikey': key, 'Authorization': 'Bearer ' + key}
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
