@@ -19,455 +19,84 @@
   <link rel="stylesheet" href="css/style.css?v=13">
   <style>
     html, body { background: #080808 !important; color: #f2f2f2 !important; margin: 0; padding: 0; }
-
-    /* ── HERO BANNER ── */
-    .dj-hero {
-      position: relative;
-      min-height: 420px;
-      display: flex;
-      align-items: flex-end;
-      overflow: hidden;
-      background: #0a0a0a;
-    }
-    .dj-hero-bg {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, #1a0000 0%, #0a0a0a 50%, #0d0d0d 100%);
-    }
-    .dj-hero-bg::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(
-        -45deg,
-        transparent,
-        transparent 40px,
-        rgba(221,17,17,0.03) 40px,
-        rgba(221,17,17,0.03) 41px
-      );
-    }
-    .dj-hero-photo-wrap {
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 50%;
-      overflow: hidden;
-    }
-    .dj-hero-photo-wrap::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 200px;
-      background: linear-gradient(to right, #080808, transparent);
-      z-index: 2;
-    }
-    .dj-hero-photo-wrap::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 200px;
-      background: linear-gradient(to top, #080808, transparent);
-      z-index: 2;
-    }
-    .dj-hero-photo {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: top center;
-      opacity: 0.5;
-      filter: grayscale(30%) contrast(1.1);
-    }
-    .dj-hero-photo.no-photo {
-      display: none;
-    }
-    .dj-hero-content {
-      position: relative;
-      z-index: 10;
-      padding: 2rem 2rem 3rem;
-      max-width: 680px;
-      width: 100%;
-    }
-    .dj-breadcrumb {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: rgba(242,242,242,0.4);
-      margin-bottom: 1.5rem;
-    }
-    .dj-breadcrumb a {
-      color: rgba(242,242,242,0.4);
-      text-decoration: none;
-    }
-    .dj-breadcrumb a:hover { color: #dd1111; }
-    .dj-breadcrumb span { margin: 0 0.5rem; }
-    .dj-on-air-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      background: rgba(221,17,17,0.15);
-      border: 1px solid rgba(221,17,17,0.4);
-      border-radius: 2px;
-      padding: 0.3rem 0.7rem;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: #dd1111;
-      margin-bottom: 1rem;
-    }
-    .dj-on-air-dot {
-      width: 6px;
-      height: 6px;
-      background: #dd1111;
-      border-radius: 50%;
-      animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-    .dj-name {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(3.5rem, 10vw, 7rem);
-      line-height: 0.9;
-      letter-spacing: 0.02em;
-      color: #f2f2f2;
-      margin: 0 0 0.5rem;
-      text-shadow: 0 2px 30px rgba(0,0,0,0.8);
-    }
-    .dj-show-name {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 1.1rem;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #dd1111;
-      margin-bottom: 1rem;
-    }
-    .dj-genres {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-    }
-    .dj-genre-tag {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 2px;
-      padding: 0.2rem 0.6rem;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: rgba(242,242,242,0.6);
-    }
-
-    /* ── MAIN BODY ── */
-    .dj-body {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 3rem 1.5rem 5rem;
-      display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 4rem;
-      align-items: start;
-    }
-
-    /* ── BIO SECTION ── */
-    .dj-bio-section {}
-    .dj-section-label {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: #dd1111;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    .dj-section-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: rgba(221,17,17,0.25);
-    }
-    .dj-bio-text {
-      font-family: 'Barlow', sans-serif;
-      font-size: 1.05rem;
-      font-weight: 300;
-      line-height: 1.8;
-      color: rgba(242,242,242,0.85);
-    }
-    .dj-bio-text p { margin: 0 0 1.2rem; }
-
-    /* ── SHOW SCHEDULE CARD ── */
-    .dj-schedule-card {
-      background: #111;
-      border: 1px solid #1e1e1e;
-      border-top: 3px solid #dd1111;
-      padding: 1.5rem;
-      margin-top: 2.5rem;
-    }
-    .dj-schedule-row {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.75rem 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    .dj-schedule-row:last-child { border-bottom: none; padding-bottom: 0; }
-    .dj-schedule-row:first-child { padding-top: 0; }
-    .dj-sched-icon {
-      font-size: 1.2rem;
-      width: 2rem;
-      text-align: center;
-      flex-shrink: 0;
-    }
-    .dj-sched-label {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: rgba(242,242,242,0.35);
-      margin-bottom: 0.1rem;
-    }
-    .dj-sched-value {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: #f2f2f2;
-    }
-
-    /* ── SIDEBAR ── */
-    .dj-sidebar {}
-
-    /* Photo card in sidebar (if no hero photo) */
-    .dj-sidebar-photo {
-      width: 100%;
-      aspect-ratio: 3/4;
-      object-fit: cover;
-      object-position: top center;
-      display: block;
-      margin-bottom: 2rem;
-      filter: grayscale(20%) contrast(1.05);
-    }
-    .dj-sidebar-photo-placeholder {
-      width: 100%;
-      aspect-ratio: 3/4;
-      background: #111;
-      border: 1px solid #1e1e1e;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 5rem;
-      margin-bottom: 2rem;
-      color: rgba(255,255,255,0.1);
-    }
-
-    /* Links card */
-    .dj-links-card {
-      background: #111;
-      border: 1px solid #1e1e1e;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-    .dj-link-row {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.6rem 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      text-decoration: none;
-      color: rgba(242,242,242,0.7);
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      transition: color 0.2s;
-    }
-    .dj-link-row:last-child { border-bottom: none; padding-bottom: 0; }
-    .dj-link-row:first-child { padding-top: 0; }
-    .dj-link-row:hover { color: #dd1111; }
-    .dj-link-icon {
-      width: 1.5rem;
-      text-align: center;
-      font-size: 1rem;
-      flex-shrink: 0;
-    }
-
-    /* Back to DJs */
-    .dj-back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.85rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: rgba(242,242,242,0.4);
-      text-decoration: none;
-      transition: color 0.2s;
-      margin-bottom: 1.5rem;
-      display: block;
-    }
-    .dj-back-link:hover { color: #dd1111; }
-
-    /* ── OTHER DJS STRIP ── */
-    .dj-others-section {
-      border-top: 1px solid #1a1a1a;
-      padding: 3rem 1.5rem;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-    .dj-others-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 1rem;
-      margin-top: 1.5rem;
-    }
-    .dj-other-card {
-      background: #111;
-      border: 1px solid #1e1e1e;
-      text-decoration: none;
-      display: block;
-      transition: border-color 0.2s, transform 0.2s;
-      overflow: hidden;
-    }
-    .dj-other-card:hover {
-      border-color: #dd1111;
-      transform: translateY(-2px);
-    }
-    .dj-other-photo {
-      width: 100%;
-      aspect-ratio: 1;
-      object-fit: cover;
-      object-position: top center;
-      display: block;
-      filter: grayscale(40%);
-      transition: filter 0.3s;
-    }
-    .dj-other-card:hover .dj-other-photo { filter: grayscale(0%); }
-    .dj-other-placeholder {
-      width: 100%;
-      aspect-ratio: 1;
-      background: #0d0d0d;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.5rem;
-    }
-    .dj-other-info {
-      padding: 0.75rem;
-    }
-    .dj-other-name {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      color: #f2f2f2;
-      margin-bottom: 0.2rem;
-    }
-    .dj-other-show {
-      font-family: 'Barlow', sans-serif;
-      font-size: 0.72rem;
-      color: rgba(242,242,242,0.4);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* ── LOADING / ERROR STATES ── */
-    .dj-loading {
-      min-height: 60vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 2rem;
-      letter-spacing: 0.1em;
-      color: rgba(242,242,242,0.2);
-    }
-    .dj-error {
-      min-height: 60vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 2rem;
-    }
-    .dj-error h2 {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 3rem;
-      color: #dd1111;
-      margin: 0 0 1rem;
-    }
-    .dj-error p {
-      font-family: 'Barlow', sans-serif;
-      color: rgba(242,242,242,0.5);
-      margin: 0 0 2rem;
-    }
-    .dj-error a {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 700;
-      font-size: 0.9rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #dd1111;
-      text-decoration: none;
-      border: 1px solid #dd1111;
-      padding: 0.7rem 1.5rem;
-    }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 768px) {
-      .dj-hero { min-height: 320px; }
-      .dj-hero-photo-wrap { width: 100%; opacity: 0.3; }
-      .dj-hero-photo-wrap::before { display: none; }
-      .dj-hero-content { max-width: 100%; padding: 1.5rem 1.25rem 2.5rem; }
-      .dj-body {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-        padding: 2rem 1.25rem 4rem;
-      }
-      .dj-sidebar { order: -1; }
-      .dj-sidebar-photo, .dj-sidebar-photo-placeholder { display: none; }
-      .dj-others-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+    .dj-hero { position:relative; min-height:420px; display:flex; align-items:flex-end; overflow:hidden; background:#0a0a0a; }
+    .dj-hero-bg { position:absolute; inset:0; background:linear-gradient(135deg,#1a0000 0%,#0a0a0a 50%,#0d0d0d 100%); }
+    .dj-hero-bg::before { content:''; position:absolute; inset:0; background:repeating-linear-gradient(-45deg,transparent,transparent 40px,rgba(221,17,17,0.03) 40px,rgba(221,17,17,0.03) 41px); }
+    .dj-hero-photo-wrap { position:absolute; right:0; top:0; bottom:0; width:50%; overflow:hidden; }
+    .dj-hero-photo-wrap::before { content:''; position:absolute; left:0; top:0; bottom:0; width:200px; background:linear-gradient(to right,#080808,transparent); z-index:2; }
+    .dj-hero-photo-wrap::after { content:''; position:absolute; bottom:0; left:0; right:0; height:200px; background:linear-gradient(to top,#080808,transparent); z-index:2; }
+    .dj-hero-photo { width:100%; height:100%; object-fit:cover; object-position:top center; opacity:0.5; filter:grayscale(30%) contrast(1.1); }
+    .dj-hero-photo.no-photo { display:none; }
+    .dj-hero-content { position:relative; z-index:10; padding:2rem 2rem 3rem; max-width:680px; width:100%; }
+    .dj-breadcrumb { font-family:'Barlow Condensed',sans-serif; font-size:0.75rem; font-weight:600; letter-spacing:0.15em; text-transform:uppercase; color:rgba(242,242,242,0.4); margin-bottom:1.5rem; }
+    .dj-breadcrumb a { color:rgba(242,242,242,0.4); text-decoration:none; }
+    .dj-breadcrumb a:hover { color:#dd1111; }
+    .dj-breadcrumb span { margin:0 0.5rem; }
+    .dj-on-air-badge { display:inline-flex; align-items:center; gap:0.4rem; background:rgba(221,17,17,0.15); border:1px solid rgba(221,17,17,0.4); border-radius:2px; padding:0.3rem 0.7rem; font-family:'Barlow Condensed',sans-serif; font-size:0.7rem; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:#dd1111; margin-bottom:1rem; }
+    .dj-on-air-dot { width:6px; height:6px; background:#dd1111; border-radius:50%; animation:pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .dj-name { font-family:'Bebas Neue',sans-serif; font-size:clamp(3.5rem,10vw,7rem); line-height:0.9; letter-spacing:0.02em; color:#f2f2f2; margin:0 0 0.5rem; text-shadow:0 2px 30px rgba(0,0,0,0.8); }
+    .dj-show-name { font-family:'Barlow Condensed',sans-serif; font-size:1.1rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:#dd1111; margin-bottom:1rem; }
+    .dj-genres { display:flex; flex-wrap:wrap; gap:0.4rem; }
+    .dj-genre-tag { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:2px; padding:0.2rem 0.6rem; font-family:'Barlow Condensed',sans-serif; font-size:0.7rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(242,242,242,0.6); }
+    .dj-body { max-width:1100px; margin:0 auto; padding:3rem 1.5rem 5rem; display:grid; grid-template-columns:1fr 340px; gap:4rem; align-items:start; }
+    .dj-section-label { font-family:'Barlow Condensed',sans-serif; font-size:0.7rem; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:#dd1111; margin-bottom:1rem; display:flex; align-items:center; gap:0.75rem; }
+    .dj-section-label::after { content:''; flex:1; height:1px; background:rgba(221,17,17,0.25); }
+    .dj-bio-text { font-family:'Barlow',sans-serif; font-size:1.05rem; font-weight:300; line-height:1.8; color:rgba(242,242,242,0.85); }
+    .dj-bio-text p { margin:0 0 1.2rem; }
+    .dj-schedule-card { background:#111; border:1px solid #1e1e1e; border-top:3px solid #dd1111; padding:1.5rem; margin-top:2.5rem; }
+    .dj-schedule-row { display:flex; align-items:center; gap:1rem; padding:0.75rem 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+    .dj-schedule-row:last-child { border-bottom:none; padding-bottom:0; }
+    .dj-schedule-row:first-child { padding-top:0; }
+    .dj-sched-icon { font-size:1.2rem; width:2rem; text-align:center; flex-shrink:0; }
+    .dj-sched-label { font-family:'Barlow Condensed',sans-serif; font-size:0.68rem; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:rgba(242,242,242,0.35); margin-bottom:0.1rem; }
+    .dj-sched-value { font-family:'Barlow Condensed',sans-serif; font-size:0.95rem; font-weight:600; color:#f2f2f2; }
+    .dj-sidebar-photo { width:100%; aspect-ratio:3/4; object-fit:cover; object-position:top center; display:block; margin-bottom:2rem; filter:grayscale(20%) contrast(1.05); }
+    .dj-sidebar-photo-placeholder { width:100%; aspect-ratio:3/4; background:#111; border:1px solid #1e1e1e; display:flex; align-items:center; justify-content:center; font-size:5rem; margin-bottom:2rem; color:rgba(255,255,255,0.1); }
+    .dj-links-card { background:#111; border:1px solid #1e1e1e; padding:1.5rem; margin-bottom:1.5rem; }
+    .dj-link-row { display:flex; align-items:center; gap:0.75rem; padding:0.6rem 0; border-bottom:1px solid rgba(255,255,255,0.05); text-decoration:none; color:rgba(242,242,242,0.7); font-family:'Barlow Condensed',sans-serif; font-size:0.95rem; font-weight:600; letter-spacing:0.05em; transition:color 0.2s; }
+    .dj-link-row:last-child { border-bottom:none; padding-bottom:0; }
+    .dj-link-row:first-child { padding-top:0; }
+    .dj-link-row:hover { color:#dd1111; }
+    .dj-link-icon { width:1.5rem; text-align:center; font-size:1rem; flex-shrink:0; }
+    .dj-back-link { display:block; font-family:'Barlow Condensed',sans-serif; font-size:0.85rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:rgba(242,242,242,0.4); text-decoration:none; transition:color 0.2s; margin-bottom:1.5rem; }
+    .dj-back-link:hover { color:#dd1111; }
+    .dj-others-section { border-top:1px solid #1a1a1a; padding:3rem 1.5rem; max-width:1100px; margin:0 auto; }
+    .dj-others-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:1rem; margin-top:1.5rem; }
+    .dj-other-card { background:#111; border:1px solid #1e1e1e; text-decoration:none; display:block; transition:border-color 0.2s,transform 0.2s; overflow:hidden; }
+    .dj-other-card:hover { border-color:#dd1111; transform:translateY(-2px); }
+    .dj-other-photo { width:100%; aspect-ratio:1; object-fit:cover; object-position:top center; display:block; filter:grayscale(40%); transition:filter 0.3s; }
+    .dj-other-card:hover .dj-other-photo { filter:grayscale(0%); }
+    .dj-other-placeholder { width:100%; aspect-ratio:1; background:#0d0d0d; display:flex; align-items:center; justify-content:center; font-size:2.5rem; }
+    .dj-other-info { padding:0.75rem; }
+    .dj-other-name { font-family:'Barlow Condensed',sans-serif; font-size:0.9rem; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:#f2f2f2; margin-bottom:0.2rem; }
+    .dj-other-show { font-family:'Barlow',sans-serif; font-size:0.72rem; color:rgba(242,242,242,0.4); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .dj-loading { min-height:60vh; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:0.1em; color:rgba(242,242,242,0.2); }
+    .dj-error { min-height:60vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:2rem; }
+    .dj-error h2 { font-family:'Bebas Neue',sans-serif; font-size:3rem; color:#dd1111; margin:0 0 1rem; }
+    .dj-error p { font-family:'Barlow',sans-serif; color:rgba(242,242,242,0.5); margin:0 0 2rem; }
+    .dj-error a { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:0.9rem; letter-spacing:0.1em; text-transform:uppercase; color:#dd1111; text-decoration:none; border:1px solid #dd1111; padding:0.7rem 1.5rem; }
+    @media(max-width:768px) {
+      .dj-hero { min-height:320px; }
+      .dj-hero-photo-wrap { width:100%; opacity:0.3; }
+      .dj-hero-photo-wrap::before { display:none; }
+      .dj-hero-content { max-width:100%; padding:1.5rem 1.25rem 2.5rem; }
+      .dj-body { grid-template-columns:1fr; gap:2rem; padding:2rem 1.25rem 4rem; }
+      .dj-sidebar { order:-1; }
+      .dj-sidebar-photo, .dj-sidebar-photo-placeholder { display:none; }
+      .dj-others-grid { grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); }
     }
   </style>
 </head>
 <body>
-
-<!-- HEADER -->
 <div id="site-header"></div>
-
-<!-- LOADING STATE -->
 <div id="dj-loading" class="dj-loading">Loading...</div>
-
-<!-- ERROR STATE (hidden by default) -->
 <div id="dj-error" class="dj-error" style="display:none">
   <h2>DJ Not Found</h2>
   <p>We couldn't find that presenter. They may have moved or the link is incorrect.</p>
   <a href="djs.html">← Back to All DJs</a>
 </div>
-
-<!-- MAIN CONTENT (hidden until loaded) -->
 <div id="dj-content" style="display:none">
-
-  <!-- HERO -->
   <div class="dj-hero">
     <div class="dj-hero-bg"></div>
     <div class="dj-hero-photo-wrap" id="hero-photo-wrap">
@@ -479,246 +108,120 @@
         <a href="djs.html">Presenters</a><span>/</span>
         <span id="hero-breadcrumb-name"></span>
       </div>
-      <div class="dj-on-air-badge">
-        <div class="dj-on-air-dot"></div>
-        On Air — ROCK.SCOT DAB+
-      </div>
+      <div class="dj-on-air-badge"><div class="dj-on-air-dot"></div>On Air — ROCK.SCOT DAB+</div>
       <h1 class="dj-name" id="hero-name"></h1>
       <div class="dj-show-name" id="hero-show-name"></div>
       <div class="dj-genres" id="hero-genres"></div>
     </div>
   </div>
-
-  <!-- BODY -->
   <div class="dj-body">
-
-    <!-- LEFT: BIO + SCHEDULE -->
     <div class="dj-bio-section">
       <div class="dj-section-label">About</div>
       <div class="dj-bio-text" id="dj-bio"></div>
-
-      <!-- Schedule (shown if show days/times exist) -->
       <div id="dj-schedule-wrap" style="display:none">
         <div class="dj-section-label" style="margin-top:2.5rem">Show Details</div>
         <div class="dj-schedule-card">
           <div class="dj-schedule-row" id="sched-show-row" style="display:none">
             <div class="dj-sched-icon">🎙️</div>
-            <div>
-              <div class="dj-sched-label">Show</div>
-              <div class="dj-sched-value" id="sched-show-name"></div>
-            </div>
+            <div><div class="dj-sched-label">Show</div><div class="dj-sched-value" id="sched-show-name"></div></div>
           </div>
           <div class="dj-schedule-row" id="sched-days-row" style="display:none">
             <div class="dj-sched-icon">📅</div>
-            <div>
-              <div class="dj-sched-label">On Air</div>
-              <div class="dj-sched-value" id="sched-days"></div>
-            </div>
+            <div><div class="dj-sched-label">On Air</div><div class="dj-sched-value" id="sched-days"></div></div>
           </div>
           <div class="dj-schedule-row" id="sched-time-row" style="display:none">
             <div class="dj-sched-icon">🕐</div>
-            <div>
-              <div class="dj-sched-label">Time</div>
-              <div class="dj-sched-value" id="sched-time"></div>
-            </div>
+            <div><div class="dj-sched-label">Time</div><div class="dj-sched-value" id="sched-time"></div></div>
           </div>
           <div class="dj-schedule-row">
             <div class="dj-sched-icon">📻</div>
-            <div>
-              <div class="dj-sched-label">Station</div>
-              <div class="dj-sched-value">ROCK.SCOT — DAB+ Digital Radio</div>
-            </div>
+            <div><div class="dj-sched-label">Station</div><div class="dj-sched-value">ROCK.SCOT — DAB+ Digital Radio</div></div>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- RIGHT: SIDEBAR -->
     <div class="dj-sidebar">
       <a href="djs.html" class="dj-back-link">← All Presenters</a>
       <img id="sidebar-photo" class="dj-sidebar-photo" src="" alt="" style="display:none">
       <div id="sidebar-placeholder" class="dj-sidebar-photo-placeholder">🎙️</div>
-
-      <!-- Links -->
       <div id="dj-links-card" class="dj-links-card" style="display:none">
         <div class="dj-section-label" style="margin-bottom:0.75rem">Links</div>
         <div id="dj-links-list"></div>
       </div>
     </div>
   </div>
-
-  <!-- OTHER DJS -->
   <div class="dj-others-section">
     <div class="dj-section-label">Also On ROCK.SCOT</div>
     <div class="dj-others-grid" id="dj-others-grid"></div>
   </div>
-
 </div>
-
-<!-- FOOTER -->
-<footer style="background:#060606; border-top:1px solid #1a1a1a; padding:2rem 1.5rem; text-align:center;">
-  <p style="font-family:'Barlow Condensed',sans-serif; font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; color:rgba(242,242,242,0.25); margin:0;">
+<footer style="background:#060606;border-top:1px solid #1a1a1a;padding:2rem 1.5rem;text-align:center;">
+  <p style="font-family:'Barlow Condensed',sans-serif;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(242,242,242,0.25);margin:0;">
     © 2025 ROCK.SCOT — Caledonia TX Ltd. Scotland's Rock Station on DAB+ Digital Radio.
   </p>
 </footer>
-
 <script>
-const SUPABASE_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
-
-function qs(id) { return document.getElementById(id); }
-
-function formatTime(t) {
-  if (!t) return null;
-  const [h, m] = t.split(':');
-  const hour = parseInt(h);
-  const ampm = hour >= 12 ? 'pm' : 'am';
-  const h12 = hour % 12 || 12;
-  return m === '00' ? `${h12}${ampm}` : `${h12}:${m}${ampm}`;
+const SUPABASE_URL='https://pwzeapvopeeoahpyicdm.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
+function qs(id){return document.getElementById(id);}
+function formatTime(t){if(!t)return null;const[h,m]=t.split(':');const hour=parseInt(h);const ampm=hour>=12?'pm':'am';const h12=hour%12||12;return m==='00'?`${h12}${ampm}`:`${h12}:${m}${ampm}`;}
+async function loadDJ(){
+  const params=new URLSearchParams(window.location.search);
+  const slug=params.get('id')||params.get('slug');
+  if(!slug){showError();return;}
+  try{
+    const headers={apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY};
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/djs?slug=eq.${encodeURIComponent(slug)}&is_active=eq.true&select=*&limit=1`,{headers});
+    const data=await res.json();
+    if(!Array.isArray(data)||data.length===0){showError();return;}
+    const dj=data[0];
+    const othersRes=await fetch(`${SUPABASE_URL}/rest/v1/djs?is_active=eq.true&order=display_order.asc,name.asc&select=id,slug,name,show_name,photo_url`,{headers});
+    const others=await othersRes.json();
+    renderDJ(dj,Array.isArray(others)?others.filter(o=>o.slug!==slug):[]);
+  }catch(e){console.error('DJ load error:',e);showError();}
 }
-
-async function loadDJ() {
-  const params = new URLSearchParams(window.location.search);
-  const slug = params.get('id') || params.get('slug');
-
-  if (!slug) { showError(); return; }
-
-  try {
-    const headers = { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY };
-
-    // Fetch the DJ
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/djs?slug=eq.${encodeURIComponent(slug)}&is_active=eq.true&select=*&limit=1`,
-      { headers }
-    );
-    const data = await res.json();
-
-    if (!Array.isArray(data) || data.length === 0) { showError(); return; }
-    const dj = data[0];
-
-    // Fetch all other active DJs for the strip
-    const othersRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/djs?is_active=eq.true&order=display_order.asc,name.asc&select=id,slug,name,show_name,photo_url`,
-      { headers }
-    );
-    const others = await othersRes.json();
-
-    renderDJ(dj, Array.isArray(others) ? others.filter(o => o.slug !== slug) : []);
-
-  } catch (e) {
-    console.error('DJ load error:', e);
-    showError();
-  }
-}
-
-function renderDJ(dj, others) {
-  // Update page meta
-  document.title = `${dj.name} | ROCK.SCOT`;
-  qs('page-title').textContent = `${dj.name} | ROCK.SCOT`;
-  qs('page-desc').content = dj.bio ? dj.bio.slice(0, 160) : `${dj.name} on ROCK.SCOT — Scotland's rock station on DAB+.`;
-  qs('og-title').content = `${dj.name} | ROCK.SCOT`;
-  qs('og-desc').content = dj.bio ? dj.bio.slice(0, 160) : '';
-  if (dj.photo_url) qs('og-image').content = dj.photo_url;
-
-  // Hero
-  qs('hero-breadcrumb-name').textContent = dj.name;
-  qs('hero-name').textContent = dj.name;
-  qs('hero-show-name').textContent = dj.show_name || 'ROCK.SCOT Presenter';
-
-  if (dj.photo_url) {
-    qs('hero-photo').src = dj.photo_url;
-    qs('hero-photo').alt = dj.name;
+function renderDJ(dj,others){
+  document.title=`${dj.name} | ROCK.SCOT`;
+  qs('page-desc').content=dj.bio?dj.bio.slice(0,160):`${dj.name} on ROCK.SCOT`;
+  qs('og-title').content=`${dj.name} | ROCK.SCOT`;
+  qs('og-desc').content=dj.bio?dj.bio.slice(0,160):'';
+  if(dj.photo_url)qs('og-image').content=dj.photo_url;
+  qs('hero-breadcrumb-name').textContent=dj.name;
+  qs('hero-name').textContent=dj.name;
+  qs('hero-show-name').textContent=dj.show_name||'ROCK.SCOT Presenter';
+  if(dj.photo_url){
+    qs('hero-photo').src=dj.photo_url;qs('hero-photo').alt=dj.name;
     qs('hero-photo').classList.remove('no-photo');
-    qs('sidebar-photo').src = dj.photo_url;
-    qs('sidebar-photo').alt = dj.name;
-    qs('sidebar-photo').style.display = 'block';
-    qs('sidebar-placeholder').style.display = 'none';
-  } else {
-    qs('hero-photo').classList.add('no-photo');
+    qs('sidebar-photo').src=dj.photo_url;qs('sidebar-photo').alt=dj.name;
+    qs('sidebar-photo').style.display='block';
+    qs('sidebar-placeholder').style.display='none';
+  }else{qs('hero-photo').classList.add('no-photo');}
+  if(dj.genres&&dj.genres.length){qs('hero-genres').innerHTML=dj.genres.map(g=>`<span class="dj-genre-tag">${g}</span>`).join('');}
+  if(dj.bio){qs('dj-bio').innerHTML=dj.bio.split('\n\n').map(p=>`<p>${p}</p>`).join('')||`<p>${dj.bio}</p>`;}
+  else{qs('dj-bio').innerHTML=`<p>Presenter on ROCK.SCOT — Scotland's rock station on DAB+ Digital Radio.</p>`;}
+  const hasSchedule=dj.show_name||(dj.show_days&&dj.show_days.length)||dj.show_time_start;
+  if(hasSchedule){
+    qs('dj-schedule-wrap').style.display='block';
+    if(dj.show_name){qs('sched-show-name').textContent=dj.show_name;qs('sched-show-row').style.display='flex';}
+    if(dj.show_days&&dj.show_days.length){qs('sched-days').textContent=dj.show_days.join(', ');qs('sched-days-row').style.display='flex';}
+    if(dj.show_time_start){const start=formatTime(dj.show_time_start);const end=dj.show_time_end?formatTime(dj.show_time_end):null;qs('sched-time').textContent=end?`${start} – ${end}`:start;qs('sched-time-row').style.display='flex';}
   }
-
-  // Genres
-  if (dj.genres && dj.genres.length) {
-    qs('hero-genres').innerHTML = dj.genres.map(g =>
-      `<span class="dj-genre-tag">${g}</span>`
-    ).join('');
-  }
-
-  // Bio
-  if (dj.bio) {
-    qs('dj-bio').innerHTML = dj.bio.split('\n\n').map(p => `<p>${p}</p>`).join('') || `<p>${dj.bio}</p>`;
-  } else {
-    qs('dj-bio').innerHTML = `<p>Presenter on ROCK.SCOT — Scotland's rock station on DAB+ Digital Radio.</p>`;
-  }
-
-  // Schedule
-  const hasSchedule = dj.show_name || (dj.show_days && dj.show_days.length) || dj.show_time_start;
-  if (hasSchedule) {
-    qs('dj-schedule-wrap').style.display = 'block';
-    if (dj.show_name) {
-      qs('sched-show-name').textContent = dj.show_name;
-      qs('sched-show-row').style.display = 'flex';
-    }
-    if (dj.show_days && dj.show_days.length) {
-      qs('sched-days').textContent = dj.show_days.join(', ');
-      qs('sched-days-row').style.display = 'flex';
-    }
-    if (dj.show_time_start) {
-      const start = formatTime(dj.show_time_start);
-      const end = dj.show_time_end ? formatTime(dj.show_time_end) : null;
-      qs('sched-time').textContent = end ? `${start} – ${end}` : start;
-      qs('sched-time-row').style.display = 'flex';
-    }
-  }
-
-  // Links
-  const links = [];
-  if (dj.website_url)  links.push({ icon: '🌐', label: 'Official Website', href: dj.website_url });
-  if (dj.wiki_url)     links.push({ icon: '📖', label: 'Wikipedia', href: dj.wiki_url });
-  if (dj.instagram)    links.push({ icon: '📸', label: 'Instagram', href: `https://instagram.com/${dj.instagram.replace('@','')}` });
-  if (dj.twitter)      links.push({ icon: '𝕏', label: 'Twitter / X', href: `https://twitter.com/${dj.twitter.replace('@','')}` });
-  if (dj.facebook)     links.push({ icon: 'f', label: 'Facebook', href: dj.facebook });
-  if (dj.soundcloud)   links.push({ icon: '☁️', label: 'SoundCloud', href: dj.soundcloud });
-  if (dj.mixcloud)     links.push({ icon: '🎧', label: 'Mixcloud', href: dj.mixcloud });
-
-  if (links.length) {
-    qs('dj-links-card').style.display = 'block';
-    qs('dj-links-list').innerHTML = links.map(l =>
-      `<a href="${l.href}" target="_blank" rel="noopener" class="dj-link-row">
-        <span class="dj-link-icon">${l.icon}</span>
-        <span>${l.label}</span>
-      </a>`
-    ).join('');
-  }
-
-  // Others strip
-  if (others.length) {
-    qs('dj-others-grid').innerHTML = others.slice(0, 12).map(o =>
-      `<a href="dj.html?id=${o.slug}" class="dj-other-card">
-        ${o.photo_url
-          ? `<img src="${o.photo_url}" alt="${o.name}" class="dj-other-photo" loading="lazy" onerror="this.parentElement.innerHTML='<div class=dj-other-placeholder>🎙️</div>'+this.parentElement.innerHTML.replace(this.outerHTML,'');">`
-          : `<div class="dj-other-placeholder">🎙️</div>`}
-        <div class="dj-other-info">
-          <div class="dj-other-name">${o.name}</div>
-          <div class="dj-other-show">${o.show_name || 'ROCK.SCOT'}</div>
-        </div>
-      </a>`
-    ).join('');
-  }
-
-  // Show content, hide loading
-  qs('dj-loading').style.display = 'none';
-  qs('dj-content').style.display = 'block';
+  const links=[];
+  if(dj.website_url)links.push({icon:'🌐',label:'Official Website',href:dj.website_url});
+  if(dj.wiki_url)links.push({icon:'📖',label:'Wikipedia',href:dj.wiki_url});
+  if(dj.instagram)links.push({icon:'📸',label:'Instagram',href:`https://instagram.com/${dj.instagram.replace('@','')}`});
+  if(dj.twitter)links.push({icon:'𝕏',label:'Twitter / X',href:`https://twitter.com/${dj.twitter.replace('@','')}`});
+  if(dj.facebook)links.push({icon:'f',label:'Facebook',href:dj.facebook});
+  if(dj.soundcloud)links.push({icon:'☁️',label:'SoundCloud',href:dj.soundcloud});
+  if(dj.mixcloud)links.push({icon:'🎧',label:'Mixcloud',href:dj.mixcloud});
+  if(links.length){qs('dj-links-card').style.display='block';qs('dj-links-list').innerHTML=links.map(l=>`<a href="${l.href}" target="_blank" rel="noopener" class="dj-link-row"><span class="dj-link-icon">${l.icon}</span><span>${l.label}</span></a>`).join('');}
+  if(others.length){qs('dj-others-grid').innerHTML=others.slice(0,12).map(o=>`<a href="dj.html?id=${o.slug}" class="dj-other-card">${o.photo_url?`<img src="${o.photo_url}" alt="${o.name}" class="dj-other-photo" loading="lazy">`:`<div class="dj-other-placeholder">🎙️</div>`}<div class="dj-other-info"><div class="dj-other-name">${o.name}</div><div class="dj-other-show">${o.show_name||'ROCK.SCOT'}</div></div></a>`).join('');}
+  qs('dj-loading').style.display='none';
+  qs('dj-content').style.display='block';
 }
-
-function showError() {
-  qs('dj-loading').style.display = 'none';
-  qs('dj-error').style.display = 'flex';
-}
-
+function showError(){qs('dj-loading').style.display='none';qs('dj-error').style.display='flex';}
 loadDJ();
 </script>
-
 <script src="js/header.js" defer></script>
 </body>
 </html>
