@@ -1,333 +1,175 @@
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>The Wire | ROCK.SCOT — Real-Time Scottish Rock News</title>
-    <meta name="description" content="The Wire — real-time Scottish rock music news, gig listings, and scene updates powered by ROCK.SCOT. Metal, Punk, Indie and Alternative stories updated live.">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://rock.scot/wire.html">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="The Wire — Real-Time Scottish Rock News | ROCK.SCOT">
-    <meta property="og:description" content="Live Scottish rock, metal, punk and indie news powered by ROCK.SCOT on DAB+ digital radio.">
-    <meta property="og:image" content="https://rock.scot/assets/images/hero-graffiti-main.jpg">
-    <meta name="twitter:card" content="summary_large_image">
-    <link rel="icon" type="image/png" href="/assets/images/logo.png">
-    <meta name="theme-color" content="#FF6600">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=13">
-    
-      
-    <!-- AEO: NewsMediaOrganization + BreadcrumbList -->
-  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>The Wire | ROCK.SCOT — Real-Time Scottish Rock News</title>
+  <meta name="description" content="The Wire — real-time Scottish rock music news, gig listings, and scene updates powered by ROCK.SCOT. Metal, Punk, Indie and Alternative stories updated live.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://rock.scot/wire.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="The Wire — Real-Time Scottish Rock News | ROCK.SCOT">
+  <meta property="og:description" content="Live Scottish rock, metal, punk and indie news powered by ROCK.SCOT on DAB+ digital radio.">
+  <meta property="og:image" content="https://rock.scot/assets/images/hero-graffiti-main.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/png" href="/rock/assets/images/logo.png">
+  <meta name="theme-color" content="#FF6600">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/rock/css/style.css?v=13">
+  <script src="/rock/js/header.js"></script>
+  <style>
+    body { background:#060606; color:#f2f2f2; }
+    .wire-page-wrap { max-width:1300px; margin:0 auto; padding:0 1.25rem 6rem; }
 
+    /* HERO */
+    .wire-hero { margin-top:98px; padding:2rem 0 1.5rem; border-bottom:1px solid #1e1e1e; display:flex; align-items:center; gap:1.25rem; flex-wrap:wrap; }
+    .wire-hero img { width:80px; height:auto; flex-shrink:0; }
+    .wire-hero-text { flex:1; min-width:200px; }
+    .wire-hero h1 { font-family:'Bebas Neue',sans-serif; font-size:clamp(2.8rem,8vw,5rem); line-height:0.9; margin:0; color:#f2f2f2; }
+    .wire-hero h1 span { color:#ff5500; }
+    .wire-hero-sub { font-family:'Barlow Condensed',sans-serif; font-size:0.88rem; color:rgba(242,242,242,0.45); margin-top:0.4rem; letter-spacing:0.04em; }
+    .wire-status-bar { display:flex; align-items:center; gap:0.5rem; font-family:'Barlow Condensed',sans-serif; font-size:0.72rem; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:rgba(242,242,242,0.35); flex-shrink:0; }
+    .wire-live-dot { width:7px; height:7px; border-radius:50%; background:#ff5500; animation:dotpulse 1.4s ease-in-out infinite; }
+    @keyframes dotpulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
 
-<style>
-    /* Magazine Card Layout */
-    #wire-output {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 20px;
-        padding-top: 20px;
-    }
-    .wire-card {
-        background: #111;
-        border: 1px solid #222;
-        border-radius: 8px;
-        overflow: hidden;
-        transition: transform 0.2s, border-color 0.2s;
-        display: flex;
-        flex-direction: column;
-    }
-    .wire-card:hover {
-        transform: translateY(-5px);
-        border-color: #ff6b00;
-    }
-    .wire-card-content { padding: 1.5rem; }
-    .wire-card-genre { color: #ff6b00; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; margin-bottom: 0.5rem; }
-    .wire-card-title { font-size: 1.25rem; font-weight: 700; color: #fff; line-height: 1.2; margin-bottom: 1rem; }
-    .wire-card-meta { font-size: 0.8rem; color: #666; }
+    /* SECTION LABEL */
+    .vinyl-label { font-family:'Barlow Condensed',sans-serif; font-size:0.68rem; font-weight:900; letter-spacing:0.28em; text-transform:uppercase; color:rgba(242,242,242,0.25); padding:1.5rem 0 0.75rem; display:flex; align-items:center; gap:0.75rem; }
+    .vinyl-label::after { content:''; flex:1; height:1px; background:#1a1a1a; }
 
-    /* Pop-out Modal Style */
-    #story-modal {
-        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; padding: 20px;
-    }
-    .modal-content {
-        background: #111; border: 1px solid #333; width: 100%; max-width: 600px;
-        border-radius: 12px; padding: 2rem; position: relative; color: #fff;
-    }
-    .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2rem; color: #666; cursor: pointer; }
-    .modal-source-btn {
-        display: inline-block; margin-top: 2rem; padding: 12px 24px;
-        background: #ff6b00; color: #000; text-decoration: none; font-weight: 900; border-radius: 4px;
-    }
-</style>
+    /* VINYL GRID */
+    #wire-output { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; }
+    @media(max-width:480px){ #wire-output { grid-template-columns:repeat(2,1fr); gap:10px; } }
 
-        <h2 id="modal-title" style="margin-top:0;"></h2>
-        <p id="modal-summary" style="line-height:1.6; color:#ccc;"></p>
-        <div style="font-size:0.8rem; color:#555; margin-top:1rem;">Source: <span id="modal-source-name"></span></div>
-        <a id="modal-link" href="#" target="_blank" class="modal-source-btn">READ FULL STORY AT SOURCE</a>
-    </div>
-</div>
+    /* SLEEVE CARD */
+    .sleeve-card { position:relative; aspect-ratio:1/1; border-radius:3px; overflow:hidden; cursor:pointer; background:#111; box-shadow:3px 4px 16px rgba(0,0,0,0.75); transition:transform 0.25s cubic-bezier(.4,0,.2,1),box-shadow 0.25s; }
+    .sleeve-card:hover { transform:translateY(-7px) scale(1.04); box-shadow:8px 16px 32px rgba(0,0,0,0.9); }
+    .sleeve-card:active { transform:scale(0.96); }
+    .sleeve-bg { position:absolute; inset:0; }
+    .sleeve-art { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity 0.5s; }
+    .sleeve-genre-tag { position:absolute; top:0; left:0; font-family:'Barlow Condensed',sans-serif; font-size:0.58rem; font-weight:900; letter-spacing:0.18em; text-transform:uppercase; padding:0.18rem 0.45rem; background:#ff5500; color:#000; border-radius:0 0 3px 0; }
+    .sleeve-info { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent,rgba(0,0,0,0.97)); padding:1.8rem 0.55rem 0.55rem; }
+    .sleeve-title { font-family:'Barlow Condensed',sans-serif; font-size:0.79rem; font-weight:700; color:#f2f2f2; line-height:1.2; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .sleeve-meta { font-family:'Barlow Condensed',sans-serif; font-size:0.62rem; color:rgba(242,242,242,0.4); margin-top:0.15rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-<style>
-    #wire-output {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 25px;
-        padding: 20px 0;
-    }
-    .wire-card {
-        background: #111;
-        border: 1px solid #222;
-        border-radius: 12px;
-        overflow: hidden;
-        cursor: pointer;
-        transition: transform 0.3s, border-color 0.3s;
-        display: flex;
-        flex-direction: column;
-    }
-    .wire-card:hover {
-        transform: translateY(-8px);
-        border-color: #ff6b00;
-    }
-    .wire-card-img {
-        width: 100%;
-        height: 180px;
-        object-fit: cover;
-        background: #000;
-    }
-    .wire-card-content { padding: 1.5rem; flex-grow: 1; }
-    .wire-card-genre { color: #ff6b00; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; margin-bottom: 0.5rem; }
-    .wire-card-title { font-size: 1.2rem; font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 1rem; }
-    .wire-card-meta { font-size: 0.8rem; color: #555; display: flex; align-items: center; gap: 8px; }
+    /* Vinyl record peek */
+    .sleeve-card::before { content:''; position:absolute; right:-32px; top:50%; transform:translateY(-50%); width:60px; height:60px; border-radius:50%; background:radial-gradient(circle at center,#1a1a1a 28%,#2a2a2a 29%,#2a2a2a 44%,#111 45%,#111 54%,#333 55%,#333 60%,#1a1a1a 61%); opacity:0; transition:opacity 0.25s,right 0.25s; z-index:3; box-shadow:inset 0 0 6px rgba(0,0,0,0.9); }
+    .sleeve-card:hover::before { opacity:1; right:-16px; }
 
-    /* Modal Styling */
-    #story-modal {
-        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.95); z-index: 99999; justify-content: center; align-items: center; padding: 20px;
-    }
-    .modal-box {
-        background: #0a0a0a; border: 1px solid #333; width: 100%; max-width: 650px;
-        border-radius: 16px; position: relative; color: #fff; overflow: hidden;
-    }
-    .modal-body { padding: 2rem; }
-    .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2.5rem; color: #ff6b00; cursor: pointer; z-index: 10; font-weight: bold; }
-    .modal-btn {
-        display: block; text-align: center; margin-top: 1.5rem; padding: 15px;
-        background: #ff6b00; color: #000; text-decoration: none; font-weight: 900; border-radius: 8px;
-    }
-</style>
+    /* LOADING */
+    .wire-loading { grid-column:1/-1; display:flex; flex-direction:column; align-items:center; padding:4rem; gap:1rem; color:rgba(242,242,242,0.35); font-family:'Barlow Condensed',sans-serif; font-size:0.85rem; letter-spacing:0.12em; text-transform:uppercase; }
+    .wire-spinner { width:32px; height:32px; border:2px solid #1e1e1e; border-top-color:#ff5500; border-radius:50%; animation:spin 0.75s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg)} }
 
-            <h2 id="modal-title" style="margin: 0.5rem 0 1.5rem 0; line-height: 1.2;"></h2>
-            <p id="modal-summary" style="line-height:1.7; color:#bbb; font-size: 1.05rem;"></p>
-            <div style="margin-top:2rem; padding-top:1rem; border-top:1px solid #222; font-size:0.9rem; color:#666;">
-                Source: <span id="modal-source" style="color:#fff; font-weight:bold;"></span>
-            </div>
-            <a id="modal-link" href="#" target="_blank" class="modal-btn">READ FULL STORY AT SOURCE</a>
-        </div>
-    </div>
-</div>
+    /* GATEFOLD OVERLAY */
+    #gf-overlay { display:none; position:fixed; inset:0; z-index:4000; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); align-items:flex-end; justify-content:center; }
+    #gf-overlay.open { display:flex; }
+    #gf-panel { width:100%; max-width:720px; background:#0e0e0e; border-top:3px solid #ff5500; border-radius:18px 18px 0 0; max-height:91vh; display:flex; flex-direction:column; transform:translateY(100%); transition:transform 0.42s cubic-bezier(.4,0,.2,1); overflow:hidden; }
+    #gf-overlay.open #gf-panel { transform:translateY(0); }
+    .gf-handle { width:38px; height:4px; background:rgba(255,255,255,0.12); border-radius:2px; margin:0.8rem auto 0; flex-shrink:0; }
 
-<style>
-    /* ─── NATIVE GRID CAROUSEL ─── */
-    #wire-output-wrapper {
-        position: relative;
-        padding: 0 40px; /* Space for buttons */
-    }
-    #wire-output {
-        display: grid;
-        grid-template-columns: repeat(20, 280px); /* Multi-item slides */
-        gap: 20px;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        scrollbar-width: none; /* Hide scrollbar for clean look */
-        padding-bottom: 10px;
-        -webkit-overflow-scrolling: touch;
-    }
-    #wire-output::-webkit-scrollbar { display: none; } /* Safari hide */
+    /* Art header */
+    .gf-art-wrap { position:relative; width:100%; height:210px; flex-shrink:0; overflow:hidden; background:#111; }
+    @media(max-width:480px){ .gf-art-wrap{height:155px;} }
+    #gf-art { width:100%; height:100%; object-fit:cover; display:block; filter:brightness(0.65); transition:opacity 0.4s; }
+    .gf-art-grad { position:absolute; inset:0; background:linear-gradient(to bottom,transparent 25%,#0e0e0e 100%); }
+    #gf-genre-badge { position:absolute; top:1rem; left:1.25rem; font-family:'Barlow Condensed',sans-serif; font-size:0.68rem; font-weight:900; letter-spacing:0.2em; text-transform:uppercase; color:#000; background:#ff5500; padding:0.2rem 0.6rem; border-radius:3px; }
+    .gf-close-x { position:absolute; top:0.9rem; right:1.1rem; background:rgba(0,0,0,0.55); border:none; color:rgba(242,242,242,0.65); font-size:1rem; width:30px; height:30px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10; }
+    .gf-close-x:hover { color:#ff5500; }
 
-    .wire-card {
-        scroll-snap-align: start;
-        background: #111;
-        border: 1px solid #222;
-        border-radius: 12px;
-        overflow: hidden;
-        cursor: pointer;
-        transition: transform 0.3s, border-color 0.3s;
-        display: flex;
-        flex-direction: column;
-        width: 280px; /* Match column width */
-    }
-    .wire-card:hover {
-        transform: translateY(-5px);
-        border-color: #ff6b00;
-    }
-    .wire-card-img {
-        width: 100%;
-        height: 160px;
-        object-fit: cover;
-        /* VITAL FIX: Prioritize top of image, crop bottom */
-        object-position: top;
-        background: #000;
-    }
-    .wire-card-content { padding: 1rem 1.25rem; flex-grow: 1; }
-    .wire-card-genre { color: #ff6b00; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; margin-bottom: 0.5rem; }
-    .wire-card-title { font-size: 1.15rem; font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 1rem; height: 3.9em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
-    .wire-card-meta { font-size: 0.8rem; color: #555; }
+    /* Body */
+    .gf-body { overflow-y:auto; padding:1rem 1.5rem 1.5rem; flex:1; }
+    #gf-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(1.6rem,5vw,2.3rem); line-height:1.05; color:#f2f2f2; margin:0 0 0.8rem; }
+    #gf-summary { font-family:'Barlow',sans-serif; font-size:0.94rem; line-height:1.75; color:rgba(242,242,242,0.65); margin:0 0 1.25rem; }
+    .gf-source-line { font-family:'Barlow Condensed',sans-serif; font-size:0.7rem; letter-spacing:0.12em; text-transform:uppercase; color:rgba(242,242,242,0.28); margin-bottom:1.1rem; }
+    .gf-source-line span { color:rgba(242,242,242,0.55); }
+    #gf-link { display:block; text-align:center; background:#ff5500; color:#000; font-family:'Barlow Condensed',sans-serif; font-size:0.88rem; font-weight:900; letter-spacing:0.15em; text-transform:uppercase; padding:0.8rem 1.5rem; border-radius:4px; text-decoration:none; }
+    #gf-link:hover { background:#ff7722; }
 
-    /* Carousel Buttons */
-    .carousel-btn {
-        position: absolute; top: 50%; transform: translateY(-50%);
-        background: rgba(0,0,0,0.8); color: #ff6b00; border: 1px solid #333;
-        font-size: 1.5rem; font-weight: bold; width: 40px; height: 40px;
-        border-radius: 20px; cursor: pointer; z-index: 10;
-        display: flex; align-items: center; justify-content: center;
-    }
-    .carousel-btn:hover { background: #1a1a1a; }
-    .carousel-prev { left: -10px; }
-    .carousel-next { right: -10px; }
-
-    /* Modal - Critical Fixes for robustness */
-    #story-modal {
-        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.95); z-index: 99999; justify-content: center; align-items: center; padding: 20px;
-    }
-    .modal-box {
-        background: #0d0d0d; border: 1px solid #333; width: 100%; max-width: 600px;
-        border-radius: 16px; position: relative; color: #fff; overflow-y: auto; max-height: 90vh;
-    }
-    .modal-body { padding: 2.5rem; }
-    .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2.5rem; color: #ff6b00; cursor: pointer; z-index: 10; font-weight: bold; }
-    .modal-btn {
-        display: block; text-align: center; margin-top: 2rem; padding: 15px;
-        background: #ff6b00; color: #000; text-decoration: none; font-weight: 900; border-radius: 8px; text-transform: uppercase;
-    }
-</style>
-<script src="/rock/js/header.js"></script>
+    /* Nav footer */
+    .gf-nav { display:flex; align-items:center; justify-content:space-between; padding:0.7rem 1.5rem 0.9rem; border-top:1px solid #1a1a1a; background:#080808; flex-shrink:0; }
+    .gf-nav-btn { display:flex; align-items:center; gap:0.35rem; background:rgba(255,255,255,0.05); border:1px solid #1e1e1e; color:#f2f2f2; font-family:'Barlow Condensed',sans-serif; font-size:0.8rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:0.5rem 0.9rem; border-radius:4px; cursor:pointer; transition:background 0.15s; }
+    .gf-nav-btn:hover { background:rgba(255,255,255,0.1); }
+    .gf-nav-btn:disabled { opacity:0.2; cursor:default; }
+    .gf-counter { font-family:'Barlow Condensed',sans-serif; font-size:0.75rem; color:rgba(242,242,242,0.3); letter-spacing:0.1em; }
+  </style>
 </head>
-<body><div id="header"></div><div id="header"></div>
+<body>
 
-<!-- WIRE HERO -->
-<div class="wire-hero" style="margin-top: 98px;">
-    <div class="wire-hero-inner" style="display:flex;align-items:center;gap:1rem;padding:1.25rem 1.25rem 0;">
-        <img onerror="this.src='/assets/images/hero.png'" onerror="this.src='/images/hero.png'" src="/assets/images/hero.png"
-             alt="ROCK.SCOT — Scotland's DAB+ Rock Station"
-             loading="eager"
-             style="width:110px;max-width:28%;height:auto;object-fit:contain;flex-shrink:0;">
-        <div style="flex:1;min-width:0;">
-            <h1 class="wire-title">THE<br><span>WIRE</span></h1>
-            <p class="wire-subtitle">Real-time Scottish rock news — powered by <strong>ROCK.SCOT</strong><br>Updated continuously from 40+ Scottish music sources</p>
-        </div>
-        <div class="wire-stats" style="flex-shrink:0;text-align:center;">
-            <div class="wire-count" id="story-count">—</div>
-            <div class="wire-count-label">Stories Live</div>
-        </div>
+<div class="wire-page-wrap">
+  <div class="wire-hero">
+    <img src="/rock/assets/images/burst.png" onerror="this.src='/rock/assets/images/logo.png'" alt="ROCK.SCOT">
+    <div class="wire-hero-text">
+      <h1>THE<br><span>WIRE</span></h1>
+      <div class="wire-hero-sub">Real-time Scottish rock news &mdash; powered by <strong>ROCK.SCOT</strong><br>Updated continuously from 40+ Scottish music sources</div>
     </div>
-</div>
-
-<!-- CONTROLS: compact pill row, not sticky -->
-<div class="wire-controls-slim">
-    <div class="wire-genre-pills">
-        <button class="wire-pill active" onclick="setPillFilter('',this)">All</button>
-        <button class="wire-pill" onclick="setPillFilter('Rock',this)">Rock</button>
+    <div class="wire-status-bar">
+      <div class="wire-live-dot"></div>
+      <span id="wire-status-text">Connecting...</span>
+      <button onclick="loadStories()" title="Refresh" style="background:none;border:none;color:rgba(242,242,242,0.35);font-size:1rem;cursor:pointer;padding:0.2rem 0.4rem;">&#8635;</button>
     </div>
-    <div class="wire-controls-right">
-        <div class="wire-status">
-            <div class="wire-live-dot" aria-hidden="true"></div>
-            <span id="wire-status-text"></span>
-        </div>
-        <button class="wire-refresh-btn-sm" onclick="loadStories(true)" aria-label="Refresh">↻</button>
-    </div>
-</div>
-
-<!-- STORIES OUTPUT -->
-<div id="wire-output">
+  </div>
+  <div class="vinyl-label">Stories Live</div>
+  <div id="wire-output">
     <div class="wire-loading" id="wire-loading">
-        <div class="wire-spinner" aria-hidden="true"></div>
-        <p>Loading Scottish rock news...</p>
+      <div class="wire-spinner"></div>
+      <span>Loading Scottish rock news...</span>
     </div>
+  </div>
 </div>
 
-        <h2 class="wire-modal-title" id="modal-title"></h2>
-        <p class="wire-modal-meta" id="modal-meta"></p>
-        <p class="wire-modal-summary" id="modal-summary"></p>
-        <p style="font-size:0.75rem;color:rgba(242,242,242,0.35);margin-bottom:0.75rem;font-style:italic;">Summary by ROCK.SCOT — original story credited below</p>
-        <a href="#" id="modal-link" class="wire-modal-cta" target="_blank" rel="noopener noreferrer">Read Full Story at Source ↗</a>
-    </div>
-</div>
-
-<!-- FOOTER -->
 <footer>
   <div class="footer-grid">
     <div class="footer-brand">
-      <img onerror="this.src='/assets/images/hero.png'" onerror="this.src='/images/hero.png'" src="/assets/images/hero.png" alt="ROCK.SCOT" style="height:44px;width:auto;">
+      <img src="/rock/assets/images/logo.png" alt="ROCK.SCOT" style="height:44px;width:auto;">
       <p>Scotland's rock station on DAB+ digital radio. Broadcasting Metal, Alt, Punk and Classic Rock 24/7 across West Scotland.</p>
-      <p style="margin-top:0.75rem;">Ofcom Licensed · SC646223 · VAT 491589639</p>
+      <p style="margin-top:0.75rem;">Ofcom Licensed &middot; SC646223 &middot; VAT 491589639</p>
     </div>
     <div class="footer-col">
       <h4>The Wire</h4>
       <p>Real-time Scottish rock news</p>
       <p>Updated continuously</p>
-      <a href="wire.html">Read The Wire →</a>
+      <a href="/rock/wire.html">Read The Wire &rarr;</a>
     </div>
     <div class="footer-col">
       <h4>Navigate</h4>
-      <a href="index.html">Home</a>
-      <a href="wire.html">The Wire</a>
-      <a href="coverage.html">Coverage</a>
-      <a href="advertise.html" class="orange">Advertise</a>
+      <a href="/rock/index.html">Home</a>
+      <a href="/rock/wire.html">The Wire</a>
+      <a href="/rock/coverage.html">Coverage</a>
+      <a href="/rock/advertise.html" class="orange">Advertise</a>
     </div>
     <div class="footer-col">
       <h4>Contact</h4>
       <a href="tel:01414597625" class="orange">0141 459 ROCK</a>
-      <a href="/cdn-cgi/l/email-protection#dfacabaabbb6b09fadb0bcb4f1acbcb0ab"><span class="__cf_email__" data-cfemail="8dfef9f8e9e4e2cdffe2eee6a3feeee2f9">[email&#160;protected]</span></a>
-      <a href="/cdn-cgi/l/email-protection#29484d5f4c5b5d405a4c695b464a42075a4a465d"><span class="__cf_email__" data-cfemail="09686d7f6c7b7d607a6c497b666a62277a6a667d">[email&#160;protected]</span></a>
-      <a href="https://bsky.app/profile/rockscot.bsky.social" target="_blank" rel="noopener">Bluesky ↗</a>
+      <a href="mailto:studio@rock.scot">studio@rock.scot</a>
+      <a href="mailto:advertise@rock.scot">advertise@rock.scot</a>
+      <a href="https://bsky.app/profile/rockscot.bsky.social" target="_blank" rel="noopener">Bluesky &nearr;</a>
     </div>
   </div>
-  <div class="footer-bottom">© 2026 ROCK.SCOT · Scotland's Rock Station · Caledonia TX Ltd · SC646223 · VAT 491589639 · Ofcom Licensed</div>
+  <div class="footer-bottom">&copy; 2026 ROCK.SCOT &middot; Scotland's Rock Station &middot; Caledonia TX Ltd &middot; SC646223 &middot; VAT 491589639 &middot; Ofcom Licensed</div>
 </footer>
 
-
-
-            <h2 id="modal-title" style="margin: 0.5rem 0 1.5rem 0; line-height: 1.2;"></h2>
-            <p id="modal-summary" style="line-height:1.7; color:#bbb; font-size: 1.05rem; white-space: pre-wrap;"></p>
-            <div style="margin-top:2.5rem; padding-top:1rem; border-top:1px solid #222; font-size:0.9rem; color:#666;">
-                SOURCE: <span id="modal-source" style="color:#fff; font-weight:bold; font-size: 1rem;"></span>
-            </div>
-            <a id="modal-link" href="#" target="_blank" class="modal-btn">READ FULL STORY AT SOURCE</a>
-        </div>
+<!-- GATEFOLD MODAL -->
+<div id="gf-overlay" role="dialog" aria-modal="true" aria-labelledby="gf-title">
+  <div id="gf-panel">
+    <div class="gf-handle"></div>
+    <div class="gf-art-wrap">
+      <img id="gf-art" src="" alt="">
+      <div class="gf-art-grad"></div>
+      <span id="gf-genre-badge"></span>
+      <button class="gf-close-x" onclick="gfClose()" aria-label="Close">&#x2715;</button>
     </div>
-</div>
-
-<!-- ROLODEX MODAL -->
-<div id="rs-modal" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.92);flex-direction:column;align-items:center;justify-content:flex-end;">
-  <div id="rs-modal-panel" style="width:100%;max-width:700px;background:#111;border-top:3px solid #ff5500;border-radius:16px 16px 0 0;padding:0;overflow:hidden;max-height:88vh;display:flex;flex-direction:column;">
-    <!-- Header bar -->
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem 0.75rem;border-bottom:1px solid #1e1e1e;flex-shrink:0;">
-      <div style="display:flex;align-items:center;gap:0.75rem;">
-        <span id="rs-modal-genre" style="font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:900;letter-spacing:0.2em;text-transform:uppercase;color:#ff5500;background:rgba(255,85,0,0.12);border:1px solid rgba(255,85,0,0.3);padding:0.2rem 0.6rem;border-radius:3px;"></span>
-        <span id="rs-modal-counter" style="font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;color:rgba(242,242,242,0.4);letter-spacing:0.1em;"></span>
-      </div>
-      <button onclick="rsCloseModal()" style="background:none;border:none;color:rgba(242,242,242,0.5);font-size:1.4rem;cursor:pointer;padding:0.25rem 0.5rem;line-height:1;">&#x2715;</button>
+    <div class="gf-body">
+      <h2 id="gf-title"></h2>
+      <p id="gf-summary"></p>
+      <div class="gf-source-line">Source: <span id="gf-source"></span></div>
+      <a id="gf-link" href="#" target="_blank" rel="noopener noreferrer">Read Full Story &nearr;</a>
     </div>
-    <!-- Story content -->
-    <div id="rs-modal-body" style="overflow-y:auto;padding:1.25rem;flex:1;">
-      <h2 id="rs-modal-title" style="font-family:'Bebas Neue',sans-serif;font-size:clamp(1.6rem,5vw,2.2rem);color:#f2f2f2;line-height:1.1;margin:0 0 1rem;"></h2>
-      <p id="rs-modal-summary" style="font-family:'Barlow',sans-serif;font-size:0.97rem;line-height:1.7;color:#bbb;margin:0 0 1.25rem;"></p>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;color:rgba(242,242,242,0.35);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1.25rem;">Source: <span id="rs-modal-source" style="color:rgba(242,242,242,0.6);"></span></div>
-      <a id="rs-modal-link" href="#" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#ff5500;color:#000;font-family:'Barlow Condensed',sans-serif;font-size:0.85rem;font-weight:900;letter-spacing:0.15em;text-transform:uppercase;padding:0.7rem 1.5rem;border-radius:3px;text-decoration:none;">Read Full Story &#8599;</a>
-    </div>
-    <!-- Carousel nav -->
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1.25rem;border-top:1px solid #1e1e1e;background:#0e0e0e;flex-shrink:0;">
-      <button id="rs-prev" onclick="rsNav(-1)" style="display:flex;align-items:center;gap:0.5rem;background:rgba(255,255,255,0.06);border:1px solid #2a2a2a;color:#f2f2f2;font-family:'Barlow Condensed',sans-serif;font-size:0.85rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.6rem 1.1rem;border-radius:4px;cursor:pointer;">&#8592; Prev</button>
-      <!-- Dot indicators -->
-      <div id="rs-dots" style="display:flex;gap:5px;flex-wrap:wrap;justify-content:center;max-width:200px;"></div>
-      <button id="rs-next" onclick="rsNav(1)" style="display:flex;align-items:center;gap:0.5rem;background:rgba(255,255,255,0.06);border:1px solid #2a2a2a;color:#f2f2f2;font-family:'Barlow Condensed',sans-serif;font-size:0.85rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.6rem 1.1rem;border-radius:4px;cursor:pointer;">Next &#8594;</button>
+    <div class="gf-nav">
+      <button class="gf-nav-btn" id="gf-prev" onclick="gfNav(-1)">&#8592; Prev</button>
+      <span class="gf-counter" id="gf-counter"></span>
+      <button class="gf-nav-btn" id="gf-next" onclick="gfNav(1)">Next &#8594;</button>
     </div>
   </div>
 </div>
@@ -335,147 +177,215 @@
 <script>
 const SUPABASE_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
-let allStories = [];
-let rsIdx = 0;
 
-// ── TOUCH SWIPE ──────────────────────────────────────
-let rsTouchX = null;
-document.getElementById('rs-modal-panel').addEventListener('touchstart', e => { rsTouchX = e.touches[0].clientX; }, {passive:true});
-document.getElementById('rs-modal-panel').addEventListener('touchend', e => {
-    if (rsTouchX === null) return;
-    const dx = e.changedTouches[0].clientX - rsTouchX;
-    if (Math.abs(dx) > 50) rsNav(dx < 0 ? 1 : -1);
-    rsTouchX = null;
-}, {passive:true});
+let allStories = [];
+let gfIdx = 0;
+const artCache = {};
+
+const GENRE_PALETTES = {
+  metal:   ['#180800','#2d1000','#3a1500'],
+  punk:    ['#0a0018','#14002c','#1c003c'],
+  indie:   ['#001808','#002c12','#003a18'],
+  alt:     ['#001018','#001c2c','#00263a'],
+  rock:    ['#180000','#2c0000','#3a0000'],
+  classic: ['#141008','#22180c','#2c2010'],
+};
+
+function genrePalette(genre) {
+  const g = (genre || '').toLowerCase();
+  for (const [k, v] of Object.entries(GENRE_PALETTES)) {
+    if (g.includes(k)) return v;
+  }
+  return ['#0d0d0d','#161616','#1e1e1e'];
+}
 
 function timeAgo(d) {
-    const s = Math.floor((Date.now() - new Date(d)) / 1000);
-    if (s < 3600) return Math.floor(s/60) + 'm ago';
-    if (s < 86400) return Math.floor(s/3600) + 'h ago';
-    return Math.floor(s/86400) + 'd ago';
+  const s = Math.floor((Date.now() - new Date(d)) / 1000);
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  return Math.floor(s/86400) + 'd ago';
 }
 
-function escHtml(str) {
-    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function esc(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-function rsShowStory(idx) {
-    const s = allStories[idx];
-    if (!s) return;
-    rsIdx = idx;
-    const panel = document.getElementById('rs-modal-body');
+async function getArtwork(story) {
+  const key = story.id;
+  if (artCache[key] !== undefined) return artCache[key];
+  artCache[key] = null; // mark as in-progress
 
-    // Animate out then in
-    panel.style.transition = 'opacity 0.15s';
-    panel.style.opacity = '0';
-    setTimeout(() => {
-        document.getElementById('rs-modal-title').textContent = s.title || '';
-        document.getElementById('rs-modal-genre').textContent = (s.genre || 'Rock').toUpperCase();
-        document.getElementById('rs-modal-summary').textContent = s.summary || 'Click below to read the full story.';
-        document.getElementById('rs-modal-source').textContent = s.source_name || 'ROCK.SCOT';
-        document.getElementById('rs-modal-link').href = s.source_url || '#';
-        document.getElementById('rs-modal-counter').textContent = (idx + 1) + ' / ' + allStories.length;
-        document.getElementById('rs-prev').disabled = idx === 0;
-        document.getElementById('rs-next').disabled = idx === allStories.length - 1;
-        document.getElementById('rs-prev').style.opacity = idx === 0 ? '0.3' : '1';
-        document.getElementById('rs-next').style.opacity = idx === allStories.length - 1 ? '0.3' : '1';
-        // Update dots
-        const dots = document.getElementById('rs-dots');
-        if (dots) {
-            Array.from(dots.children).forEach((d, i) => {
-                d.style.background = i === idx ? '#ff5500' : 'rgba(242,242,242,0.2)';
-                d.style.width = i === idx ? '18px' : '6px';
-            });
-        }
-        panel.style.opacity = '1';
-        panel.scrollTop = 0;
-    }, 150);
-}
+  const term = (story.title || '').split(/[\-\u2013\u2014|:,]/)[0].trim().slice(0, 80);
 
-function rsNav(dir) {
-    const next = rsIdx + dir;
-    if (next < 0 || next >= allStories.length) return;
-    rsShowStory(next);
-}
+  // 1. iTunes
+  try {
+    const r = await fetch('https://itunes.apple.com/search?term=' + encodeURIComponent(term) + '&media=music&limit=1');
+    const d = await r.json();
+    if (d.results && d.results[0] && d.results[0].artworkUrl100) {
+      artCache[key] = d.results[0].artworkUrl100.replace('100x100bb', '600x600bb');
+      return artCache[key];
+    }
+  } catch(e) {}
 
-function openModal(idx) {
-    const modal = document.getElementById('rs-modal');
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-    // Build dots (max 20 shown)
-    const dots = document.getElementById('rs-dots');
-    const count = Math.min(allStories.length, 20);
-    dots.innerHTML = Array.from({length: count}, (_, i) =>
-        '<div style="height:6px;border-radius:3px;background:rgba(242,242,242,0.2);transition:all 0.2s;cursor:pointer;" onclick="rsShowStory(' + i + ')"></div>'
-    ).join('');
-    rsShowStory(idx);
-}
+  // 2. MusicBrainz + Cover Art Archive
+  try {
+    const r = await fetch('https://musicbrainz.org/ws/2/release/?query=' + encodeURIComponent(term) + '&limit=1&fmt=json', {
+      headers: {'User-Agent': 'ROCKSCOT/1.0 (studio@rock.scot)'}
+    });
+    const d = await r.json();
+    if (d.releases && d.releases[0]) {
+      const mbid = d.releases[0].id;
+      const ca = await fetch('https://coverartarchive.org/release/' + mbid + '/front-250');
+      if (ca.ok) { artCache[key] = ca.url; return artCache[key]; }
+    }
+  } catch(e) {}
 
-function rsCloseModal() {
-    document.getElementById('rs-modal').style.display = 'none';
-    document.body.style.overflow = '';
+  return null;
 }
 
 function renderStories(stories) {
-    const output = document.getElementById('wire-output');
-    const loading = document.getElementById('wire-loading');
-    const statusEl = document.getElementById('wire-status-text');
-    if (loading) loading.style.display = 'none';
-    if (!output) return;
-    if (!stories || stories.length === 0) {
-        output.innerHTML = '<p style="text-align:center;padding:3rem;opacity:0.5;">No stories found.</p>';
-        return;
-    }
-    output.innerHTML = stories.map((s, idx) =>
-        '<div class="wire-card" onclick="openModal(' + idx + ')" style="cursor:pointer;">'
-        + '<div class="wire-card-content">'
-        + '<div class="wire-card-genre">' + escHtml(s.genre || 'Rock') + '</div>'
-        + '<div class="wire-card-title">' + escHtml(s.title) + '</div>'
-        + '<div class="wire-card-meta">' + escHtml(s.source_name || 'ROCK.SCOT') + ' &bull; ' + timeAgo(s.created_at) + '</div>'
-        + '</div></div>'
-    ).join('');
-    if (statusEl) statusEl.textContent = stories.length + ' Stories Live';
+  const output = document.getElementById('wire-output');
+  const statusEl = document.getElementById('wire-status-text');
+  if (!output) return;
+  if (!stories || stories.length === 0) {
+    output.innerHTML = '<div class="wire-loading"><p>No stories found.</p></div>';
+    return;
+  }
+  output.innerHTML = stories.map((s, idx) => {
+    const pal = genrePalette(s.genre);
+    return '<div class="sleeve-card" onclick="gfOpen(' + idx + ')" tabindex="0" role="button" aria-label="' + esc(s.title) + '">'
+      + '<div class="sleeve-bg" style="background:linear-gradient(135deg,' + pal[0] + ' 0%,' + pal[1] + ' 50%,' + pal[2] + ' 100%);position:absolute;inset:0;"></div>'
+      + '<img class="sleeve-art" id="sa-' + idx + '" src="" alt="">'
+      + '<span class="sleeve-genre-tag">' + esc(s.genre || 'Rock') + '</span>'
+      + '<div class="sleeve-info">'
+      + '<div class="sleeve-title">' + esc(s.title) + '</div>'
+      + '<div class="sleeve-meta">' + esc(s.source_name || 'ROCK.SCOT') + ' &middot; ' + timeAgo(s.created_at) + '</div>'
+      + '</div></div>';
+  }).join('');
+  if (statusEl) statusEl.textContent = stories.length + ' Stories Live';
+
+  // Lazy load art — stagger to avoid hammering APIs
+  stories.forEach((s, idx) => {
+    setTimeout(() => {
+      getArtwork(s).then(url => {
+        if (!url) return;
+        const img = document.getElementById('sa-' + idx);
+        if (!img) return;
+        img.src = url;
+        img.onload = () => { img.style.opacity = '1'; };
+      });
+    }, idx * 120);
+  });
 }
 
-async function loadStories() {
-    const key = (typeof SUPA_KEY !== 'undefined' && SUPA_KEY) ? SUPA_KEY : SUPABASE_KEY;
-    const statusEl = document.getElementById('wire-status-text');
-    if (statusEl) statusEl.textContent = 'Connecting...';
-    try {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/wire_news?select=id,title,summary,source_url,source_name,genre,created_at&order=created_at.desc&limit=200', {
-            headers: { 'apikey': key, 'Authorization': 'Bearer ' + key }
-        });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-            allStories = data;
-            renderStories(allStories);
-        } else {
-            if (statusEl) statusEl.textContent = 'No stories found';
-            document.getElementById('wire-loading').style.display = 'none';
+function gfOpen(idx) {
+  gfIdx = idx;
+  const overlay = document.getElementById('gf-overlay');
+  overlay.style.display = 'flex';
+  requestAnimationFrame(() => requestAnimationFrame(() => overlay.classList.add('open')));
+  document.body.style.overflow = 'hidden';
+  gfShow(idx);
+}
+
+function gfClose() {
+  const overlay = document.getElementById('gf-overlay');
+  overlay.classList.remove('open');
+  setTimeout(() => { overlay.style.display = 'none'; }, 420);
+  document.body.style.overflow = '';
+}
+
+function gfShow(idx) {
+  const s = allStories[idx];
+  if (!s) return;
+  gfIdx = idx;
+  const panel = document.getElementById('gf-panel');
+  panel.style.transition = 'opacity 0.12s';
+  panel.style.opacity = '0.5';
+  setTimeout(() => {
+    document.getElementById('gf-title').textContent = s.title || '';
+    document.getElementById('gf-genre-badge').textContent = (s.genre || 'Rock').toUpperCase();
+    document.getElementById('gf-summary').textContent = s.summary || 'Tap below to read the full story at source.';
+    document.getElementById('gf-source').textContent = s.source_name || 'ROCK.SCOT';
+    document.getElementById('gf-link').href = s.source_url || '#';
+    document.getElementById('gf-counter').textContent = (idx + 1) + ' / ' + allStories.length;
+    document.getElementById('gf-prev').disabled = idx === 0;
+    document.getElementById('gf-next').disabled = idx === allStories.length - 1;
+
+    const artEl = document.getElementById('gf-art');
+    const pal = genrePalette(s.genre);
+    document.querySelector('.gf-art-wrap').style.background = 'linear-gradient(135deg,' + pal[0] + ',' + pal[2] + ')';
+
+    if (artCache[s.id]) {
+      artEl.src = artCache[s.id];
+      artEl.style.opacity = '1';
+    } else {
+      artEl.style.opacity = '0';
+      getArtwork(s).then(url => {
+        if (url && gfIdx === idx) {
+          artEl.src = url;
+          artEl.onload = () => { artEl.style.opacity = '1'; };
         }
-    } catch (err) {
-        console.error('Wire error:', err.message);
-        if (statusEl) statusEl.textContent = 'Error: ' + err.message;
-        document.getElementById('wire-loading').style.display = 'none';
+      });
     }
+    document.querySelector('.gf-body').scrollTop = 0;
+    panel.style.opacity = '1';
+  }, 120);
+}
+
+function gfNav(dir) {
+  const next = gfIdx + dir;
+  if (next < 0 || next >= allStories.length) return;
+  gfShow(next);
+}
+
+// Swipe support
+let gfTX = null;
+document.getElementById('gf-panel').addEventListener('touchstart', e => { gfTX = e.touches[0].clientX; }, {passive:true});
+document.getElementById('gf-panel').addEventListener('touchend', e => {
+  if (gfTX === null) return;
+  const dx = e.changedTouches[0].clientX - gfTX;
+  if (Math.abs(dx) > 50) gfNav(dx < 0 ? 1 : -1);
+  gfTX = null;
+}, {passive:true});
+
+document.getElementById('gf-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('gf-overlay')) gfClose();
+});
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('gf-overlay').classList.contains('open')) return;
+  if (e.key === 'ArrowRight') gfNav(1);
+  else if (e.key === 'ArrowLeft') gfNav(-1);
+  else if (e.key === 'Escape') gfClose();
+});
+
+async function loadStories() {
+  const key = (typeof SUPA_KEY !== 'undefined' && SUPA_KEY) ? SUPA_KEY : SUPABASE_KEY;
+  const statusEl = document.getElementById('wire-status-text');
+  if (statusEl) statusEl.textContent = 'Connecting...';
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/wire_news?select=id,title,summary,source_url,source_name,genre,created_at&order=created_at.desc&limit=200', {
+      headers: {'apikey': key, 'Authorization': 'Bearer ' + key}
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      allStories = data;
+      renderStories(allStories);
+    } else {
+      if (statusEl) statusEl.textContent = 'No stories found';
+      document.getElementById('wire-loading').style.display = 'none';
+    }
+  } catch(err) {
+    console.error('Wire error:', err.message);
+    if (statusEl) statusEl.textContent = 'Error — ' + err.message;
+    document.getElementById('wire-loading').style.display = 'none';
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadStories();
-    setInterval(loadStories, 5 * 60 * 1000);
-});
-document.addEventListener('keydown', e => {
-    if (document.getElementById('rs-modal').style.display !== 'none') {
-        if (e.key === 'ArrowRight') rsNav(1);
-        if (e.key === 'ArrowLeft') rsNav(-1);
-        if (e.key === 'Escape') rsCloseModal();
-    }
-});
-window.addEventListener('click', e => {
-    if (e.target === document.getElementById('rs-modal')) rsCloseModal();
+  loadStories();
+  setInterval(loadStories, 5 * 60 * 1000);
 });
 </script>
-
 </body>
 </html>
