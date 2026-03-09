@@ -304,9 +304,10 @@ function renderStories(stories) {
   }
   output.innerHTML = stories.map((s, idx) => {
     const pal = genrePalette(s.genre);
+    const art = s.artwork_url || '';
     return '<div class="sleeve-card" onclick="gfOpen(' + idx + ')" tabindex="0" role="button" aria-label="' + esc(s.title) + '">'
       + '<div class="sleeve-bg" style="background:linear-gradient(135deg,' + pal[0] + ' 0%,' + pal[1] + ' 50%,' + pal[2] + ' 100%);position:absolute;inset:0;"></div>'
-      + '<img class="sleeve-art" id="sa-' + idx + '" src="" alt="">'
+      + '<img class="sleeve-art" id="sa-' + idx + '" src="' + art + '" alt="" ' + (art ? 'style="opacity:1;"' : '') + '>'
       + '<span class="sleeve-genre-tag">' + esc(s.genre || 'Rock') + '</span>'
       + '<div class="sleeve-info">'
       + '<div class="sleeve-title">' + esc(s.title) + '</div>'
@@ -315,8 +316,9 @@ function renderStories(stories) {
   }).join('');
   if (statusEl) statusEl.textContent = stories.length + ' Stories Live';
 
-  // Lazy load art — stagger to avoid hammering APIs
+  // Only lazy-load for stories missing artwork_url
   stories.forEach((s, idx) => {
+    if (s.artwork_url) return;
     setTimeout(() => {
       getArtwork(s).then(url => {
         if (!url) return;
@@ -366,7 +368,10 @@ function gfShow(idx) {
     const pal = genrePalette(s.genre);
     document.querySelector('.gf-art-wrap').style.background = 'linear-gradient(135deg,' + pal[0] + ',' + pal[2] + ')';
 
-    if (artCache[s.id]) {
+    if (s.artwork_url) {
+      artEl.src = s.artwork_url;
+      artEl.style.opacity = '1';
+    } else if (artCache[s.id]) {
       artEl.src = artCache[s.id];
       artEl.style.opacity = '1';
     } else {
@@ -414,7 +419,7 @@ async function loadStories() {
   const statusEl = document.getElementById('wire-status-text');
   if (statusEl) statusEl.textContent = 'Connecting...';
   try {
-    const res = await fetch(SUPABASE_URL + '/rest/v1/wire_news?select=id,title,summary,source_url,source_name,genre,created_at&order=created_at.desc&limit=60', {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/wire_news?select=id,title,summary,source_url,source_name,genre,created_at,artwork_url&order=created_at.desc&limit=60', {
       headers: {'apikey': key, 'Authorization': 'Bearer ' + key}
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
