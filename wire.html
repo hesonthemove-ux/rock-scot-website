@@ -263,7 +263,10 @@ async function getArtwork(story) {
   if (artCache[key] !== undefined) return artCache[key];
   artCache[key] = null; // mark as in-progress
 
-  const term = (story.title || '').split(/[\-\u2013\u2014|:,]/)[0].trim().slice(0, 80);
+  const raw = (story.title || '').replace(/^new single\s*[:–—]\s*/i, '').replace(/^new album\s*[:–—]\s*/i, '');
+  const stopWords = /\b(share|shares|release|releases|announce|announces|perform|performs|celebrate|celebrates|reveal|reveals|confirm|confirms|drop|drops|cover|covers|launch|launches|return|returns|to |will |has |have |are |is )\b/i;
+  const stopMatch = raw.search(stopWords);
+  const term = (stopMatch > 3 ? raw.slice(0, stopMatch) : raw.split(/[-–—|:,]/)[0]).trim().slice(0, 60);
 
   // 1. iTunes
   try {
