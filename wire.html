@@ -14,11 +14,14 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" type="image/png" href="/rock/assets/images/logo.png">
   <meta name="theme-color" content="#FF6600">
+  <link rel="dns-prefetch" href="https://pwzeapvopeeoahpyicdm.supabase.co">
+  <link rel="preconnect" href="https://pwzeapvopeeoahpyicdm.supabase.co" crossorigin>
+  <link rel="dns-prefetch" href="https://itunes.apple.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet"></noscript>
   <link rel="stylesheet" href="/rock/css/style.css?v=13">
-  <script src="/rock/js/header.js"></script>
   <style>
     body { background:#060606; color:#f2f2f2; }
     .wire-page-wrap { max-width:1300px; margin:0 auto; padding:0 1.25rem 6rem; }
@@ -99,7 +102,7 @@
 
 <div class="wire-page-wrap">
   <div class="wire-hero">
-    <img src="/rock/assets/images/wire-machine.png" onerror="this.src='/rock/assets/images/logo.png'" alt="ROCK.SCOT">
+    <img src="/rock/assets/images/wire-machine.png" onerror="this.src='/rock/assets/images/logo.png'" alt="ROCK.SCOT" fetchpriority="high" loading="eager" decoding="async">
     <div class="wire-hero-text">
       <h1>THE <span>WIRE</span></h1>
       <div class="wire-hero-sub">Real-time Scottish rock news &mdash; powered by <strong>ROCK.SCOT</strong><br>Updated continuously from 40+ Scottish music sources</div>
@@ -446,5 +449,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(loadStories, 5 * 60 * 1000);
 });
 </script>
+  <script src="/rock/js/header.js"></script>
 </body>
 </html>
