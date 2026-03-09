@@ -3467,14 +3467,7 @@ function scheduleRender() {
     }).join('') + '</div>';
 }
 
-/* ── HOOK INTO PANEL SWITCHING ── */
-const _origShowPanel = window.showPanel;
-window.showPanel = function(name) {
-  _origShowPanel(name);
-  if (name === 'djs') djLoad();
-  if (name === 'wirenews') wireNewsLoad();
-  if (name === 'schedule') { djLoad().then(scheduleRender); }
-};
+
 
 /* Photo preview */
 document.addEventListener('DOMContentLoaded', () => {
@@ -3533,6 +3526,9 @@ function closeMobileNav() {
 }
 
 function showPanel(name) {
+  if (name === 'djs') setTimeout(djLoad, 50);
+  if (name === 'wirenews') setTimeout(wireNewsLoad, 50);
+  if (name === 'schedule') setTimeout(() => { djLoad().then(scheduleRender); }, 50);
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('panel-' + name)?.classList.add('active');
