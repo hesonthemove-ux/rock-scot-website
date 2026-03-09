@@ -66,10 +66,6 @@
     }
 </style>
 
-<div id="story-modal">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closeModal()">&times;</span>
-        <div id="modal-genre" class="wire-card-genre"></div>
         <h2 id="modal-title" style="margin-top:0;"></h2>
         <p id="modal-summary" style="line-height:1.6; color:#ccc;"></p>
         <div style="font-size:0.8rem; color:#555; margin-top:1rem;">Source: <span id="modal-source-name"></span></div>
@@ -126,12 +122,6 @@
     }
 </style>
 
-<div id="story-modal">
-    <div class="modal-box">
-        <span class="close-modal" onclick="closeModal()">&times;</span>
-        <img onerror="this.src='/assets/images/hero.png'" id="modal-img" src="/assets/images/hero.png" style="width:100%; height:250px; object-fit:cover;">
-        <div class="modal-body">
-            <div id="modal-genre" class="wire-card-genre"></div>
             <h2 id="modal-title" style="margin: 0.5rem 0 1.5rem 0; line-height: 1.2;"></h2>
             <p id="modal-summary" style="line-height:1.7; color:#bbb; font-size: 1.05rem;"></p>
             <div style="margin-top:2rem; padding-top:1rem; border-top:1px solid #222; font-size:0.9rem; color:#666;">
@@ -262,11 +252,6 @@
     </div>
 </div>
 
-<!-- STORY MODAL -->
-<div class="wire-modal-overlay" id="story-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div class="wire-modal">
-        <button class="wire-modal-close" onclick="closeModal()" aria-label="Close">✕</button>
-        <div id="modal-genre" class="wire-modal-genre"></div>
         <h2 class="wire-modal-title" id="modal-title"></h2>
         <p class="wire-modal-meta" id="modal-meta"></p>
         <p class="wire-modal-summary" id="modal-summary"></p>
@@ -309,12 +294,6 @@
 
 
 
-<div id="story-modal">
-    <div class="modal-box">
-        <span class="close-modal" onclick="closeModal()">&times;</span>
-        <img onerror="this.src='/assets/images/hero.png'" id="modal-img" src="/assets/images/hero.png" style="width:100%; height:250px; object-fit:cover; object-position: top;">
-        <div class="modal-body">
-            <div id="modal-genre" class="wire-card-genre"></div>
             <h2 id="modal-title" style="margin: 0.5rem 0 1.5rem 0; line-height: 1.2;"></h2>
             <p id="modal-summary" style="line-height:1.7; color:#bbb; font-size: 1.05rem; white-space: pre-wrap;"></p>
             <div style="margin-top:2.5rem; padding-top:1rem; border-top:1px solid #222; font-size:0.9rem; color:#666;">
@@ -324,10 +303,50 @@
         </div>
     </div>
 </div>
-<div id="story-modal" onclick="closeModal()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; padding:20px; overflow-y:auto;"><div id="modal-body" onclick="event.stopPropagation()" style="background:#111; color:white; padding:30px; border-radius:8px; max-width:600px; margin:50px auto;"></div></div><div id="story-modal" onclick="closeModal()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; padding:20px; overflow-y:auto;"><div id="modal-body" onclick="event.stopPropagation()" style="background:#111; color:white; padding:30px; border-radius:8px; max-width:600px; margin:50px auto;"></div></div><script>
+
+<!-- ROLODEX MODAL -->
+<div id="rs-modal" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.92);flex-direction:column;align-items:center;justify-content:flex-end;">
+  <div id="rs-modal-panel" style="width:100%;max-width:700px;background:#111;border-top:3px solid #ff5500;border-radius:16px 16px 0 0;padding:0;overflow:hidden;max-height:88vh;display:flex;flex-direction:column;">
+    <!-- Header bar -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem 0.75rem;border-bottom:1px solid #1e1e1e;flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <span id="rs-modal-genre" style="font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:900;letter-spacing:0.2em;text-transform:uppercase;color:#ff5500;background:rgba(255,85,0,0.12);border:1px solid rgba(255,85,0,0.3);padding:0.2rem 0.6rem;border-radius:3px;"></span>
+        <span id="rs-modal-counter" style="font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;color:rgba(242,242,242,0.4);letter-spacing:0.1em;"></span>
+      </div>
+      <button onclick="rsCloseModal()" style="background:none;border:none;color:rgba(242,242,242,0.5);font-size:1.4rem;cursor:pointer;padding:0.25rem 0.5rem;line-height:1;">&#x2715;</button>
+    </div>
+    <!-- Story content -->
+    <div id="rs-modal-body" style="overflow-y:auto;padding:1.25rem;flex:1;">
+      <h2 id="rs-modal-title" style="font-family:'Bebas Neue',sans-serif;font-size:clamp(1.6rem,5vw,2.2rem);color:#f2f2f2;line-height:1.1;margin:0 0 1rem;"></h2>
+      <p id="rs-modal-summary" style="font-family:'Barlow',sans-serif;font-size:0.97rem;line-height:1.7;color:#bbb;margin:0 0 1.25rem;"></p>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;color:rgba(242,242,242,0.35);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1.25rem;">Source: <span id="rs-modal-source" style="color:rgba(242,242,242,0.6);"></span></div>
+      <a id="rs-modal-link" href="#" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#ff5500;color:#000;font-family:'Barlow Condensed',sans-serif;font-size:0.85rem;font-weight:900;letter-spacing:0.15em;text-transform:uppercase;padding:0.7rem 1.5rem;border-radius:3px;text-decoration:none;">Read Full Story &#8599;</a>
+    </div>
+    <!-- Carousel nav -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1.25rem;border-top:1px solid #1e1e1e;background:#0e0e0e;flex-shrink:0;">
+      <button id="rs-prev" onclick="rsNav(-1)" style="display:flex;align-items:center;gap:0.5rem;background:rgba(255,255,255,0.06);border:1px solid #2a2a2a;color:#f2f2f2;font-family:'Barlow Condensed',sans-serif;font-size:0.85rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.6rem 1.1rem;border-radius:4px;cursor:pointer;">&#8592; Prev</button>
+      <!-- Dot indicators -->
+      <div id="rs-dots" style="display:flex;gap:5px;flex-wrap:wrap;justify-content:center;max-width:200px;"></div>
+      <button id="rs-next" onclick="rsNav(1)" style="display:flex;align-items:center;gap:0.5rem;background:rgba(255,255,255,0.06);border:1px solid #2a2a2a;color:#f2f2f2;font-family:'Barlow Condensed',sans-serif;font-size:0.85rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.6rem 1.1rem;border-radius:4px;cursor:pointer;">Next &#8594;</button>
+    </div>
+  </div>
+</div>
+
+<script>
 const SUPABASE_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
 let allStories = [];
+let rsIdx = 0;
+
+// ── TOUCH SWIPE ──────────────────────────────────────
+let rsTouchX = null;
+document.getElementById('rs-modal-panel').addEventListener('touchstart', e => { rsTouchX = e.touches[0].clientX; }, {passive:true});
+document.getElementById('rs-modal-panel').addEventListener('touchend', e => {
+    if (rsTouchX === null) return;
+    const dx = e.changedTouches[0].clientX - rsTouchX;
+    if (Math.abs(dx) > 50) rsNav(dx < 0 ? 1 : -1);
+    rsTouchX = null;
+}, {passive:true});
 
 function timeAgo(d) {
     const s = Math.floor((Date.now() - new Date(d)) / 1000);
@@ -340,21 +359,60 @@ function escHtml(str) {
     return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-function openModal(idx) {
+function rsShowStory(idx) {
     const s = allStories[idx];
     if (!s) return;
-    document.getElementById('modal-title').textContent = s.title || '';
-    document.getElementById('modal-genre').textContent = (s.genre || 'ROCK').toUpperCase();
-    document.getElementById('modal-summary').textContent = s.summary || 'Click below to read the full story.';
-    const srcEl = document.getElementById('modal-source-name') || document.getElementById('modal-source');
-    if (srcEl) srcEl.textContent = s.source_name || 'ROCK.SCOT';
-    document.getElementById('modal-link').href = s.source_url || '#';
-    document.getElementById('story-modal').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
+    rsIdx = idx;
+    const panel = document.getElementById('rs-modal-body');
+
+    // Animate out then in
+    panel.style.transition = 'opacity 0.15s';
+    panel.style.opacity = '0';
+    setTimeout(() => {
+        document.getElementById('rs-modal-title').textContent = s.title || '';
+        document.getElementById('rs-modal-genre').textContent = (s.genre || 'Rock').toUpperCase();
+        document.getElementById('rs-modal-summary').textContent = s.summary || 'Click below to read the full story.';
+        document.getElementById('rs-modal-source').textContent = s.source_name || 'ROCK.SCOT';
+        document.getElementById('rs-modal-link').href = s.source_url || '#';
+        document.getElementById('rs-modal-counter').textContent = (idx + 1) + ' / ' + allStories.length;
+        document.getElementById('rs-prev').disabled = idx === 0;
+        document.getElementById('rs-next').disabled = idx === allStories.length - 1;
+        document.getElementById('rs-prev').style.opacity = idx === 0 ? '0.3' : '1';
+        document.getElementById('rs-next').style.opacity = idx === allStories.length - 1 ? '0.3' : '1';
+        // Update dots
+        const dots = document.getElementById('rs-dots');
+        if (dots) {
+            Array.from(dots.children).forEach((d, i) => {
+                d.style.background = i === idx ? '#ff5500' : 'rgba(242,242,242,0.2)';
+                d.style.width = i === idx ? '18px' : '6px';
+            });
+        }
+        panel.style.opacity = '1';
+        panel.scrollTop = 0;
+    }, 150);
 }
 
-function closeModal() {
-    document.getElementById('story-modal').style.display = 'none';
+function rsNav(dir) {
+    const next = rsIdx + dir;
+    if (next < 0 || next >= allStories.length) return;
+    rsShowStory(next);
+}
+
+function openModal(idx) {
+    const modal = document.getElementById('rs-modal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    // Build dots (max 20 shown)
+    const dots = document.getElementById('rs-dots');
+    const count = Math.min(allStories.length, 20);
+    dots.innerHTML = Array.from({length: count}, (_, i) =>
+        '<div style="height:6px;border-radius:3px;background:rgba(242,242,242,0.2);transition:all 0.2s;cursor:pointer;" onclick="rsShowStory(' + i + ')"></div>'
+    ).join('');
+    rsShowStory(idx);
+}
+
+function rsCloseModal() {
+    document.getElementById('rs-modal').style.display = 'none';
     document.body.style.overflow = '';
 }
 
@@ -407,8 +465,17 @@ document.addEventListener('DOMContentLoaded', () => {
     loadStories();
     setInterval(loadStories, 5 * 60 * 1000);
 });
-window.addEventListener('click', e => { if (e.target === document.getElementById('story-modal')) closeModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+document.addEventListener('keydown', e => {
+    if (document.getElementById('rs-modal').style.display !== 'none') {
+        if (e.key === 'ArrowRight') rsNav(1);
+        if (e.key === 'ArrowLeft') rsNav(-1);
+        if (e.key === 'Escape') rsCloseModal();
+    }
+});
+window.addEventListener('click', e => {
+    if (e.target === document.getElementById('rs-modal')) rsCloseModal();
+});
 </script>
+
 </body>
 </html>
