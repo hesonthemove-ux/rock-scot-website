@@ -3246,251 +3246,6 @@ function downloadContractPDF() {
   <div class="footer">ROCK.SCOT is operated by Caledonia TX Ltd. This contract is governed by Scots Law.</div>
   <script>window.onload = function(){ window.print(); }<\/script>
   
-<script>
-/* ── DJ MANAGEMENT ── */
-const DJ_URL = SUPABASE_URL + '/rest/v1/djs';
-let djData = [];
-let djEditId = null;
-
-async function djLoad() {
-  const r = await fetch(DJ_URL + '?select=*&order=display_order.asc,name.asc', {
-    headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
-  });
-  djData = await r.json();
-  djRender(djData);
-  document.getElementById('nav-count-djs').textContent = djData.filter(d => d.is_active).length;
-}
-
-function djRender(list) {
-  const tb = document.getElementById('dj-tbody');
-  if (!list.length) {
-    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem;">No DJs found</td></tr>';
-    return;
-  }
-  tb.innerHTML = list.map(d => `
-    <tr>
-      <td><img src="${escH(d.photo_url||'')}" onerror="this.style.display='none'" style="width:36px;height:36px;border-radius:50%;object-fit:cover;background:var(--panel2);"></td>
-      <td><strong>${escH(d.name)}</strong><br><span style="font-size:0.75rem;color:var(--muted);">${escH(d.slug)}</span></td>
-      <td>${escH(d.show_name||'—')}</td>
-      <td style="font-size:0.8rem;">${d.show_days ? d.show_days.join(', ') : '—'}</td>
-      <td style="font-size:0.8rem;">${d.genres ? d.genres.join(', ') : '—'}</td>
-      <td><span style="padding:0.2rem 0.5rem;border-radius:3px;font-size:0.75rem;font-weight:700;background:${d.is_active?'rgba(0,204,136,0.15)':'rgba(255,255,255,0.05)'};color:${d.is_active?'#00cc88':'var(--muted)'};">${d.is_active?'Active':'Inactive'}</span></td>
-      <td style="text-align:center;">${d.display_order}</td>
-      <td>
-        <button onclick="djOpenEdit('${d.id}')" style="background:var(--panel2);border:1px solid var(--border2);color:var(--white);padding:0.25rem 0.6rem;border-radius:3px;cursor:pointer;font-size:0.8rem;margin-right:0.3rem;">Edit</button>
-        <button onclick="djDelete('${d.id}','${escH(d.name)}')" style="background:#440000;border:1px solid #660000;color:#ff6666;padding:0.25rem 0.6rem;border-radius:3px;cursor:pointer;font-size:0.8rem;">Del</button>
-      </td>
-    </tr>`).join('');
-}
-
-function djFilter() {
-  const q = document.getElementById('dj-search').value.toLowerCase();
-  const s = document.getElementById('dj-filter-status').value;
-  const filtered = djData.filter(d => {
-    const matchQ = !q || d.name.toLowerCase().includes(q) || (d.show_name||'').toLowerCase().includes(q);
-    const matchS = s === 'all' || (s === 'active' && d.is_active) || (s === 'inactive' && !d.is_active);
-    return matchQ && matchS;
-  });
-  djRender(filtered);
-}
-
-function djOpenAdd() {
-  djEditId = null;
-  document.getElementById('dj-modal-title').textContent = 'Add DJ';
-  document.getElementById('dj-save-btn').textContent = 'Add DJ';
-  ['name','slug','show','days','start','end','genres','bio','photo','wiki','website','instagram','twitter','facebook','mixcloud','soundcloud'].forEach(f => {
-    const el = document.getElementById('dj-f-' + f);
-    if (el) el.value = '';
-  });
-  document.getElementById('dj-f-order').value = 0;
-  document.getElementById('dj-f-active').checked = true;
-  document.getElementById('dj-photo-preview').style.display = 'none';
-  document.getElementById('dj-modal').style.display = 'block';
-}
-
-function djOpenEdit(id) {
-  const d = djData.find(x => x.id === id);
-  if (!d) return;
-  djEditId = id;
-  document.getElementById('dj-modal-title').textContent = 'Edit — ' + d.name;
-  document.getElementById('dj-save-btn').textContent = 'Save Changes';
-  document.getElementById('dj-f-name').value = d.name || '';
-  document.getElementById('dj-f-slug').value = d.slug || '';
-  document.getElementById('dj-f-show').value = d.show_name || '';
-  document.getElementById('dj-f-days').value = d.show_days ? d.show_days.join(', ') : '';
-  document.getElementById('dj-f-start').value = d.show_time_start || '';
-  document.getElementById('dj-f-end').value = d.show_time_end || '';
-  document.getElementById('dj-f-genres').value = d.genres ? d.genres.join(', ') : '';
-  document.getElementById('dj-f-bio').value = d.bio || '';
-  document.getElementById('dj-f-photo').value = d.photo_url || '';
-  document.getElementById('dj-f-wiki').value = d.wiki_url || '';
-  document.getElementById('dj-f-website').value = d.website_url || '';
-  document.getElementById('dj-f-instagram').value = d.instagram || '';
-  document.getElementById('dj-f-twitter').value = d.twitter || '';
-  document.getElementById('dj-f-facebook').value = d.facebook || '';
-  document.getElementById('dj-f-mixcloud').value = d.mixcloud || '';
-  document.getElementById('dj-f-soundcloud').value = d.soundcloud || '';
-  document.getElementById('dj-f-order').value = d.display_order || 0;
-  document.getElementById('dj-f-active').checked = d.is_active;
-  const prev = document.getElementById('dj-photo-preview');
-  if (d.photo_url) { prev.src = d.photo_url; prev.style.display = 'block'; } else { prev.style.display = 'none'; }
-  document.getElementById('dj-modal').style.display = 'block';
-}
-
-function djCloseModal() {
-  document.getElementById('dj-modal').style.display = 'none';
-}
-
-function djParseArray(val) {
-  return val ? val.split(',').map(s => s.trim()).filter(Boolean) : null;
-}
-
-async function djSave() {
-  const name = document.getElementById('dj-f-name').value.trim();
-  const slug = document.getElementById('dj-f-slug').value.trim();
-  if (!name || !slug) { alert('Name and slug are required'); return; }
-  const payload = {
-    name, slug,
-    show_name: document.getElementById('dj-f-show').value.trim() || null,
-    show_days: djParseArray(document.getElementById('dj-f-days').value),
-    show_time_start: document.getElementById('dj-f-start').value || null,
-    show_time_end: document.getElementById('dj-f-end').value || null,
-    genres: djParseArray(document.getElementById('dj-f-genres').value),
-    bio: document.getElementById('dj-f-bio').value.trim() || null,
-    photo_url: document.getElementById('dj-f-photo').value.trim() || null,
-    wiki_url: document.getElementById('dj-f-wiki').value.trim() || null,
-    website_url: document.getElementById('dj-f-website').value.trim() || null,
-    instagram: document.getElementById('dj-f-instagram').value.trim() || null,
-    twitter: document.getElementById('dj-f-twitter').value.trim() || null,
-    facebook: document.getElementById('dj-f-facebook').value.trim() || null,
-    mixcloud: document.getElementById('dj-f-mixcloud').value.trim() || null,
-    soundcloud: document.getElementById('dj-f-soundcloud').value.trim() || null,
-    display_order: parseInt(document.getElementById('dj-f-order').value) || 0,
-    is_active: document.getElementById('dj-f-active').checked
-  };
-  const method = djEditId ? 'PATCH' : 'POST';
-  const url = djEditId ? DJ_URL + '?id=eq.' + djEditId : DJ_URL;
-  const headers = { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', Prefer: 'return=representation' };
-  const r = await fetch(url, { method, headers, body: JSON.stringify(payload) });
-  if (r.ok) { djCloseModal(); djLoad(); } else { const e = await r.json(); alert('Error: ' + (e.message || JSON.stringify(e))); }
-}
-
-async function djDelete(id, name) {
-  if (!confirm('Delete ' + name + '? This cannot be undone.')) return;
-  const r = await fetch(DJ_URL + '?id=eq.' + id, {
-    method: 'DELETE',
-    headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
-  });
-  if (r.ok) djLoad();
-}
-
-/* ── WIRE NEWS MANAGEMENT ── */
-let wireData = [];
-
-async function wireNewsLoad() {
-  const r = await fetch(SUPABASE_URL + '/rest/v1/wire_news?select=id,title,source_name,genre,created_at&order=created_at.desc&limit=200', {
-    headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
-  });
-  wireData = await r.json();
-  wireNewsRender(wireData);
-  document.getElementById('nav-count-wirenews').textContent = wireData.length;
-}
-
-function wireNewsRender(list) {
-  const tb = document.getElementById('wire-tbody');
-  if (!list.length) { tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem;">No stories</td></tr>'; return; }
-  tb.innerHTML = list.map(s => `
-    <tr>
-      <td><input type="checkbox" class="wire-cb" value="${s.id}"></td>
-      <td style="max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escH(s.title)}</td>
-      <td style="font-size:0.8rem;color:var(--muted);">${escH(s.source_name||'')}</td>
-      <td><span style="padding:0.15rem 0.4rem;border-radius:3px;font-size:0.72rem;font-weight:700;background:#ff5500;color:#000;">${escH(s.genre||'')}</span></td>
-      <td style="font-size:0.8rem;color:var(--muted);white-space:nowrap;">${timeAgo(s.created_at)}</td>
-      <td><button onclick="wireNewsDelete('${s.id}')" style="background:#440000;border:1px solid #660000;color:#ff6666;padding:0.2rem 0.5rem;border-radius:3px;cursor:pointer;font-size:0.75rem;">Del</button></td>
-    </tr>`).join('');
-}
-
-function wireNewsFilter() {
-  const q = document.getElementById('wire-search').value.toLowerCase();
-  const g = document.getElementById('wire-filter-genre').value;
-  wireNewsRender(wireData.filter(s =>
-    (!q || s.title.toLowerCase().includes(q)) &&
-    (g === 'all' || (s.genre||'').toLowerCase() === g)
-  ));
-}
-
-function wireSelectAll(cb) {
-  document.querySelectorAll('.wire-cb').forEach(c => c.checked = cb.checked);
-}
-
-async function wireNewsDelete(id) {
-  if (!confirm('Delete this story?')) return;
-  await fetch(SUPABASE_URL + '/rest/v1/wire_news?id=eq.' + id, {
-    method: 'DELETE', headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
-  });
-  wireNewsLoad();
-}
-
-async function wireNewsBulkDelete() {
-  const ids = [...document.querySelectorAll('.wire-cb:checked')].map(c => c.value);
-  if (!ids.length) { alert('Select stories first'); return; }
-  if (!confirm('Delete ' + ids.length + ' stories?')) return;
-  await fetch(SUPABASE_URL + '/rest/v1/wire_news?id=in.(' + ids.join(',') + ')', {
-    method: 'DELETE', headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
-  });
-  wireNewsLoad();
-}
-
-function timeAgo(d) {
-  const s = Math.floor((Date.now() - new Date(d)) / 1000);
-  if (s < 3600) return Math.floor(s/60) + 'm ago';
-  if (s < 86400) return Math.floor(s/3600) + 'h ago';
-  return Math.floor(s/86400) + 'd ago';
-}
-
-/* ── SCHEDULE PANEL ── */
-function scheduleRender() {
-  const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-  const grid = document.getElementById('schedule-grid');
-  const active = djData.filter(d => d.is_active && d.show_days && d.show_days.length);
-  grid.innerHTML = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:0.75rem;">' +
-    days.map(day => {
-      const shows = active.filter(d => d.show_days.map(x=>x.trim()).includes(day));
-      return '<div style="background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:0.75rem;">' +
-        '<div style="font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#ff5500;margin-bottom:0.5rem;">' + day + '</div>' +
-        (shows.length ? shows.map(d =>
-          '<div style="background:var(--panel);border:1px solid var(--border2);border-radius:4px;padding:0.4rem 0.6rem;margin-bottom:0.35rem;font-size:0.8rem;">' +
-          '<div style="font-weight:700;">' + escH(d.name) + '</div>' +
-          '<div style="color:var(--muted);font-size:0.72rem;">' + escH(d.show_name||'') + (d.show_time_start ? ' · ' + d.show_time_start.slice(0,5) : '') + '</div>' +
-          '</div>').join('') : '<div style="color:var(--muted);font-size:0.8rem;">—</div>') +
-        '</div>';
-    }).join('') + '</div>';
-}
-
-
-
-/* Photo preview */
-document.addEventListener('DOMContentLoaded', () => {
-  const photoInput = document.getElementById('dj-f-photo');
-  const prev = document.getElementById('dj-photo-preview');
-  if (photoInput) {
-    photoInput.addEventListener('input', () => {
-      if (photoInput.value) { prev.src = photoInput.value; prev.style.display = 'block'; }
-      else { prev.style.display = 'none'; }
-    });
-  }
-  /* Auto-generate slug from name */
-  const nameInput = document.getElementById('dj-f-name');
-  const slugInput = document.getElementById('dj-f-slug');
-  if (nameInput) {
-    nameInput.addEventListener('input', () => {
-      if (!djEditId) {
-        slugInput.value = nameInput.value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-      }
-    });
-  }
-});
-</script>
 </body></html>`);
   win.document.close();
 }
@@ -3913,5 +3668,252 @@ Using web search, produce a JSON response with this EXACT structure (respond wit
 /* ── BOOT ───────────────────────────────────────────────────────── */
 init();
 </script>
+
+<script>
+/* ── DJ MANAGEMENT ── */
+const DJ_URL = SUPABASE_URL + '/rest/v1/djs';
+let djData = [];
+let djEditId = null;
+
+async function djLoad() {
+  const r = await fetch(DJ_URL + '?select=*&order=display_order.asc,name.asc', {
+    headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+  });
+  djData = await r.json();
+  djRender(djData);
+  document.getElementById('nav-count-djs').textContent = djData.filter(d => d.is_active).length;
+}
+
+function djRender(list) {
+  const tb = document.getElementById('dj-tbody');
+  if (!list.length) {
+    tb.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem;">No DJs found</td></tr>';
+    return;
+  }
+  tb.innerHTML = list.map(d => `
+    <tr>
+      <td><img src="${escH(d.photo_url||'')}" onerror="this.style.display='none'" style="width:36px;height:36px;border-radius:50%;object-fit:cover;background:var(--panel2);"></td>
+      <td><strong>${escH(d.name)}</strong><br><span style="font-size:0.75rem;color:var(--muted);">${escH(d.slug)}</span></td>
+      <td>${escH(d.show_name||'—')}</td>
+      <td style="font-size:0.8rem;">${d.show_days ? d.show_days.join(', ') : '—'}</td>
+      <td style="font-size:0.8rem;">${d.genres ? d.genres.join(', ') : '—'}</td>
+      <td><span style="padding:0.2rem 0.5rem;border-radius:3px;font-size:0.75rem;font-weight:700;background:${d.is_active?'rgba(0,204,136,0.15)':'rgba(255,255,255,0.05)'};color:${d.is_active?'#00cc88':'var(--muted)'};">${d.is_active?'Active':'Inactive'}</span></td>
+      <td style="text-align:center;">${d.display_order}</td>
+      <td>
+        <button onclick="djOpenEdit('${d.id}')" style="background:var(--panel2);border:1px solid var(--border2);color:var(--white);padding:0.25rem 0.6rem;border-radius:3px;cursor:pointer;font-size:0.8rem;margin-right:0.3rem;">Edit</button>
+        <button onclick="djDelete('${d.id}','${escH(d.name)}')" style="background:#440000;border:1px solid #660000;color:#ff6666;padding:0.25rem 0.6rem;border-radius:3px;cursor:pointer;font-size:0.8rem;">Del</button>
+      </td>
+    </tr>`).join('');
+}
+
+function djFilter() {
+  const q = document.getElementById('dj-search').value.toLowerCase();
+  const s = document.getElementById('dj-filter-status').value;
+  const filtered = djData.filter(d => {
+    const matchQ = !q || d.name.toLowerCase().includes(q) || (d.show_name||'').toLowerCase().includes(q);
+    const matchS = s === 'all' || (s === 'active' && d.is_active) || (s === 'inactive' && !d.is_active);
+    return matchQ && matchS;
+  });
+  djRender(filtered);
+}
+
+function djOpenAdd() {
+  djEditId = null;
+  document.getElementById('dj-modal-title').textContent = 'Add DJ';
+  document.getElementById('dj-save-btn').textContent = 'Add DJ';
+  ['name','slug','show','days','start','end','genres','bio','photo','wiki','website','instagram','twitter','facebook','mixcloud','soundcloud'].forEach(f => {
+    const el = document.getElementById('dj-f-' + f);
+    if (el) el.value = '';
+  });
+  document.getElementById('dj-f-order').value = 0;
+  document.getElementById('dj-f-active').checked = true;
+  document.getElementById('dj-photo-preview').style.display = 'none';
+  document.getElementById('dj-modal').style.display = 'block';
+}
+
+function djOpenEdit(id) {
+  const d = djData.find(x => x.id === id);
+  if (!d) return;
+  djEditId = id;
+  document.getElementById('dj-modal-title').textContent = 'Edit — ' + d.name;
+  document.getElementById('dj-save-btn').textContent = 'Save Changes';
+  document.getElementById('dj-f-name').value = d.name || '';
+  document.getElementById('dj-f-slug').value = d.slug || '';
+  document.getElementById('dj-f-show').value = d.show_name || '';
+  document.getElementById('dj-f-days').value = d.show_days ? d.show_days.join(', ') : '';
+  document.getElementById('dj-f-start').value = d.show_time_start || '';
+  document.getElementById('dj-f-end').value = d.show_time_end || '';
+  document.getElementById('dj-f-genres').value = d.genres ? d.genres.join(', ') : '';
+  document.getElementById('dj-f-bio').value = d.bio || '';
+  document.getElementById('dj-f-photo').value = d.photo_url || '';
+  document.getElementById('dj-f-wiki').value = d.wiki_url || '';
+  document.getElementById('dj-f-website').value = d.website_url || '';
+  document.getElementById('dj-f-instagram').value = d.instagram || '';
+  document.getElementById('dj-f-twitter').value = d.twitter || '';
+  document.getElementById('dj-f-facebook').value = d.facebook || '';
+  document.getElementById('dj-f-mixcloud').value = d.mixcloud || '';
+  document.getElementById('dj-f-soundcloud').value = d.soundcloud || '';
+  document.getElementById('dj-f-order').value = d.display_order || 0;
+  document.getElementById('dj-f-active').checked = d.is_active;
+  const prev = document.getElementById('dj-photo-preview');
+  if (d.photo_url) { prev.src = d.photo_url; prev.style.display = 'block'; } else { prev.style.display = 'none'; }
+  document.getElementById('dj-modal').style.display = 'block';
+}
+
+function djCloseModal() {
+  document.getElementById('dj-modal').style.display = 'none';
+}
+
+function djParseArray(val) {
+  return val ? val.split(',').map(s => s.trim()).filter(Boolean) : null;
+}
+
+async function djSave() {
+  const name = document.getElementById('dj-f-name').value.trim();
+  const slug = document.getElementById('dj-f-slug').value.trim();
+  if (!name || !slug) { alert('Name and slug are required'); return; }
+  const payload = {
+    name, slug,
+    show_name: document.getElementById('dj-f-show').value.trim() || null,
+    show_days: djParseArray(document.getElementById('dj-f-days').value),
+    show_time_start: document.getElementById('dj-f-start').value || null,
+    show_time_end: document.getElementById('dj-f-end').value || null,
+    genres: djParseArray(document.getElementById('dj-f-genres').value),
+    bio: document.getElementById('dj-f-bio').value.trim() || null,
+    photo_url: document.getElementById('dj-f-photo').value.trim() || null,
+    wiki_url: document.getElementById('dj-f-wiki').value.trim() || null,
+    website_url: document.getElementById('dj-f-website').value.trim() || null,
+    instagram: document.getElementById('dj-f-instagram').value.trim() || null,
+    twitter: document.getElementById('dj-f-twitter').value.trim() || null,
+    facebook: document.getElementById('dj-f-facebook').value.trim() || null,
+    mixcloud: document.getElementById('dj-f-mixcloud').value.trim() || null,
+    soundcloud: document.getElementById('dj-f-soundcloud').value.trim() || null,
+    display_order: parseInt(document.getElementById('dj-f-order').value) || 0,
+    is_active: document.getElementById('dj-f-active').checked
+  };
+  const method = djEditId ? 'PATCH' : 'POST';
+  const url = djEditId ? DJ_URL + '?id=eq.' + djEditId : DJ_URL;
+  const headers = { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', Prefer: 'return=representation' };
+  const r = await fetch(url, { method, headers, body: JSON.stringify(payload) });
+  if (r.ok) { djCloseModal(); djLoad(); } else { const e = await r.json(); alert('Error: ' + (e.message || JSON.stringify(e))); }
+}
+
+async function djDelete(id, name) {
+  if (!confirm('Delete ' + name + '? This cannot be undone.')) return;
+  const r = await fetch(DJ_URL + '?id=eq.' + id, {
+    method: 'DELETE',
+    headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+  });
+  if (r.ok) djLoad();
+}
+
+/* ── WIRE NEWS MANAGEMENT ── */
+let wireData = [];
+
+async function wireNewsLoad() {
+  const r = await fetch(SUPABASE_URL + '/rest/v1/wire_news?select=id,title,source_name,genre,created_at&order=created_at.desc&limit=200', {
+    headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+  });
+  wireData = await r.json();
+  wireNewsRender(wireData);
+  document.getElementById('nav-count-wirenews').textContent = wireData.length;
+}
+
+function wireNewsRender(list) {
+  const tb = document.getElementById('wire-tbody');
+  if (!list.length) { tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem;">No stories</td></tr>'; return; }
+  tb.innerHTML = list.map(s => `
+    <tr>
+      <td><input type="checkbox" class="wire-cb" value="${s.id}"></td>
+      <td style="max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escH(s.title)}</td>
+      <td style="font-size:0.8rem;color:var(--muted);">${escH(s.source_name||'')}</td>
+      <td><span style="padding:0.15rem 0.4rem;border-radius:3px;font-size:0.72rem;font-weight:700;background:#ff5500;color:#000;">${escH(s.genre||'')}</span></td>
+      <td style="font-size:0.8rem;color:var(--muted);white-space:nowrap;">${timeAgo(s.created_at)}</td>
+      <td><button onclick="wireNewsDelete('${s.id}')" style="background:#440000;border:1px solid #660000;color:#ff6666;padding:0.2rem 0.5rem;border-radius:3px;cursor:pointer;font-size:0.75rem;">Del</button></td>
+    </tr>`).join('');
+}
+
+function wireNewsFilter() {
+  const q = document.getElementById('wire-search').value.toLowerCase();
+  const g = document.getElementById('wire-filter-genre').value;
+  wireNewsRender(wireData.filter(s =>
+    (!q || s.title.toLowerCase().includes(q)) &&
+    (g === 'all' || (s.genre||'').toLowerCase() === g)
+  ));
+}
+
+function wireSelectAll(cb) {
+  document.querySelectorAll('.wire-cb').forEach(c => c.checked = cb.checked);
+}
+
+async function wireNewsDelete(id) {
+  if (!confirm('Delete this story?')) return;
+  await fetch(SUPABASE_URL + '/rest/v1/wire_news?id=eq.' + id, {
+    method: 'DELETE', headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+  });
+  wireNewsLoad();
+}
+
+async function wireNewsBulkDelete() {
+  const ids = [...document.querySelectorAll('.wire-cb:checked')].map(c => c.value);
+  if (!ids.length) { alert('Select stories first'); return; }
+  if (!confirm('Delete ' + ids.length + ' stories?')) return;
+  await fetch(SUPABASE_URL + '/rest/v1/wire_news?id=in.(' + ids.join(',') + ')', {
+    method: 'DELETE', headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+  });
+  wireNewsLoad();
+}
+
+function timeAgo(d) {
+  const s = Math.floor((Date.now() - new Date(d)) / 1000);
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  return Math.floor(s/86400) + 'd ago';
+}
+
+/* ── SCHEDULE PANEL ── */
+function scheduleRender() {
+  const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const grid = document.getElementById('schedule-grid');
+  const active = djData.filter(d => d.is_active && d.show_days && d.show_days.length);
+  grid.innerHTML = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:0.75rem;">' +
+    days.map(day => {
+      const shows = active.filter(d => d.show_days.map(x=>x.trim()).includes(day));
+      return '<div style="background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:0.75rem;">' +
+        '<div style="font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#ff5500;margin-bottom:0.5rem;">' + day + '</div>' +
+        (shows.length ? shows.map(d =>
+          '<div style="background:var(--panel);border:1px solid var(--border2);border-radius:4px;padding:0.4rem 0.6rem;margin-bottom:0.35rem;font-size:0.8rem;">' +
+          '<div style="font-weight:700;">' + escH(d.name) + '</div>' +
+          '<div style="color:var(--muted);font-size:0.72rem;">' + escH(d.show_name||'') + (d.show_time_start ? ' · ' + d.show_time_start.slice(0,5) : '') + '</div>' +
+          '</div>').join('') : '<div style="color:var(--muted);font-size:0.8rem;">—</div>') +
+        '</div>';
+    }).join('') + '</div>';
+}
+
+
+
+/* Photo preview */
+document.addEventListener('DOMContentLoaded', () => {
+  const photoInput = document.getElementById('dj-f-photo');
+  const prev = document.getElementById('dj-photo-preview');
+  if (photoInput) {
+    photoInput.addEventListener('input', () => {
+      if (photoInput.value) { prev.src = photoInput.value; prev.style.display = 'block'; }
+      else { prev.style.display = 'none'; }
+    });
+  }
+  /* Auto-generate slug from name */
+  const nameInput = document.getElementById('dj-f-name');
+  const slugInput = document.getElementById('dj-f-slug');
+  if (nameInput) {
+    nameInput.addEventListener('input', () => {
+      if (!djEditId) {
+        slugInput.value = nameInput.value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+      }
+    });
+  }
+});
+</script>
+
 </body>
 </html>
