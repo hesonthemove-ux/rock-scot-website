@@ -607,11 +607,21 @@ function hwOpenModal(i){
 <script>
 // Live rates from Supabase — updates all price spans on this page
 document.addEventListener('DOMContentLoaded', async function() {
+  // TEMP DEBUG — visible on page
+  const dbg = document.createElement('div');
+  dbg.id = 'rate-debug';
+  dbg.style.cssText = 'position:fixed;bottom:80px;left:0;right:0;background:#000;color:#ff5500;font-size:11px;padding:6px 10px;z-index:9999;font-family:monospace;';
+  dbg.textContent = 'Rates: starting fetch...';
+  document.body.appendChild(dbg);
+
   try {
+    dbg.textContent = 'Rates: fetching /rock/rates-proxy.php...';
     const resp = await fetch('/rock/rates-proxy.php');
-    if (!resp.ok) { console.error('Rates proxy error:', resp.status); return; }
+    if (!resp.ok) { dbg.textContent = 'Rates ERROR: proxy returned ' + resp.status; return; }
+    dbg.textContent = 'Rates: proxy ok, parsing...';
     const rows = await resp.json();
-    if (!Array.isArray(rows)) return;
+    if (!Array.isArray(rows)) { dbg.textContent = 'Rates ERROR: not an array — got: ' + JSON.stringify(rows).slice(0,80); return; }
+    dbg.textContent = 'Rates: got ' + rows.length + ' rows. reg=' + (rows.find(r=>r.key==='single_inverclyde')||{}).value;
     const r = {};
     rows.forEach(row => { r[row.key] = parseFloat(row.value) || 0; });
 
@@ -639,6 +649,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     set('idx-card-reg',  fmt(reg));
     set('idx-card-multi',fmt(mul));
     set('idx-card-toh',  fmt(toh));
-  } catch(e) { console.warn('Rate load failed:', e); }
+  } catch(e) { 
+    const dbg2 = document.getElementById('rate-debug');
+    if(dbg2) dbg2.textContent = 'Rates EXCEPTION: ' + e.message;
+  }
 });
 </script>
