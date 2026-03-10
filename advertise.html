@@ -1284,36 +1284,5 @@
     </script>
 
 <script src="js/header.js"></script>
-<script>
-/* ── LIVE RATES FROM SUPABASE ── */
-(async function() {
-  try {
-    const res = await fetch('https://pwzeapvopeeoahpyicdm.supabase.co/rest/v1/site_settings?select=key,value', {
-      headers: { apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk', Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk' }
-    });
-    const rows = await res.json();
-    if (!Array.isArray(rows)) return;
-    const r = {};
-    rows.forEach(row => r[row.key] = parseFloat(row.value) || 0);
-    const vat = 1 + (r.vat_rate || 20) / 100;
-
-    // Helper — format as £X,XXX
-    function fmt(n) {
-      return '£' + Math.round(n).toLocaleString('en-GB');
-    }
-
-    // Update any element with data-rate attribute
-    document.querySelectorAll('[data-rate]').forEach(el => {
-      const key = el.dataset.rate;
-      const incVat = el.dataset.vatInc === 'true';
-      if (r[key] !== undefined) {
-        el.textContent = fmt(incVat ? r[key] * vat : r[key]);
-      }
-    });
-  } catch(e) {
-    console.warn('Rate load failed:', e);
-  }
-})();
-</script>
 </body>
 </html>
