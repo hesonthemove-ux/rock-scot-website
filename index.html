@@ -608,14 +608,8 @@ function hwOpenModal(i){
 // Live rates from Supabase — updates all price spans on this page
 document.addEventListener('DOMContentLoaded', async function() {
   try {
-    const resp = await fetch(
-      'https://pwzeapvopeeoahpyicdm.supabase.co/rest/v1/site_settings?select=key,value',
-      { headers: {
-        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk'
-      }}
-    );
-    if (!resp.ok) return;
+    const resp = await fetch('/rock/rates-proxy.php');
+    if (!resp.ok) { console.error('Rates proxy error:', resp.status); return; }
     const rows = await resp.json();
     if (!Array.isArray(rows)) return;
     const r = {};

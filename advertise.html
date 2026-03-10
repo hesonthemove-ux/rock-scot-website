@@ -695,8 +695,7 @@
     async function loadLiveRates() {
         try {
             const resp = await fetch(
-                SUPABASE_URL + '/rest/v1/site_settings?select=key,value',
-                { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+                '/rock/rates-proxy.php'
             );
             if (!resp.ok) throw new Error('rates fetch failed');
             const rows = await resp.json();
