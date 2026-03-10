@@ -3025,7 +3025,8 @@ const RATE_FIELDS = [
   { key: 'single_inverclyde',      label: 'Single Mux — Inverclyde',        group: 'Single Mux (28-day base)' },
   { key: 'single_north_ayrshire',  label: 'Single Mux — North Ayrshire',    group: 'Single Mux (28-day base)' },
   { key: 'single_s_lanarkshire',   label: 'Single Mux — S. Lanarkshire',     group: 'Single Mux (28-day base)' },
-  { key: 'multi_regional',         label: 'Multi-Regional (all 3 muxes)',    group: 'Multi-Regional (28-day base)' },
+  { key: 'single_oban',            label: 'Single Mux — Oban (coming soon)', group: 'Single Mux (28-day base)' },
+  { key: 'multi_regional',         label: 'Multi-Regional (all active muxes)', group: 'Multi-Regional (28-day base)' },
   { key: 'top_of_hour',            label: 'Top of Hour (28-day base)',       group: 'Premium' },
   { key: 'production_bolt_on',     label: 'Production Bolt-on',              group: 'Add-ons' },
   { key: 'rush_fee',               label: 'Rush Processing Fee',             group: 'Add-ons' },
@@ -3162,7 +3163,19 @@ async function saveRates() {
     confirmBtn.disabled = true;
     confirmBtn.textContent = 'Saving…';
     try {
-      await sbPost('/rest/v1/site_settings?on_conflict=key', updates, token);
+      // Upsert each rate individually with correct Prefer header
+      for (const u of updates) {
+        await fetch(SUPABASE_URL + '/rest/v1/site_settings?on_conflict=key', {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify([u])
+        });
+      }
       updates.forEach(u => { currentRates[u.key] = u.value; });
       overlay.innerHTML = `
         <div style="background:var(--panel);border:1px solid var(--border);border-radius:4px;max-width:480px;width:100%;padding:2rem;text-align:center;">
@@ -3697,16 +3710,20 @@ async function djHandlePhotoUpload(input) {
     formData.append('file', file, filename);
     formData.append('dest', 'djs');
 
-    const res = await fetch('/upload.php', { method: 'POST', body: formData });
-    if (res.ok) {
-      document.getElementById('dj-photo_url').value = destPath;
-      statusEl.textContent = '✅ Saved to ' + destPath;
+    const res = await fetch('/upload.php', {
+      method: 'POST',
+      headers: { 'X-Upload-Token': 'rockscot-upload-2025' },
+      body: formData
+    });
+    const json = await res.json();
+    if (res.ok && json.success) {
+      document.getElementById('dj-photo_url').value = json.url;
+      preview.src = json.url;
+      statusEl.textContent = '✅ Uploaded — ' + json.url;
       statusEl.style.color = 'var(--green)';
     } else {
-      // Fallback — no upload endpoint yet, just set the path manually
-      document.getElementById('dj-photo_url').value = destPath;
-      statusEl.textContent = '⚠️ Set path — copy file manually to ' + destPath;
-      statusEl.style.color = 'var(--gold)';
+      statusEl.textContent = '❌ ' + (json.error || 'Upload failed');
+      statusEl.style.color = 'var(--red)';
     }
   } catch(e) {
     document.getElementById('dj-photo_url').value = destPath;
