@@ -3665,6 +3665,69 @@ Using web search, produce a JSON response with this EXACT structure (respond wit
   }
 }
 
+
+async function djHandlePhotoUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('dj-photo-upload-status');
+  const preview = document.getElementById('dj-photo-preview');
+  const previewWrap = document.getElementById('dj-photo-preview-wrap');
+
+  // Show preview immediately
+  const reader = new FileReader();
+  reader.onload = e => {
+    preview.src = e.target.result;
+    previewWrap.style.display = 'flex';
+    previewWrap.style.alignItems = 'center';
+  };
+  reader.readAsDataURL(file);
+
+  // Sanitise filename: lowercase, spaces to underscores, keep extension
+  const ext = file.name.split('.').pop().toLowerCase();
+  const base = file.name.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]/g, '_');
+  const filename = base + '.' + ext;
+  const destPath = '/assets/images/djs/' + filename;
+
+  statusEl.textContent = 'Uploading...';
+  statusEl.style.color = 'var(--muted)';
+
+  try {
+    // Upload via Pi upload endpoint
+    const formData = new FormData();
+    formData.append('file', file, filename);
+    formData.append('dest', 'djs');
+
+    const res = await fetch('/upload.php', { method: 'POST', body: formData });
+    if (res.ok) {
+      document.getElementById('dj-photo_url').value = destPath;
+      statusEl.textContent = '✅ Saved to ' + destPath;
+      statusEl.style.color = 'var(--green)';
+    } else {
+      // Fallback — no upload endpoint yet, just set the path manually
+      document.getElementById('dj-photo_url').value = destPath;
+      statusEl.textContent = '⚠️ Set path — copy file manually to ' + destPath;
+      statusEl.style.color = 'var(--gold)';
+    }
+  } catch(e) {
+    document.getElementById('dj-photo_url').value = destPath;
+    statusEl.textContent = '⚠️ Set path — copy file to ' + destPath + ' on the Pi';
+    statusEl.style.color = 'var(--gold)';
+  }
+  markDjDirty();
+}
+
+// Populate photo preview when editing existing DJ
+function djPopulatePhotoPreview(url) {
+  if (!url) return;
+  const preview = document.getElementById('dj-photo-preview');
+  const previewWrap = document.getElementById('dj-photo-preview-wrap');
+  if (preview && previewWrap) {
+    preview.src = url;
+    previewWrap.style.display = 'flex';
+    previewWrap.style.alignItems = 'center';
+  }
+}
+
 /* ── BOOT ───────────────────────────────────────────────────────── */
 init();
 </script>
