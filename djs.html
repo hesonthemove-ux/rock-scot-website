@@ -117,6 +117,8 @@ const SUPABASE_URL='https://pwzeapvopeeoahpyicdm.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
 let djs=[],activeIndex=0,isDragging=false,trackOffset=0;
 const CARD_WIDTH=264;
+const CLONES=3; // clones each side for seamless loop
+
 async function loadDJs(){
   try{
     const res=await fetch(`${SUPABASE_URL}/rest/v1/djs?is_active=eq.true&order=display_order.asc,name.asc&select=*`,{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}});
@@ -129,53 +131,133 @@ async function loadDJs(){
     goTo(0,false);
   }catch(e){document.getElementById('djs-loading').textContent='Could not load presenters.';}
 }
+
+function makeCardHTML(dj,i,realIndex){
+  return `<div class="dj-card-inner">${dj.photo_url?`<img src="${esc(dj.photo_url)}" alt="${esc(dj.name)}" class="dj-card-photo" loading="lazy">`:`<div class="dj-card-placeholder">🎙️</div>`}<div class="dj-card-overlay"></div><div class="dj-card-accent"></div><div class="dj-card-num">${String(realIndex+1).padStart(2,'0')}</div><div class="dj-card-info"><div class="dj-card-name">${esc(dj.name)}</div><div class="dj-card-show">${esc(dj.show_name||'ROCK.SCOT')}</div></div></div>`;
+}
+
 function buildCarousel(){
   const track=document.getElementById('carousel-track');
   const dots=document.getElementById('carousel-dots');
   track.innerHTML='';dots.innerHTML='';
-  djs.forEach((dj,i)=>{
+  const n=djs.length;
+
+  // Build: [last N clones] + [real cards] + [first N clones]
+  const allItems=[];
+  for(let c=n-CLONES;c<n;c++) allItems.push({dj:djs[c],realIndex:c,clone:true});
+  for(let i=0;i<n;i++) allItems.push({dj:djs[i],realIndex:i,clone:false});
+  for(let c=0;c<CLONES;c++) allItems.push({dj:djs[c],realIndex:c,clone:true});
+
+  allItems.forEach(({dj,realIndex,clone},trackIndex)=>{
     const card=document.createElement('div');
-    card.className='dj-card';card.dataset.index=i;
-    card.innerHTML=`<div class="dj-card-inner">${dj.photo_url?`<img src="${esc(dj.photo_url)}" alt="${esc(dj.name)}" class="dj-card-photo" loading="lazy">`:`<div class="dj-card-placeholder">🎙️</div>`}<div class="dj-card-overlay"></div><div class="dj-card-accent"></div><div class="dj-card-num">${String(i+1).padStart(2,'0')}</div><div class="dj-card-info"><div class="dj-card-name">${esc(dj.name)}</div><div class="dj-card-show">${esc(dj.show_name||'ROCK.SCOT')}</div></div></div>`;
-    card.addEventListener('click',()=>goTo(i));
+    card.className='dj-card';
+    card.dataset.trackIndex=trackIndex;
+    card.dataset.realIndex=realIndex;
+    card.innerHTML=makeCardHTML(dj,trackIndex,realIndex);
+    if(!clone) card.addEventListener('click',()=>goTo(realIndex));
     track.appendChild(card);
+  });
+
+  // Dots for real cards only
+  djs.forEach((dj,i)=>{
     const dot=document.createElement('button');
-    dot.className='carousel-dot';dot.setAttribute('aria-label',`Go to ${dj.name}`);
+    dot.className='carousel-dot';
+    dot.setAttribute('aria-label',`Go to ${dj.name}`);
     dot.addEventListener('click',()=>goTo(i));
     dots.appendChild(dot);
   });
+
   document.getElementById('arrow-prev').addEventListener('click',()=>goTo(activeIndex-1));
   document.getElementById('arrow-next').addEventListener('click',()=>goTo(activeIndex+1));
   setupDrag(track);
 }
-function goTo(index,animate=true){
-  index=Math.max(0,Math.min(djs.length-1,index));
-  activeIndex=index;
+
+// trackIndexForReal: position of real card (not clone) in the track
+function trackIndexForReal(realIndex){ return CLONES + realIndex; }
+
+function setTransform(track, offset, animate){
+  if(animate){
+    track.style.transition='transform 0.45s cubic-bezier(0.25,0.46,0.45,0.94)';
+  } else {
+    track.style.transition='none';
+  }
+  track.style.transform=`translateX(${offset}px)`;
+  trackOffset=offset;
+}
+
+function goTo(realIndex, animate=true){
+  const n=djs.length;
+  // Wrap real index
+  realIndex=((realIndex%n)+n)%n;
+  activeIndex=realIndex;
+
   const track=document.getElementById('carousel-track');
   const cards=track.querySelectorAll('.dj-card');
   const dots=document.querySelectorAll('.carousel-dot');
   const stageW=window.innerWidth;
   const centreOffset=stageW/2-CARD_WIDTH/2;
-  trackOffset=centreOffset-index*CARD_WIDTH;
-  if(animate){track.classList.remove('dragging');track.classList.add('snapping');setTimeout(()=>track.classList.remove('snapping'),500);}
-  track.style.transform=`translateX(${trackOffset}px)`;
-  cards.forEach((card,i)=>{card.classList.remove('active','near');const dist=Math.abs(i-index);if(dist===0)card.classList.add('active');else if(dist===1)card.classList.add('near');});
-  dots.forEach((dot,i)=>dot.classList.toggle('active',i===index));
-  updateInfo(djs[index]);
+  const ti=trackIndexForReal(realIndex);
+  const newOffset=centreOffset-ti*CARD_WIDTH;
+
+  setTransform(track, newOffset, animate);
+
+  // After transition, silently jump to real position if we used a clone
+  if(animate){
+    track.addEventListener('transitionend', function onEnd(){
+      track.removeEventListener('transitionend', onEnd);
+      // If we are at a clone position, silently snap to real
+      const currentTI=trackIndexForReal(activeIndex);
+      const realOffset=centreOffset-currentTI*CARD_WIDTH;
+      if(Math.abs(trackOffset-realOffset)>1){
+        setTransform(track, realOffset, false);
+      }
+    });
+  }
+
+  // Update card classes — check real index
+  cards.forEach(card=>{
+    card.classList.remove('active','near');
+    const ri=parseInt(card.dataset.realIndex);
+    const dist=Math.min(Math.abs(ri-realIndex), n-Math.abs(ri-realIndex));
+    if(dist===0) card.classList.add('active');
+    else if(dist===1) card.classList.add('near');
+  });
+
+  dots.forEach((dot,i)=>dot.classList.toggle('active',i===realIndex));
+  updateInfo(djs[realIndex]);
 }
+
 function updateInfo(dj){
   const panel=document.getElementById('dj-info-panel');
   panel.innerHTML='';void panel.offsetHeight;
   panel.innerHTML=`<div class="dj-info-name">${esc(dj.name)}</div><div class="dj-info-show">${esc(dj.show_name||'ROCK.SCOT Presenter')}</div>${dj.genres&&dj.genres.length?`<div class="dj-info-genres">${dj.genres.map(g=>`<span class="dj-info-genre">${esc(g)}</span>`).join('')}</div>`:''} ${dj.bio?`<p class="dj-info-bio">${esc(dj.bio)}</p>`:''}<a href="dj.html?id=${esc(dj.slug)}" class="dj-info-cta">Full Profile →</a>`;
 }
+
 function buildGrid(){
   document.getElementById('djs-grid').innerHTML=djs.map(dj=>`<a href="dj.html?id=${esc(dj.slug)}" class="djs-grid-card">${dj.photo_url?`<img src="${esc(dj.photo_url)}" alt="${esc(dj.name)}" class="djs-grid-photo" loading="lazy">`:`<div class="djs-grid-placeholder">🎙️</div>`}<div class="djs-grid-hover-bar"></div><div class="djs-grid-info"><div class="djs-grid-name">${esc(dj.name)}</div><div class="djs-grid-show">${esc(dj.show_name||'ROCK.SCOT')}</div></div></a>`).join('');
 }
+
 function setupDrag(track){
   let startX=0,startOffset=0,moved=false;
-  function onStart(x){isDragging=true;moved=false;startX=x;startOffset=trackOffset;track.classList.add('dragging');track.classList.remove('snapping');}
-  function onMove(x){if(!isDragging)return;const dx=x-startX;if(Math.abs(dx)>5)moved=true;trackOffset=startOffset+dx;track.style.transform=`translateX(${trackOffset}px)`;}
-  function onEnd(x){if(!isDragging)return;isDragging=false;track.classList.remove('dragging');if(!moved)return;const dx=x-startX;let newIndex=activeIndex;if(Math.abs(dx)>40)newIndex+=dx<0?1:-1;goTo(newIndex);}
+  function onStart(x){isDragging=true;moved=false;startX=x;startOffset=trackOffset;track.style.transition='none';}
+  function onMove(x){
+    if(!isDragging)return;
+    const dx=x-startX;
+    if(Math.abs(dx)>5)moved=true;
+    trackOffset=startOffset+dx;
+    track.style.transform=`translateX(${trackOffset}px)`;
+  }
+  function onEnd(x){
+    if(!isDragging)return;
+    isDragging=false;
+    if(!moved)return;
+    const dx=x-startX;
+    const n=djs.length;
+    let newIndex=activeIndex;
+    if(Math.abs(dx)>40) newIndex+=dx<0?1:-1;
+    newIndex=((newIndex%n)+n)%n;
+    goTo(newIndex,true);
+  }
   track.addEventListener('mousedown',e=>{e.preventDefault();onStart(e.clientX);});
   window.addEventListener('mousemove',e=>onMove(e.clientX));
   window.addEventListener('mouseup',e=>onEnd(e.clientX));
@@ -183,6 +265,7 @@ function setupDrag(track){
   track.addEventListener('touchmove',e=>onMove(e.touches[0].clientX),{passive:true});
   track.addEventListener('touchend',e=>onEnd(e.changedTouches[0].clientX));
 }
+
 document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')goTo(activeIndex-1);if(e.key==='ArrowRight')goTo(activeIndex+1);});
 window.addEventListener('resize',()=>goTo(activeIndex,false));
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
