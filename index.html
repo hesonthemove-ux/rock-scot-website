@@ -606,7 +606,7 @@ function hwOpenModal(i){
   document.getElementById('hw-modal-summary').textContent=s.summary||'Read the full story at the ori
 <script>
 // Live rates from Supabase — updates all price spans on this page
-(async function() {
+document.addEventListener('DOMContentLoaded', async function() {
   try {
     const resp = await fetch(
       'https://pwzeapvopeeoahpyicdm.supabase.co/rest/v1/site_settings?select=key,value',
@@ -640,6 +640,6 @@ function hwOpenModal(i){
     set('idx-card-reg',  fmt(reg));
     set('idx-card-multi',fmt(mul));
     set('idx-card-toh',  fmt(toh));
-  } catch(e) { /* fail silently, defaults remain */ }
-})();
+  } catch(e) { console.warn('Rate load failed:', e); }
+});
 </script>
