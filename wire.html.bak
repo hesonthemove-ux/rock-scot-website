@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>The Wire | ROCK.SCOT — Real-Time Scottish Rock News</title>
+    <meta name="description" content="The Wire — real-time Scottish rock music news, gig listings, and scene updates powered by ROCK.SCOT. Metal, Punk, Indie and Alternative stories updated live.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://rock.scot/wire.html">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="The Wire — Real-Time Scottish Rock News | ROCK.SCOT">
+    <meta property="og:description" content="Live Scottish rock, metal, punk and indie news powered by ROCK.SCOT on DAB+ digital radio.">
+    <meta property="og:image" content="https://rock.scot/assets/images/hero-graffiti-main.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+    <meta name="theme-color" content="#FF6600">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=13">
+    
+      
+    <!-- AEO: NewsMediaOrganization + BreadcrumbList -->
+  <script>
+const SUPABASE_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
+
+let allStories = [];
+const STORIES_LIMIT = 40;
+
+// ROBUST LOGO CHECK (Handles minor spelling differences)
+function getPlaceholder(sourceName) {
+    const src = String(sourceName || '').toLowerCase();
+    // Prioritize external logos if matched
+    if (src.indexOf('nme') > -1) return 'https://www.nme.com/wp-content/uploads/2016/09/NME_Logo.jpg';
+    if (src.indexOf('melody') > -1) return 'https://upload.wikimedia.org/wikipedia/en/2/23/Melody_Maker_logo.png';
+    // Reliable fallback on the Pi
+    return '/assets/images/hero.png';
+}
+
+function timeAgo(d) {
+    const s = Math.floor((Date.now() - new Date(d)) / 1000);
+    if (s < 3600) return Math.floor(s / 60) + 'm ago';
+    if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+    return Math.floor(s / 86400) + 'd ago';
+}
+
+async function loadStories() {
+    const status = document.getElementById('wire-status-text');
+    const loading = document.getElementById('wire-loading');
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/wire_news?select=*&order=created_at.desc&limit='+STORIES_LIMIT, {
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        });
+        const data = await res.json();
+        
+        // Critical Fix: Ensure data is an array before storing it.
+        if (Array.isArray(data)) {
+            allStories = data;
+            if(allStories.length > 0) {
+                render();
+                if (status) status.textContent = allStories.length + ' Stories Live';
+                return;
+            }
+        }
+        throw new Error("No data received");
+    } catch (e) {
+        if (status) status.textContent = 'Updating...';
+        console.warn("Wire connection error:", e);
+        if(loading) loading.style.display = 'none';
+        document.getElementById('wire-output').innerHTML = '<p style="text-align:center; padding:3rem; opacity:0.5;">No stories found.</p>';
+    }
+}
+
+// ROBUST MODAL CALL - Safer summary parsing
+function openModal(id) {
+    const s = allStories.find(item => item.id === id);
+    if(!s) return;
+    document.getElementById('modal-title').textContent = s.title;
+    document.getElementById('modal-genre').textContent = s.genre || 'ROCK';
+    document.getElementById('modal-source').textContent = s.source_name;
+    document.getElementById('modal-link').href = s.source_url;
+    document.getElementById('modal-img').src = getPlaceholder(s.source_name);
+    
+    // Safety handling for summary (prevents crash on null summaries)
+    const summary = String(s.summary || '').trim();
+    document.getElementById('modal-summary').textContent = (summary.length > 0) ? summary : 'Click below to read the full story...';
+    
+    document.getElementById('story-modal').style.display = 'flex';
+}
+
+function closeModal() { document.getElementById('story-modal').style.display = 'none'; }
+
+function render() {
+    const out = document.getElementById('wire-output');
+    const load = document.getElementById('wire-loading');
+    if (load) load.style.display = 'none';
+    if (!out) return;
+
+    out.innerHTML = allStories.map(s => `
+        <div class="wire-card" onclick="openModal(${s.id})">
+            <img onerror="this.src='/assets/images/hero.png'" class="wire-card-img" src="/assets/images/hero.png">
+            <div class="wire-card-content">
+                <div class="wire-card-genre">${s.genre || 'ROCK'}</div>
+                <div class="wire-card-title">${s.title}</div>
+                <div class="wire-card-meta">${s.source_name} &bull; ${timeAgo(s.created_at)}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// CAROUSEL NAVIGATION FUNCTION
+function scrollCarousel(direction) {
+    const carousel = document.getElementById('wire-output');
+    if (!carousel) return;
+    const itemWidth = 300; // Match card width + gap
+    const scrollAmount = itemWidth * 3; // Scroll 3 items at a time
+    carousel.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+}
+
+document.addEventListener('DOMContentLoaded', loadStories);
+window.onclick = function(e) { if (e.target == document.getElementById('story-modal')) closeModal(); }
+</script>
+<script>
+const SUPABASE_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
+
+let allStories = [];
+const STORIES_LIMIT = 40;
+
+// ROBUST LOGO CHECK (Handles minor spelling differences)
+function getPlaceholder(sourceName) {
+    const src = String(sourceName || '').toLowerCase();
+    // Prioritize external logos if matched
+    if (src.indexOf('nme') > -1) return 'https://www.nme.com/wp-content/uploads/2016/09/NME_Logo.jpg';
+    if (src.indexOf('melody') > -1) return 'https://upload.wikimedia.org/wikipedia/en/2/23/Melody_Maker_logo.png';
+    // Reliable fallback on the Pi
+    return '/assets/images/hero.png';
+}
+
+function timeAgo(d) {
+    const s = Math.floor((Date.now() - new Date(d)) / 1000);
+    if (s < 3600) return Math.floor(s / 60) + 'm ago';
+    if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+    return Math.floor(s / 86400) + 'd ago';
+}
+
+async function loadStories() {
+    const status = document.getElementById('wire-status-text');
+    const loading = document.getElementById('wire-loading');
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/wire_news?select=*&order=created_at.desc&limit='+STORIES_LIMIT, {
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        });
+        const data = await res.json();
+        
+        // Critical Fix: Ensure data is an array before storing it.
+        if (Array.isArray(data)) {
+            allStories = data;
+            if(allStories.length > 0) {
+                render();
+                if (status) status.textContent = allStories.length + ' Stories Live';
+                return;
+            }
+        }
+        throw new Error("No data received");
+    } catch (e) {
+        if (status) status.textContent = 'Updating...';
+        console.warn("Wire connection error:", e);
+        if(loading) loading.style.display = 'none';
+        document.getElementById('wire-output').innerHTML = '<p style="text-align:center; padding:3rem; opacity:0.5;">No stories found.</p>';
+    }
+}
+
+// ROBUST MODAL CALL - Safer summary parsing
+function openModal(id) {
+    const s = allStories.find(item => item.id === id);
+    if(!s) return;
+    document.getElementById('modal-title').textContent = s.title;
+    document.getElementById('modal-genre').textContent = s.genre || 'ROCK';
+    document.getElementById('modal-source').textContent = s.source_name;
+    document.getElementById('modal-link').href = s.source_url;
+    document.getElementById('modal-img').src = getPlaceholder(s.source_name);
+    
+    // Safety handling for summary (prevents crash on null summaries)
+    const summary = String(s.summary || '').trim();
+    document.getElementById('modal-summary').textContent = (summary.length > 0) ? summary : 'Click below to read the full story...';
+    
+    document.getElementById('story-modal').style.display = 'flex';
+}
+
+function closeModal() { document.getElementById('story-modal').style.display = 'none'; }
+
+function render() {
+    const out = document.getElementById('wire-output');
+    const load = document.getElementById('wire-loading');
+    if (load) load.style.display = 'none';
+    if (!out) return;
+
+    out.innerHTML = allStories.map(s => `
+        <div class="wire-card" onclick="openModal(${s.id})">
+            <img onerror="this.src='/assets/images/hero.png'" class="wire-card-img" src="/assets/images/hero.png">
+            <div class="wire-card-content">
+                <div class="wire-card-genre">${s.genre || 'ROCK'}</div>
+                <div class="wire-card-title">${s.title}</div>
+                <div class="wire-card-meta">${s.source_name} &bull; ${timeAgo(s.created_at)}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// CAROUSEL NAVIGATION FUNCTION
+function scrollCarousel(direction) {
+    const carousel = document.getElementById('wire-output');
+    if (!carousel) return;
+    const itemWidth = 300; // Match card width + gap
+    const scrollAmount = itemWidth * 3; // Scroll 3 items at a time
+    carousel.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+}
+
+document.addEventListener('DOMContentLoaded', loadStories);
+window.onclick = function(e) { if (e.target == document.getElementById('story-modal')) closeModal(); }
+</script>
+
+<style>
+    /* Magazine Card Layout */
+    #wire-output {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        padding-top: 20px;
+    }
+    .wire-card {
+        background: #111;
+        border: 1px solid #222;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: transform 0.2s, border-color 0.2s;
+        display: flex;
+        flex-direction: column;
+    }
+    .wire-card:hover {
+        transform: translateY(-5px);
+        border-color: #ff6b00;
+    }
+    .wire-card-content { padding: 1.5rem; }
+    .wire-card-genre { color: #ff6b00; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .wire-card-title { font-size: 1.25rem; font-weight: 700; color: #fff; line-height: 1.2; margin-bottom: 1rem; }
+    .wire-card-meta { font-size: 0.8rem; color: #666; }
+
+    /* Pop-out Modal Style */
+    #story-modal {
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; padding: 20px;
+    }
+    .modal-content {
+        background: #111; border: 1px solid #333; width: 100%; max-width: 600px;
+        border-radius: 12px; padding: 2rem; position: relative; color: #fff;
+    }
+    .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2rem; color: #666; cursor: pointer; }
+    .modal-source-btn {
+        display: inline-block; margin-top: 2rem; padding: 12px 24px;
+        background: #ff6b00; color: #000; text-decoration: none; font-weight: 900; border-radius: 4px;
+    }
+</style>
+
+<div id="story-modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <div id="modal-genre" class="wire-card-genre"></div>
+        <h2 id="modal-title" style="margin-top:0;"></h2>
+        <p id="modal-summary" style="line-height:1.6; color:#ccc;"></p>
+        <div style="font-size:0.8rem; color:#555; margin-top:1rem;">Source: <span id="modal-source-name"></span></div>
+        <a id="modal-link" href="#" target="_blank" class="modal-source-btn">READ FULL STORY AT SOURCE</a>
+    </div>
+</div>
+
+<style>
+    #wire-output {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 25px;
+        padding: 20px 0;
+    }
+    .wire-card {
+        background: #111;
+        border: 1px solid #222;
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.3s, border-color 0.3s;
+        display: flex;
+        flex-direction: column;
+    }
+    .wire-card:hover {
+        transform: translateY(-8px);
+        border-color: #ff6b00;
+    }
+    .wire-card-img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        background: #000;
+    }
+    .wire-card-content { padding: 1.5rem; flex-grow: 1; }
+    .wire-card-genre { color: #ff6b00; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .wire-card-title { font-size: 1.2rem; font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 1rem; }
+    .wire-card-meta { font-size: 0.8rem; color: #555; display: flex; align-items: center; gap: 8px; }
+
+    /* Modal Styling */
+    #story-modal {
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.95); z-index: 99999; justify-content: center; align-items: center; padding: 20px;
+    }
+    .modal-box {
+        background: #0a0a0a; border: 1px solid #333; width: 100%; max-width: 650px;
+        border-radius: 16px; position: relative; color: #fff; overflow: hidden;
+    }
+    .modal-body { padding: 2rem; }
+    .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2.5rem; color: #ff6b00; cursor: pointer; z-index: 10; font-weight: bold; }
+    .modal-btn {
+        display: block; text-align: center; margin-top: 1.5rem; padding: 15px;
+        background: #ff6b00; color: #000; text-decoration: none; font-weight: 900; border-radius: 8px;
+    }
+</style>
+
+<div id="story-modal">
+    <div class="modal-box">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <img onerror="this.src='/assets/images/hero.png'" id="modal-img" src="/assets/images/hero.png" style="width:100%; height:250px; object-fit:cover;">
+        <div class="modal-body">
+            <div id="modal-genre" class="wire-card-genre"></div>
+            <h2 id="modal-title" style="margin: 0.5rem 0 1.5rem 0; line-height: 1.2;"></h2>
+            <p id="modal-summary" style="line-height:1.7; color:#bbb; font-size: 1.05rem;"></p>
+            <div style="margin-top:2rem; padding-top:1rem; border-top:1px solid #222; font-size:0.9rem; color:#666;">
+                Source: <span id="modal-source" style="color:#fff; font-weight:bold;"></span>
+            </div>
+            <a id="modal-link" href="#" target="_blank" class="modal-btn">READ FULL STORY AT SOURCE</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ─── NATIVE GRID CAROUSEL ─── */
+    #wire-output-wrapper {
+        position: relative;
+        padding: 0 40px; /* Space for buttons */
+    }
+    #wire-output {
+        display: grid;
+        grid-template-columns: repeat(20, 280px); /* Multi-item slides */
+        gap: 20px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none; /* Hide scrollbar for clean look */
+        padding-bottom: 10px;
+        -webkit-overflow-scrolling: touch;
+    }
+    #wire-output::-webkit-scrollbar { display: none; } /* Safari hide */
+
+    .wire-card {
+        scroll-snap-align: start;
+        background: #111;
+        border: 1px solid #222;
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.3s, border-color 0.3s;
+        display: flex;
+        flex-direction: column;
+        width: 280px; /* Match column width */
+    }
+    .wire-card:hover {
+        transform: translateY(-5px);
+        border-color: #ff6b00;
+    }
+    .wire-card-img {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+        /* VITAL FIX: Prioritize top of image, crop bottom */
+        object-position: top;
+        background: #000;
+    }
+    .wire-card-content { padding: 1rem 1.25rem; flex-grow: 1; }
+    .wire-card-genre { color: #ff6b00; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .wire-card-title { font-size: 1.15rem; font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 1rem; height: 3.9em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+    .wire-card-meta { font-size: 0.8rem; color: #555; }
+
+    /* Carousel Buttons */
+    .carousel-btn {
+        position: absolute; top: 50%; transform: translateY(-50%);
+        background: rgba(0,0,0,0.8); color: #ff6b00; border: 1px solid #333;
+        font-size: 1.5rem; font-weight: bold; width: 40px; height: 40px;
+        border-radius: 20px; cursor: pointer; z-index: 10;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .carousel-btn:hover { background: #1a1a1a; }
+    .carousel-prev { left: -10px; }
+    .carousel-next { right: -10px; }
+
+    /* Modal - Critical Fixes for robustness */
+    #story-modal {
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.95); z-index: 99999; justify-content: center; align-items: center; padding: 20px;
+    }
+    .modal-box {
+        background: #0d0d0d; border: 1px solid #333; width: 100%; max-width: 600px;
+        border-radius: 16px; position: relative; color: #fff; overflow-y: auto; max-height: 90vh;
+    }
+    .modal-body { padding: 2.5rem; }
+    .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2.5rem; color: #ff6b00; cursor: pointer; z-index: 10; font-weight: bold; }
+    .modal-btn {
+        display: block; text-align: center; margin-top: 2rem; padding: 15px;
+        background: #ff6b00; color: #000; text-decoration: none; font-weight: 900; border-radius: 8px; text-transform: uppercase;
+    }
+</style>
+<script src="/rock/js/header.js"></script>
+</head>
+<body><div id="header"></div><div id="header"></div>
+
+<!-- WIRE HERO -->
+<div class="wire-hero" style="margin-top: 98px;">
+    <div class="wire-hero-inner" style="display:flex;align-items:center;gap:1rem;padding:1.25rem 1.25rem 0;">
+        <img onerror="this.src='/assets/images/hero.png'" onerror="this.src='/images/hero.png'" src="/assets/images/hero.png"
+             alt="ROCK.SCOT — Scotland's DAB+ Rock Station"
+             loading="eager"
+             style="width:110px;max-width:28%;height:auto;object-fit:contain;flex-shrink:0;">
+        <div style="flex:1;min-width:0;">
+            <h1 class="wire-title">THE<br><span>WIRE</span></h1>
+            <p class="wire-subtitle">Real-time Scottish rock news — powered by <strong>ROCK.SCOT</strong><br>Updated continuously from 40+ Scottish music sources</p>
+        </div>
+        <div class="wire-stats" style="flex-shrink:0;text-align:center;">
+            <div class="wire-count" id="story-count">—</div>
+            <div class="wire-count-label">Stories Live</div>
+        </div>
+    </div>
+</div>
+
+<!-- CONTROLS: compact pill row, not sticky -->
+<div class="wire-controls-slim">
+    <div class="wire-genre-pills">
+        <button class="wire-pill active" onclick="setPillFilter('',this)">All</button>
+        <button class="wire-pill" onclick="setPillFilter('Rock',this)">Rock</button>
+    </div>
+    <div class="wire-controls-right">
+        <div class="wire-status">
+            <div class="wire-live-dot" aria-hidden="true"></div>
+            <span id="wire-status-text"></span>
+        </div>
+        <button class="wire-refresh-btn-sm" onclick="loadStories(true)" aria-label="Refresh">↻</button>
+    </div>
+</div>
+
+<!-- STORIES OUTPUT -->
+<div id="wire-output">
+    <div class="wire-loading" id="wire-loading">
+        <div class="wire-spinner" aria-hidden="true"></div>
+        <p>Loading Scottish rock news...</p>
+    </div>
+</div>
+
+<!-- STORY MODAL -->
+<div class="wire-modal-overlay" id="story-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="wire-modal">
+        <button class="wire-modal-close" onclick="closeModal()" aria-label="Close">✕</button>
+        <div id="modal-genre" class="wire-modal-genre"></div>
+        <h2 class="wire-modal-title" id="modal-title"></h2>
+        <p class="wire-modal-meta" id="modal-meta"></p>
+        <p class="wire-modal-summary" id="modal-summary"></p>
+        <p style="font-size:0.75rem;color:rgba(242,242,242,0.35);margin-bottom:0.75rem;font-style:italic;">Summary by ROCK.SCOT — original story credited below</p>
+        <a href="#" id="modal-link" class="wire-modal-cta" target="_blank" rel="noopener noreferrer">Read Full Story at Source ↗</a>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <img onerror="this.src='/assets/images/hero.png'" onerror="this.src='/images/hero.png'" src="/assets/images/hero.png" alt="ROCK.SCOT" style="height:44px;width:auto;">
+      <p>Scotland's rock station on DAB+ digital radio. Broadcasting Metal, Alt, Punk and Classic Rock 24/7 across West Scotland.</p>
+      <p style="margin-top:0.75rem;">Ofcom Licensed · SC646223 · VAT 491589639</p>
+    </div>
+    <div class="footer-col">
+      <h4>The Wire</h4>
+      <p>Real-time Scottish rock news</p>
+      <p>Updated continuously</p>
+      <a href="wire.html">Read The Wire →</a>
+    </div>
+    <div class="footer-col">
+      <h4>Navigate</h4>
+      <a href="index.html">Home</a>
+      <a href="wire.html">The Wire</a>
+      <a href="coverage.html">Coverage</a>
+      <a href="advertise.html" class="orange">Advertise</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="tel:01414597625" class="orange">0141 459 ROCK</a>
+      <a href="/cdn-cgi/l/email-protection#dfacabaabbb6b09fadb0bcb4f1acbcb0ab"><span class="__cf_email__" data-cfemail="8dfef9f8e9e4e2cdffe2eee6a3feeee2f9">[email&#160;protected]</span></a>
+      <a href="/cdn-cgi/l/email-protection#29484d5f4c5b5d405a4c695b464a42075a4a465d"><span class="__cf_email__" data-cfemail="09686d7f6c7b7d607a6c497b666a62277a6a667d">[email&#160;protected]</span></a>
+      <a href="https://bsky.app/profile/rockscot.bsky.social" target="_blank" rel="noopener">Bluesky ↗</a>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 ROCK.SCOT · Scotland's Rock Station · Caledonia TX Ltd · SC646223 · VAT 491589639 · Ofcom Licensed</div>
+</footer>
+
+<script>
+const SUPABASE_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
+
+let allStories = [];
+const STORIES_LIMIT = 40;
+
+// ROBUST LOGO CHECK (Handles minor spelling differences)
+function getPlaceholder(sourceName) {
+    const src = String(sourceName || '').toLowerCase();
+    // Prioritize external logos if matched
+    if (src.indexOf('nme') > -1) return 'https://www.nme.com/wp-content/uploads/2016/09/NME_Logo.jpg';
+    if (src.indexOf('melody') > -1) return 'https://upload.wikimedia.org/wikipedia/en/2/23/Melody_Maker_logo.png';
+    // Reliable fallback on the Pi
+    return '/assets/images/hero.png';
+}
+
+function timeAgo(d) {
+    const s = Math.floor((Date.now() - new Date(d)) / 1000);
+    if (s < 3600) return Math.floor(s / 60) + 'm ago';
+    if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+    return Math.floor(s / 86400) + 'd ago';
+}
+
+async function loadStories() {
+    const status = document.getElementById('wire-status-text');
+    const loading = document.getElementById('wire-loading');
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/wire_news?select=*&order=created_at.desc&limit='+STORIES_LIMIT, {
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        });
+        const data = await res.json();
+        
+        // Critical Fix: Ensure data is an array before storing it.
+        if (Array.isArray(data)) {
+            allStories = data;
+            if(allStories.length > 0) {
+                render();
+                if (status) status.textContent = allStories.length + ' Stories Live';
+                return;
+            }
+        }
+        throw new Error("No data received");
+    } catch (e) {
+        if (status) status.textContent = 'Updating...';
+        console.warn("Wire connection error:", e);
+        if(loading) loading.style.display = 'none';
+        document.getElementById('wire-output').innerHTML = '<p style="text-align:center; padding:3rem; opacity:0.5;">No stories found.</p>';
+    }
+}
+
+// ROBUST MODAL CALL - Safer summary parsing
+function openModal(id) {
+    const s = allStories.find(item => item.id === id);
+    if(!s) return;
+    document.getElementById('modal-title').textContent = s.title;
+    document.getElementById('modal-genre').textContent = s.genre || 'ROCK';
+    document.getElementById('modal-source').textContent = s.source_name;
+    document.getElementById('modal-link').href = s.source_url;
+    document.getElementById('modal-img').src = getPlaceholder(s.source_name);
+    
+    // Safety handling for summary (prevents crash on null summaries)
+    const summary = String(s.summary || '').trim();
+    document.getElementById('modal-summary').textContent = (summary.length > 0) ? summary : 'Click below to read the full story...';
+    
+    document.getElementById('story-modal').style.display = 'flex';
+}
+
+function closeModal() { document.getElementById('story-modal').style.display = 'none'; }
+
+function render() {
+    const out = document.getElementById('wire-output');
+    const load = document.getElementById('wire-loading');
+    if (load) load.style.display = 'none';
+    if (!out) return;
+
+    out.innerHTML = allStories.map(s => `
+        <div class="wire-card" onclick="openModal(${s.id})">
+            <img onerror="this.src='/assets/images/hero.png'" class="wire-card-img" src="/assets/images/hero.png">
+            <div class="wire-card-content">
+                <div class="wire-card-genre">${s.genre || 'ROCK'}</div>
+                <div class="wire-card-title">${s.title}</div>
+                <div class="wire-card-meta">${s.source_name} &bull; ${timeAgo(s.created_at)}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// CAROUSEL NAVIGATION FUNCTION
+function scrollCarousel(direction) {
+    const carousel = document.getElementById('wire-output');
+    if (!carousel) return;
+    const itemWidth = 300; // Match card width + gap
+    const scrollAmount = itemWidth * 3; // Scroll 3 items at a time
+    carousel.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+}
+
+document.addEventListener('DOMContentLoaded', loadStories);
+window.onclick = function(e) { if (e.target == document.getElementById('story-modal')) closeModal(); }
+</script><script>
+const SUPABASE_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
+
+let allStories = [];
+const STORIES_LIMIT = 40;
+
+// ROBUST LOGO CHECK (Handles minor spelling differences)
+function getPlaceholder(sourceName) {
+    const src = String(sourceName || '').toLowerCase();
+    // Prioritize external logos if matched
+    if (src.indexOf('nme') > -1) return 'https://www.nme.com/wp-content/uploads/2016/09/NME_Logo.jpg';
+    if (src.indexOf('melody') > -1) return 'https://upload.wikimedia.org/wikipedia/en/2/23/Melody_Maker_logo.png';
+    // Reliable fallback on the Pi
+    return '/assets/images/hero.png';
+}
+
+function timeAgo(d) {
+    const s = Math.floor((Date.now() - new Date(d)) / 1000);
+    if (s < 3600) return Math.floor(s / 60) + 'm ago';
+    if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+    return Math.floor(s / 86400) + 'd ago';
+}
+
+async function loadStories() {
+    const status = document.getElementById('wire-status-text');
+    const loading = document.getElementById('wire-loading');
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/wire_news?select=*&order=created_at.desc&limit='+STORIES_LIMIT, {
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        });
+        const data = await res.json();
+        
+        // Critical Fix: Ensure data is an array before storing it.
+        if (Array.isArray(data)) {
+            allStories = data;
+            if(allStories.length > 0) {
+                render();
+                if (status) status.textContent = allStories.length + ' Stories Live';
+                return;
+            }
+        }
+        throw new Error("No data received");
+    } catch (e) {
+        if (status) status.textContent = 'Updating...';
+        console.warn("Wire connection error:", e);
+        if(loading) loading.style.display = 'none';
+        document.getElementById('wire-output').innerHTML = '<p style="text-align:center; padding:3rem; opacity:0.5;">No stories found.</p>';
+    }
+}
+
+// ROBUST MODAL CALL - Safer summary parsing
+function openModal(id) {
+    const s = allStories.find(item => item.id === id);
+    if(!s) return;
+    document.getElementById('modal-title').textContent = s.title;
+    document.getElementById('modal-genre').textContent = s.genre || 'ROCK';
+    document.getElementById('modal-source').textContent = s.source_name;
+    document.getElementById('modal-link').href = s.source_url;
+    document.getElementById('modal-img').src = getPlaceholder(s.source_name);
+    
+    // Safety handling for summary (prevents crash on null summaries)
+    const summary = String(s.summary || '').trim();
+    document.getElementById('modal-summary').textContent = (summary.length > 0) ? summary : 'Click below to read the full story...';
+    
+    document.getElementById('story-modal').style.display = 'flex';
+}
+
+function closeModal() { document.getElementById('story-modal').style.display = 'none'; }
+
+function render() {
+    const out = document.getElementById('wire-output');
+    const load = document.getElementById('wire-loading');
+    if (load) load.style.display = 'none';
+    if (!out) return;
+
+    out.innerHTML = allStories.map(s => `
+        <div class="wire-card" onclick="openModal(${s.id})">
+            <img onerror="this.src='/assets/images/hero.png'" class="wire-card-img" src="/assets/images/hero.png">
+            <div class="wire-card-content">
+                <div class="wire-card-genre">${s.genre || 'ROCK'}</div>
+                <div class="wire-card-title">${s.title}</div>
+                <div class="wire-card-meta">${s.source_name} &bull; ${timeAgo(s.created_at)}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// CAROUSEL NAVIGATION FUNCTION
+function scrollCarousel(direction) {
+    const carousel = document.getElementById('wire-output');
+    if (!carousel) return;
+    const itemWidth = 300; // Match card width + gap
+    const scrollAmount = itemWidth * 3; // Scroll 3 items at a time
+    carousel.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+}
+
+document.addEventListener('DOMContentLoaded', loadStories);
+window.onclick = function(e) { if (e.target == document.getElementById('story-modal')) closeModal(); }
+</script>
+
+<div id="story-modal">
+    <div class="modal-box">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <img onerror="this.src='/assets/images/hero.png'" id="modal-img" src="/assets/images/hero.png" style="width:100%; height:250px; object-fit:cover; object-position: top;">
+        <div class="modal-body">
+            <div id="modal-genre" class="wire-card-genre"></div>
+            <h2 id="modal-title" style="margin: 0.5rem 0 1.5rem 0; line-height: 1.2;"></h2>
+            <p id="modal-summary" style="line-height:1.7; color:#bbb; font-size: 1.05rem; white-space: pre-wrap;"></p>
+            <div style="margin-top:2.5rem; padding-top:1rem; border-top:1px solid #222; font-size:0.9rem; color:#666;">
+                SOURCE: <span id="modal-source" style="color:#fff; font-weight:bold; font-size: 1rem;"></span>
+            </div>
+            <a id="modal-link" href="#" target="_blank" class="modal-btn">READ FULL STORY AT SOURCE</a>
+        </div>
+    </div>
+</div>
+<div id="story-modal" onclick="closeModal()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; padding:20px; overflow-y:auto;"><div id="modal-body" onclick="event.stopPropagation()" style="background:#111; color:white; padding:30px; border-radius:8px; max-width:600px; margin:50px auto;"></div></div><div id="story-modal" onclick="closeModal()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; padding:20px; overflow-y:auto;"><div id="modal-body" onclick="event.stopPropagation()" style="background:#111; color:white; padding:30px; border-radius:8px; max-width:600px; margin:50px auto;"></div></div></body>
+</html>
