@@ -622,7 +622,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     const bolt = r.production_bolt_on || 150;
     const rush = r.rush_fee           || 75;
 
-    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    console.log('RATES LOADED:', {reg, mul, toh, bolt, rush});
+    const set = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) { el.textContent = val; el.style.color = '#00ff00'; }
+      else { console.warn('MISSING ELEMENT:', id); }
+    };
     set('idx-rush',     '+' + fmt(rush));
     set('idx-bolt',     fmt(bolt));
     set('idx-reg-aeo',  fmt(reg));
