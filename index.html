@@ -25,13 +25,6 @@
   <style>
     /* Critical inline — ensures dark background renders before CSS loads */
     html, body { background: #080808 !important; color: #f2f2f2 !important; margin: 0; padding: 0; }
-    @media (max-width: 768px) {
-      .story-grid, .tom-grid { display: flex !important; flex-direction: column !important; width: 100% !important; }
-      .story-image-block, .tom-image-wrap { width: 100% !important; max-width: 100% !important; margin: 0 !important; }
-      .story-image-block img, .tom-image-wrap img { width: 100% !important; height: auto !important; display: block !important; }
-      .story-text-block, .tom-content { width: 100% !important; max-width: 100% !important; padding-right: 0 !important; }
-      .tom-stat-row { gap: 1.5rem !important; }
-    }
   </style>
   
   </head>
@@ -180,11 +173,15 @@
         <div class="tom-stat-row">
           <div>
             <div class="tom-stat-val">20+</div>
-            <div class="tom-stat-label">Years Experience</div>
+            <div class="tom-stat-label">Years On Air</div>
           </div>
           <div>
-            <div class="tom-stat-val">6–10AM</div>
-            <div class="tom-stat-label">Morning Rock, Daily</div>
+            <div class="tom-stat-val">24/7</div>
+            <div class="tom-stat-label">Live Broadcasting</div>
+          </div>
+          <div>
+            <div class="tom-stat-val">DAB+</div>
+            <div class="tom-stat-label">Digital Radio</div>
           </div>
         </div>
       </div>
@@ -292,19 +289,19 @@
       <div class="advertise-card featured">
         <div class="advertise-card-label">Most Popular</div>
         <div class="advertise-card-name">Multi-Regional</div>
-        <div class="advertise-card-price"><span id="idx-card-multi">£1,245</span><span> +VAT</span></div>
+        <div class="advertise-card-price">£995<span> +VAT</span></div>
         <p class="advertise-card-desc">134 plays over 28 days across all broadcast areas. Maximum reach across Scotland's rock audience.</p>
         <a href="advertise.html" class="advertise-card-cta">Get Started →</a>
       </div>
       <div class="advertise-card">
         <div class="advertise-card-label">Premium</div>
         <div class="advertise-card-name">Top of Hour</div>
-        <div class="advertise-card-price"><span id="idx-card-toh">£350</span><span> +VAT</span></div>
+        <div class="advertise-card-price">£2,495<span> +VAT</span></div>
         <p class="advertise-card-desc">Premium positioning at the top of every hour. Maximum impact. Ultimate listener engagement.</p>
         <a href="advertise.html" class="advertise-card-cta">Get Started →</a>
       </div>
     </div>
-    <p style="font-size:0.8rem; color: var(--muted); margin-top: 1.5rem; text-align:center;">All prices exclude VAT. Rush campaigns available (+<span id='idx-rush'>£75</span> surcharge). Production from <span id='idx-bolt'>£150</span>.</p>
+    <p style="font-size:0.8rem; color: var(--muted); margin-top: 1.5rem; text-align:center;">All prices exclude VAT. Rush campaigns available (+£50 surcharge). Production from £250.</p>
   </div>
 </section>
 
@@ -342,7 +339,7 @@
 
         <div style="background:#0d0d0d;border:1px solid #1a1a1a;border-radius:4px;padding:1.5rem;">
           <p style="font-family:var(--font-cond);font-size:.7rem;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:#ff5500;margin-bottom:.75rem;">Advertising</p>
-          <p style="font-size:.88rem;color:rgba(242,242,242,.7);line-height:1.8;">Packages from <span id='idx-reg-aeo'>£495</span> +VAT. Regional (134 plays/28 days), Multi-Regional, and Top of Hour available. Book online at rock.scot/advertise. Production from <span id='idx-bolt-aeo'>£150</span>. Contact: <a href="mailto:advertise@rock.scot" style="color:#ff5500;">advertise@rock.scot</a></p>
+          <p style="font-size:.88rem;color:rgba(242,242,242,.7);line-height:1.8;">Packages from <span id="idx-reg-aeo">£495</span> +VAT. Regional (134 plays/28 days), Multi-Regional, and Top of Hour available. Book online at rock.scot/advertise. Production from <span id="idx-bolt-aeo">£250</span>. Contact: <a href="mailto:advertise@rock.scot" style="color:#ff5500;">advertise@rock.scot</a></p>
         </div>
 
         <div style="background:#0d0d0d;border:1px solid #1a1a1a;border-radius:4px;padding:1.5rem;">
@@ -426,7 +423,7 @@
         </div>
         <div itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer"
              class="faq-body" style="margin-top:0.85rem;">
-          <p itemprop="text" style="font-size:0.95rem;color:var(--muted);line-height:1.75;">ROCK.SCOT offers three advertising packages: <strong style="color:var(--white);">Regional (<span id='idx-faq-reg'>£495</span> +VAT)</strong> — 134 plays over 28 days in a single DAB+ area; <strong style="color:var(--white);">Multi-Regional (<span id='idx-faq-multi'>£1,245</span> +VAT)</strong> — 134 plays across all broadcast areas; and <strong style="color:var(--white);">Top of Hour (<span id='idx-faq-toh'>£350</span> +VAT)</strong> — premium station-ident positioning at the top of every hour. Professional production is available from <span id='idx-faq-bolt'>£150</span>. Contact <a href="mailto:advertise@rock.scot" style="color:var(--orange);">advertise@rock.scot</a> or <a href="advertise.html" style="color:var(--orange);">get an instant quote online</a>.</p>
+          <p itemprop="text" style="font-size:0.95rem;color:var(--muted);line-height:1.75;">ROCK.SCOT offers three advertising packages: <strong style="color:var(--white);">Regional (<span id="idx-faq-reg">£495</span> +VAT)</strong> — 134 plays over 28 days in a single DAB+ area; <strong style="color:var(--white);">Multi-Regional (<span id="idx-faq-multi">£995</span> +VAT)</strong> — 134 plays across all broadcast areas; and <strong style="color:var(--white);">Top of Hour (<span id="idx-faq-toh">£2,495</span> +VAT)</strong> — premium station-ident positioning at the top of every hour. Professional production is available from <span id="idx-faq-bolt">£250</span>. Contact <a href="mailto:advertise@rock.scot" style="color:var(--orange);">advertise@rock.scot</a> or <a href="advertise.html" style="color:var(--orange);">get an instant quote online</a>.</p>
         </div>
       </div>
 
@@ -487,7 +484,7 @@
           "name": "How do I advertise on ROCK.SCOT?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "ROCK.SCOT offers Regional advertising at £495 +VAT (134 plays, 28 days, single area), Multi-Regional at £1,245 +VAT (all broadcast areas), and Top of Hour at £350 +VAT (premium positioning every hour). Production from £150. Contact advertise@rock.scot."
+            "text": "ROCK.SCOT offers Regional advertising at £495 +VAT (134 plays, 28 days, single area), Multi-Regional at £995 +VAT (all broadcast areas), and Top of Hour at £2,495 +VAT (premium positioning every hour). Production from £250. Contact advertise@rock.scot."
           }
         },
         {
@@ -603,43 +600,43 @@ function hwOpenModal(i){
   document.getElementById('hw-modal-genre').innerHTML='<span class="wire-genre-tag '+gclass+'">'+escH(genre)+'</span>';
   document.getElementById('hw-modal-title').textContent=s.title||'';
   document.getElementById('hw-modal-meta').textContent=(s.source_name||'ROCK.SCOT')+' · '+ago(s.created_at);
-  document.getElementById('hw-modal-summary').textContent=s.summary||'Read the full story at the ori
-<script>
-// Live rates from Supabase — updates all price spans on this page
-(async function() {
-  try {
-    const resp = await fetch(
-      'https://pwzeapvopeeoahpyicdm.supabase.co/rest/v1/site_settings?select=key,value',
-      { headers: {
-        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5NDcyMzMsImV4cCI6MjA1NjUyMzIzM30.R4oKTMIjSEJBonVSEApJNS57cEBFwFQCLmFEY9HPSrg',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5NDcyMzMsImV4cCI6MjA1NjUyMzIzM30.R4oKTMIjSEJBonVSEApJNS57cEBFwFQCLmFEY9HPSrg'
-      }}
-    );
-    if (!resp.ok) return;
-    const rows = await resp.json();
-    if (!Array.isArray(rows)) return;
-    const r = {};
-    rows.forEach(row => { r[row.key] = parseFloat(row.value) || 0; });
-
-    const fmt = p => '£' + p.toLocaleString('en-GB', {minimumFractionDigits:0});
-    const reg  = r.single_inverclyde  || 495;
-    const mul  = r.multi_regional     || 1245;
-    const toh  = r.top_of_hour        || 350;
-    const bolt = r.production_bolt_on || 150;
-    const rush = r.rush_fee           || 75;
-
-    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-    set('idx-rush',     '+' + fmt(rush));
-    set('idx-bolt',     fmt(bolt));
-    set('idx-reg-aeo',  fmt(reg));
-    set('idx-bolt-aeo', fmt(bolt));
-    set('idx-faq-reg',  fmt(reg));
-    set('idx-faq-multi',fmt(mul));
-    set('idx-faq-toh',  fmt(toh));
-    set('idx-faq-bolt', fmt(bolt));
-    set('idx-card-reg',  fmt(reg));
-    set('idx-card-multi',fmt(mul));
-    set('idx-card-toh',  fmt(toh));
-  } catch(e) { /* fail silently, defaults remain */ }
-})();
+  document.getElementById('hw-modal-summary').textContent=s.summary||'Read the full story at the original source.';
+  var lnk=document.getElementById('hw-modal-link');
+  var hasLink=s.source_url&&s.source_url.startsWith('http');
+  if(hasLink){lnk.href=s.source_url;lnk.textContent='Read Full Story at '+(s.source_name||'Source')+' ↗';lnk.style.display='';}
+  else{lnk.style.display='none';}
+  var m=document.getElementById('hw-modal');
+  m.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function hwCloseModal(){
+  document.getElementById('hw-modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('click',function(e){if(e.target&&e.target.id==='hw-modal')hwCloseModal();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')hwCloseModal();});
 </script>
+<script>
+fetch('/rock/rates-proxy.php')
+  .then(function(r){ return r.json(); })
+  .then(function(rows){
+    var r = {};
+    rows.forEach(function(row){ r[row.key] = parseFloat(row.value) || 0; });
+    function fmt(p){ return '£' + Math.round(p).toLocaleString('en-GB'); }
+    function set(id, val){ var el = document.getElementById(id); if(el) el.textContent = val; }
+    set('idx-card-reg',          fmt(r.single_inverclyde  || 495));
+    set('idx-reg-aeo',           fmt(r.single_inverclyde  || 495));
+    set('idx-bolt-aeo',          fmt(r.production_bolt_on || 150));
+    set('idx-faq-reg',           fmt(r.single_inverclyde  || 495));
+    set('idx-faq-multi',         fmt(r.multi_regional     || 995));
+    set('idx-faq-toh',           fmt(r.top_of_hour        || 2495));
+    set('idx-faq-bolt',          fmt(r.production_bolt_on || 150));
+    set('footer-price-from',     fmt(r.single_inverclyde  || 495));
+    set('footer-price-regional', fmt(r.single_inverclyde  || 495));
+    set('footer-price-multi',    fmt(r.multi_regional     || 995));
+    set('footer-price-toh',      fmt(r.top_of_hour        || 2495));
+  })
+  .catch(function(e){ console.warn('Rates:', e); });
+</script>
+</body>
+</html>
