@@ -193,3 +193,122 @@ loadDJs();
 <script src="js/header.js" defer></script>
 </body>
 </html>
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    const track = document.querySelector('.carousel-track');
+    const countBadge = document.querySelector('.djs-count-badge');
+
+    try {
+        const response = await fetch('djs-proxy.php');
+        const presenters = await response.json();
+
+        if (!Array.isArray(presenters)) throw new Error('Invalid data');
+
+        if (countBadge) {
+            countBadge.innerHTML = `<div class="djs-count-dot"></div>${presenters.length} PRESENTERS LIVE`;
+        }
+
+        // Clear existing hardcoded cards
+        track.innerHTML = '';
+
+        presenters.forEach((dj, index) => {
+            const cardNumber = (index + 1).toString().padStart(2, '0');
+            const cardHtml = `
+                <div class="dj-card" data-index="${index}" 
+                     data-name="${dj.name}" 
+                     data-show="${dj.show_name || ''}" 
+                     data-bio="${dj.bio || ''}" 
+                     data-genres="${dj.genres || ''}">
+                    <div class="dj-card-inner">
+                        <img src="${dj.image_url}" class="dj-card-photo" alt="${dj.name}">
+                        <div class="dj-card-overlay"></div>
+                        <div class="dj-card-accent"></div>
+                        <div class="dj-card-info">
+                            <div class="dj-card-name">${dj.name}</div>
+                            <div class="dj-card-show">${dj.show_name || 'Presenter'}</div>
+                        </div>
+                    </div>
+                    <div class="dj-card-num">${cardNumber}</div>
+                </div>`;
+            track.insertAdjacentHTML('beforeend', cardHtml);
+        });
+
+        // Re-initialize your carousel logic
+        if (typeof initCarousel === "function") {
+            initCarousel();
+        }
+
+    } catch (err) {
+        console.error('Error loading presenters:', err);
+    }
+});
+</script>
+<script>
+// Override the existing loadDJs to use the proxy and sync with the carousel
+async function loadDJs() {
+    try {
+        const response = await fetch('djs-proxy.php');
+        const data = await response.json();
+        if (!Array.isArray(data)) return;
+
+        // Update the global 'djs' variable the carousel depends on
+        window.djs = data; 
+        
+        // Update the count badge
+        const badge = document.querySelector('.djs-count-badge');
+        if (badge) badge.innerHTML = `<div class="djs-count-dot"></div>${data.length} PRESENTERS LIVE`;
+
+        // Build the carousel track
+        const track = document.getElementById('carousel-track');
+        if (track) {
+            track.innerHTML = data.map((dj, i) => `
+                <div class="dj-card" onclick="goTo(${i})">
+                    <div class="dj-card-inner">
+                        <img src="${dj.image_url}" class="dj-card-photo" alt="${dj.name}">
+                        <div class="dj-card-overlay"></div>
+                        <div class="dj-card-accent"></div>
+                        <div class="dj-card-info">
+                            <div class="dj-card-name">${dj.name}</div>
+                            <div class="dj-card-show">${dj.show_name || ''}</div>
+                        </div>
+                    </div>
+                    <div class="dj-card-num">${(i + 1).toString().padStart(2, '0')}</div>
+                </div>`).join('');
+        }
+
+        // Initialize the carousel now that data is loaded
+        if (typeof initCarousel === 'function') initCarousel();
+        
+        // Populate the grid if it exists
+        if (typeof buildGrid === 'function') buildGrid();
+
+    } catch (e) {
+        console.error("DJs Load Failed:", e);
+    }
+}
+// Start the process
+loadDJs();
+</script>
+<script>
+async function loadDJs() {
+    try {
+        const r = await fetch('djs-proxy.php');
+        const data = await r.json();
+        window.djs = data;
+        const track = document.getElementById('carousel-track');
+        if (track) {
+            track.innerHTML = data.map((dj, i) => `
+                <div class="dj-card" onclick="goTo(${i})">
+                    <div class="dj-card-inner">
+                        <img src="${dj.image_url}" class="dj-card-photo" alt="${dj.name}">
+                        <div class="dj-card-overlay"></div>
+                        <div class="dj-card-info"><div class="dj-card-name">${dj.name}</div></div>
+                    </div>
+                    <div class="dj-card-num">${(i + 1).toString().padStart(2, '0')}</div>
+                </div>`).join('');
+        }
+        if (typeof initCarousel === 'function') initCarousel();
+    } catch (e) { console.error(e); }
+}
+loadDJs();
+</script>
