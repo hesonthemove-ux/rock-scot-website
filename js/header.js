@@ -13,6 +13,10 @@ styleEl.textContent = '#rs-header{position:fixed;top:0;left:0;right:0;height:64p
 +'#rs-header.scrolled{border-bottom-color:#ff5500;}'
 +'#rs-hc{max-width:1300px;margin:0 auto;padding:0 1.25rem;height:100%;display:flex;align-items:center;gap:1rem;}'
 +'#rs-logo{height:42px;width:auto;flex-shrink:0;display:block;}'
++'#rs-clock{display:flex;flex-direction:column;justify-content:center;margin-left:1rem;padding-left:1rem;border-left:1px solid var(--border, #1e1e1e);line-height:1.2;min-width:0;}'
++'#rs-clock-time{font-family:"Barlow Condensed",sans-serif;font-size:.95rem;font-weight:700;color:#f2f2f2;letter-spacing:.06em;white-space:nowrap;}'
++'#rs-clock-line{font-family:"Barlow Condensed",sans-serif;font-size:.65rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#ff5500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;}'
++'@media(max-width:768px){#rs-clock{display:none;}}'
 +'#rs-nav{display:flex;align-items:center;gap:.2rem;margin-left:auto;}'
 +'#rs-nav a{font-size:.88rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(242,242,242,.6);padding:.4rem .65rem;border-radius:3px;text-decoration:none;white-space:nowrap;transition:color .15s,background .15s;}'
 +'#rs-nav a:hover,#rs-nav a.rs-active{color:#f2f2f2;background:rgba(255,255,255,.08);}'
@@ -66,6 +70,7 @@ function injectHeader() {
     '<header id="rs-header"><div id="rs-hc">'
     +'<a href="/rock/index.html" style="line-height:0;flex-shrink:0;">'
     +'<img id="rs-logo" src="/rock/assets/images/logo.png" alt="ROCK.SCOT"></a>'
+    +'<div id="rs-clock"><div id="rs-clock-time"></div><div id="rs-clock-line"></div></div>'
     +'<nav id="rs-nav">'
     +'<a href="/rock/index.html#genres" id="rs-n-genres">Genres</a>'
     +'<a href="/rock/wire.html" id="rs-n-wire">The Wire</a>'
@@ -292,3 +297,28 @@ if(document.readyState==='loading'){
 }
 
 } /* end guard */
+/* ── CLOCK + ROCK TAGLINE ── */
+(function rsClockInit(){
+  var lines = ["It's {time} — Scotland's rock station is live.", "It's {time}. Turn it up.", "It's {time}. Rock never sleeps.", "It's {time}. The riff starts now.", "It's {time}. Somewhere in Scotland, someone's headbanging.", "It's {time}. No pop. No compromise.", "It's {time}. ROCK.SCOT is on air.", "It's {time}. The amp's at eleven.", "It's {time}. This is Scotland's rock station.", "It's {time}. Three chords and the truth."];
+  function tick(){
+    var el = document.getElementById('rs-clock-time');
+    var ll = document.getElementById('rs-clock-line');
+    if(!el) return;
+    var now = new Date();
+    var h = now.getHours(), m = now.getMinutes();
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    var timeStr = h + ':' + (m < 10 ? '0' + m : m) + ' ' + ampm;
+    el.textContent = timeStr;
+    if(ll){
+      var idx = Math.floor(now.getMinutes() / 6) % lines.length;
+      ll.textContent = lines[idx].replace('{time}', timeStr);
+    }
+  }
+  tick();
+  setInterval(tick, 10000);
+  // Re-init after DOM ready in case header injected before body
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', tick);
+  }
+})();

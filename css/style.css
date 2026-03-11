@@ -206,6 +206,16 @@ section { padding: 5.5rem 1.5rem; }
   background: var(--panel); padding: 2.5rem 1.5rem; text-align: center;
   transition: background 0.3s, transform 0.3s; position: relative; overflow: hidden;
 }
+.genre-bg-art {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.genre-bg-art svg { width: 100%; height: 100%; color: var(--white); }
+.genre-card.rock   .genre-bg-art svg { color: var(--orange); }
+.genre-card.metal  .genre-bg-art svg { color: #aaaaaa; }
+.genre-card.punk   .genre-bg-art svg { color: var(--orange); }
+.genre-card.alt    .genre-bg-art svg { color: #6699cc; }
+.genre-name, .genre-desc { position: relative; z-index: 1; }
 .genre-card::before {
   content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
   transform: scaleX(0); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); transform-origin: left;
@@ -224,9 +234,7 @@ section { padding: 5.5rem 1.5rem; }
 .genre-card.alt::after    { background: radial-gradient(ellipse at 50% 100%, rgba(255,215,0,0.08) 0%, transparent 70%); }
 .genre-card:hover { background: #1e1e1e; transform: translateY(-4px); }
 .genre-card:hover::before, .genre-card:hover::after { transform: scaleX(1); opacity: 1; }
-.genre-icon { font-size: 2.5rem; margin-bottom: 1rem; display: block; transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1); }
-.genre-card:hover .genre-icon { transform: scale(1.2) rotate(-6deg); }
-.genre-name { font-family: var(--font-display); font-size: 1.7rem; letter-spacing: 0.05em; margin-bottom: 0.4rem; transition: letter-spacing 0.3s; }
+.genre-card:hover .genre-name { font-family: var(--font-display); font-size: 1.7rem; letter-spacing: 0.05em; margin-bottom: 0.4rem; transition: letter-spacing 0.3s; }
 .genre-card:hover .genre-name { letter-spacing: 0.08em; }
 .genre-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.55; font-weight: 300; }
 .genre-card.rock  .genre-name { color: var(--orange); }
@@ -702,3 +710,12 @@ footer { background: var(--dark); border-top: 2px solid var(--border); padding: 
   transition: all 0.15s; display: flex; align-items: center; justify-content: center;
 }
 .wire-refresh-btn-sm:hover { border-color: var(--orange); color: var(--orange); }
+
+/* ── TEAM FEATURED GRID ── */
+.team-featured-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center;
+}
+@media (max-width: 768px) {
+  .team-featured-grid { grid-template-columns: 1fr; }
+  .team-featured-grid > div:last-child { display: none; } /* hide photo on mobile */
+}
