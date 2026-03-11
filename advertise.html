@@ -586,6 +586,26 @@
   .adv-hero-stat-div { display: none; }
 }
 </style>
+
+<style>
+.btn-calculate {
+  background: var(--orange);
+  color: #000;
+  font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.85rem 2.5rem;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 1rem;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-calculate:hover { background: #ff7722; transform: translateY(-1px); }
+</style>
 </head>
 <body>
     
@@ -756,7 +776,7 @@
                         <textarea id="notes" rows="4" placeholder="Tell us about your business and campaign goals..."></textarea>
                     </div>
                     
-                    <button type="button" class="btn-calculate" onclick="calculateQuote()">Calculate Quote</button>
+                    <button type="button" class="btn-calculate" onclick="if(typeof calculateQuote==='function') calculateQuote(); else console.warn('calculateQuote not ready')">Calculate Quote</button>
                     
                     <div class="quote-result" id="quote-result">
                         <h3 style="font-family: 'Bebas Neue'; font-size: 2rem; margin-bottom: 1rem; letter-spacing: 0.1em;">Your Quote</h3>
@@ -1073,19 +1093,18 @@
 
     // ── PACKAGE SHORTCUT BUTTONS ──────────────────────────────────
     window.selectPackage = function(pkgKey) {
-        if (!PACKAGES[pkgKey]) return;
-
-        const packageSelect = document.getElementById('package');
-        if (!packageSelect) return;
-        packageSelect.value = pkgKey;
-        onPackageChange();
-        calculateQuote();
-
-        /* Scroll to the calculator — try wrapper first, fallback to form */
+        /* Scroll immediately — don't wait for PACKAGES */
         const target = document.querySelector('.quote-calculator') || document.getElementById('quote-form');
         if (target) {
             const offset = target.getBoundingClientRect().top + window.scrollY - 110;
             window.scrollTo({ top: offset, behavior: 'smooth' });
+        }
+        /* Set the package select value directly */
+        const packageSelect = document.getElementById('package');
+        if (packageSelect) {
+            packageSelect.value = pkgKey;
+            if (typeof onPackageChange === 'function') onPackageChange();
+            if (typeof calculateQuote === 'function') calculateQuote();
         }
     };
 

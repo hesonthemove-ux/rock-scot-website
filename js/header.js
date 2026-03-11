@@ -15,7 +15,7 @@ styleEl.textContent = '#rs-header{position:fixed;top:0;left:0;right:0;height:64p
 +'#rs-logo{height:42px;width:auto;flex-shrink:0;display:block;}'
 +'#rs-clock{display:flex;flex-direction:column;justify-content:center;margin-left:1rem;padding-left:1rem;border-left:1px solid var(--border, #1e1e1e);line-height:1.2;min-width:0;}'
 +'#rs-clock-time{font-family:"Barlow Condensed",sans-serif;font-size:.95rem;font-weight:700;color:#f2f2f2;letter-spacing:.06em;white-space:nowrap;}'
-+'#rs-clock-line{font-family:"Barlow Condensed",sans-serif;font-size:.65rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#ff5500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;}'
++'#rs-clock-line{font-family:"Barlow Condensed",sans-serif;font-size:.65rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#ff5500;white-space:nowrap;overflow:visible;max-width:380px;}'
 +'@media(max-width:768px){#rs-clock{display:none;}}'
 +'#rs-nav{display:flex;align-items:center;gap:.2rem;margin-left:auto;}'
 +'#rs-nav a{font-size:.88rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(242,242,242,.6);padding:.4rem .65rem;border-radius:3px;text-decoration:none;white-space:nowrap;transition:color .15s,background .15s;}'
@@ -299,7 +299,8 @@ if(document.readyState==='loading'){
 } /* end guard */
 /* ── CLOCK + ROCK TAGLINE ── */
 (function rsClockInit(){
-  var lines = ["It's {time} — Scotland's rock station is live.", "It's {time}. Turn it up.", "It's {time}. Rock never sleeps.", "It's {time}. The riff starts now.", "It's {time}. Somewhere in Scotland, someone's headbanging.", "It's {time}. No pop. No compromise.", "It's {time}. ROCK.SCOT is on air.", "It's {time}. The amp's at eleven.", "It's {time}. This is Scotland's rock station.", "It's {time}. Three chords and the truth."];
+  var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var quotes = ['No pop. No compromise.','Three chords and the truth.','Rock never sleeps.','The amp is at eleven.','Scotland rocks. Always.','Turn it up. Way up.','No sellouts. Just rock.','The riff starts now.','Pure. Scottish. Rock.','Loud and proud, Scotland.'];
   function tick(){
     var el = document.getElementById('rs-clock-time');
     var ll = document.getElementById('rs-clock-line');
@@ -311,8 +312,9 @@ if(document.readyState==='loading'){
     var timeStr = h + ':' + (m < 10 ? '0' + m : m) + ' ' + ampm;
     el.textContent = timeStr;
     if(ll){
-      var idx = Math.floor(now.getMinutes() / 6) % lines.length;
-      ll.textContent = lines[idx].replace('{time}', timeStr);
+      var day = days[now.getDay()];
+      var idx = Math.floor(now.getMinutes() / 6) % quotes.length;
+      ll.textContent = day + ' — ' + quotes[idx];
     }
   }
   tick();
