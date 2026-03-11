@@ -322,3 +322,5 @@ if(document.readyState==='loading'){
     document.addEventListener('DOMContentLoaded', tick);
   }
 })();
+
+function toggleRadio(btn) { const p = document.getElementById('radio-player'); if(p.paused) { p.load(); p.play(); btn.textContent='STOP'; } else { p.pause(); p.src=''; p.load(); btn.textContent='LISTEN'; } }

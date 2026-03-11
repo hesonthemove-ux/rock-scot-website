@@ -722,3 +722,6 @@ footer { background: var(--dark); border-top: 2px solid var(--border); padding: 
   .team-featured-grid { grid-template-columns: 1fr; }
   .team-featured-grid > div:last-child { display: none; } /* hide photo on mobile */
 }
+
+.team-featured-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+@media (max-width:768px) { .team-featured-grid { grid-template-columns: 1fr; } }
