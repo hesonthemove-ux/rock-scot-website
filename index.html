@@ -151,41 +151,35 @@
 </section>
 
 <!-- TOM RUSSELL -->
-<section id="tom">
-  <div class="container">
-    <div class="tom-grid">
-      <div class="tom-image-wrap">
-        <img src="assets/images/studio-1.jpg" alt="Tom Russell" loading="lazy">
+<section id="team" style="padding:5rem 0; background:var(--dark);">
+  <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
+
+    <!-- eyebrow -->
+    <div style="font-family:var(--font-cond);font-size:0.72rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:var(--orange);margin-bottom:0.75rem;">SCOTLAND'S ROCK VOICES</div>
+    <h2 style="font-family:var(--font-display);font-size:clamp(2.5rem,7vw,5rem);line-height:0.9;color:var(--white);margin-bottom:3rem;">THE<br><span style="color:var(--orange);">TEAM</span></h2>
+
+    <!-- Tom Russell — featured / godfather -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center;background:var(--panel);border:1px solid var(--border);border-left:4px solid var(--orange);padding:2.5rem;margin-bottom:1px;">
+      <div>
+        <div style="font-family:var(--font-cond);font-size:0.7rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--orange);margin-bottom:0.5rem;">THE GODFATHER OF ROCK</div>
+        <div style="font-family:var(--font-display);font-size:clamp(2rem,5vw,3.5rem);line-height:0.9;color:var(--white);margin-bottom:1rem;">TOM<br>RUSSELL</div>
+        <p style="font-family:var(--font-body);font-size:0.92rem;font-weight:300;line-height:1.75;color:rgba(242,242,242,0.6);margin-bottom:1.25rem;">A broadcasting legend — a voice that's defined Scottish rock radio for over two decades. Radio Clyde's Friday Night Rock Show. 20+ years. The Godfather.<br><br>He doesn't just play the music. He lives it.</p>
+        <a href="/rock/dj.html?id=tom-russell" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.65rem 1.5rem;background:var(--orange);color:var(--white);font-family:var(--font-cond);font-size:0.78rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;">Full Profile →</a>
       </div>
-      <div class="tom-content">
-        <p class="section-tag">On Air</p>
-        <h2>TOM RUSSELL</h2>
-        <h3>The Voice Behind The Movement</h3>
-        <p>
-          <strong>Tom Russell</strong> is a broadcasting legend — a voice that's defined Scottish rock radio for over two decades. His knowledge runs deep, his passion deeper still.
-        </p>
-        <p>
-          From Real Radio to the airwaves of Scotland, Tom has introduced generations to the music that matters. Now he's at ROCK.SCOT, building something that puts rock first and respects its audience.
-        </p>
-        <p>
-          Catch Tom live on ROCK.SCOT — search us on your DAB+ radio or listen online.
-        </p>
-        <div class="tom-stat-row">
-          <div>
-            <div class="tom-stat-val">20+</div>
-            <div class="tom-stat-label">Years On Air</div>
-          </div>
-          <div>
-            <div class="tom-stat-val">24/7</div>
-            <div class="tom-stat-label">Live Broadcasting</div>
-          </div>
-          <div>
-            <div class="tom-stat-val">DAB+</div>
-            <div class="tom-stat-label">Digital Radio</div>
-          </div>
-        </div>
+      <div style="text-align:center;">
+        <img src="assets/images/studio-1.jpg" alt="Tom Russell" loading="lazy" style="width:100%;max-width:320px;aspect-ratio:3/4;object-fit:cover;object-position:top;border:1px solid var(--border);filter:grayscale(20%);">
       </div>
     </div>
+
+    <!-- Rest of the team grid — loaded from Supabase -->
+    <div style="font-family:var(--font-cond);font-size:0.7rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(242,242,242,0.3);padding:1.5rem 0 1rem;border-top:1px solid var(--border);margin-top:2rem;">ALSO ON ROCK.SCOT</div>
+    <div id="team-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1px;background:var(--border);">
+      <!-- Populated by JS -->
+    </div>
+    <div style="text-align:center;margin-top:2rem;">
+      <a href="/rock/djs.html" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 2rem;border:1px solid var(--border);color:rgba(242,242,242,0.5);font-family:var(--font-cond);font-size:0.78rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;transition:border-color 0.2s,color 0.2s;" onmouseover="this.style.borderColor='var(--orange)';this.style.color='var(--orange)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='rgba(242,242,242,0.5)'">Meet The Full Team →</a>
+    </div>
+
   </div>
 </section>
 
@@ -289,14 +283,14 @@
       <div class="advertise-card featured">
         <div class="advertise-card-label">Most Popular</div>
         <div class="advertise-card-name">Multi-Regional</div>
-        <div class="advertise-card-price">£995<span> +VAT</span></div>
+        <div class="advertise-card-price"><span id="idx-card-multi">£995</span><span> +VAT</span></div>
         <p class="advertise-card-desc">134 plays over 28 days across all broadcast areas. Maximum reach across Scotland's rock audience.</p>
         <a href="advertise.html" class="advertise-card-cta">Get Started →</a>
       </div>
       <div class="advertise-card">
         <div class="advertise-card-label">Premium</div>
         <div class="advertise-card-name">Top of Hour</div>
-        <div class="advertise-card-price">£2,495<span> +VAT</span></div>
+        <div class="advertise-card-price"><span id="idx-card-toh">£2,495</span><span> +VAT</span></div>
         <p class="advertise-card-desc">Premium positioning at the top of every hour. Maximum impact. Ultimate listener engagement.</p>
         <a href="advertise.html" class="advertise-card-cta">Get Started →</a>
       </div>
