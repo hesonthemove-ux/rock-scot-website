@@ -615,6 +615,7 @@ footer { background: var(--dark); border-top: 2px solid var(--border); padding: 
   .coverage-grid  { grid-template-columns: repeat(2, 1fr); }
   .advertise-grid { grid-template-columns: repeat(3, 1fr); }
   .tom-grid       { grid-template-columns: 280px 1fr; gap: 2.5rem; }
+  .story-grid     { grid-template-columns: 1fr 1fr; gap: 2rem; }
   .footer-grid    { grid-template-columns: 1fr 1fr; gap: 2rem; }
   .footer-brand   { grid-column: 1 / -1; }
 }
@@ -628,6 +629,8 @@ footer { background: var(--dark); border-top: 2px solid var(--border); padding: 
   .schedule-row   { grid-template-columns: 110px 1fr auto; gap: 1rem; }
   .schedule-dj    { display: none; }
   .tom-grid       { grid-template-columns: 1fr; }
+  .story-grid     { grid-template-columns: 1fr; }
+  .story-image-block { display: none; }
   .tom-image-wrap { max-width: 300px; }
   .tom-image-wrap img { aspect-ratio: 3/2; }
   .footer-grid    { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
