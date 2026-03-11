@@ -611,6 +611,11 @@ document.addEventListener('click',function(e){if(e.target&&e.target.id==='hw-mod
 document.addEventListener('keydown',function(e){if(e.key==='Escape')hwCloseModal();});
 </script>
 <script>
+/* ROCK.SCOT — Live Rates + Team Grid */
+var SUPA_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
+
+/* Rates */
 fetch('/rock/rates-proxy.php')
   .then(function(r){ return r.json(); })
   .then(function(rows){
@@ -619,18 +624,42 @@ fetch('/rock/rates-proxy.php')
     function fmt(p){ return '£' + Math.round(p).toLocaleString('en-GB'); }
     function set(id, val){ var el = document.getElementById(id); if(el) el.textContent = val; }
     set('idx-card-reg',          fmt(r.single_inverclyde  || 495));
+    set('idx-card-multi',        fmt(r.multi_regional     || 1249));
+    set('idx-card-toh',          fmt(r.top_of_hour        || 2499));
     set('idx-reg-aeo',           fmt(r.single_inverclyde  || 495));
-    set('idx-bolt-aeo',          fmt(r.production_bolt_on || 150));
+    set('idx-bolt-aeo',          fmt(r.production_bolt_on || 350));
     set('idx-faq-reg',           fmt(r.single_inverclyde  || 495));
-    set('idx-faq-multi',         fmt(r.multi_regional     || 995));
-    set('idx-faq-toh',           fmt(r.top_of_hour        || 2495));
-    set('idx-faq-bolt',          fmt(r.production_bolt_on || 150));
+    set('idx-faq-multi',         fmt(r.multi_regional     || 1249));
+    set('idx-faq-toh',           fmt(r.top_of_hour        || 2499));
+    set('idx-faq-bolt',          fmt(r.production_bolt_on || 350));
     set('footer-price-from',     fmt(r.single_inverclyde  || 495));
     set('footer-price-regional', fmt(r.single_inverclyde  || 495));
-    set('footer-price-multi',    fmt(r.multi_regional     || 995));
-    set('footer-price-toh',      fmt(r.top_of_hour        || 2495));
+    set('footer-price-multi',    fmt(r.multi_regional     || 1249));
+    set('footer-price-toh',      fmt(r.top_of_hour        || 2499));
   })
-  .catch(function(e){ console.warn('Rates:', e); });
+  .catch(function(e){ console.warn('Rates fetch failed:', e); });
+
+/* Team Grid */
+fetch(SUPA_URL + '/rest/v1/djs?is_active=eq.true&order=display_order.asc,name.asc&select=name,slug,photo_url', {
+  headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY }
+})
+.then(function(r){ return r.json(); })
+.then(function(djs){
+  var grid = document.getElementById('team-grid');
+  if(!grid || !Array.isArray(djs)) return;
+  djs = djs.filter(function(d){ return d.slug !== 'tom-russell'; });
+  grid.innerHTML = djs.map(function(dj){
+    var photo = dj.photo_url
+      ? '<img src="' + dj.photo_url + '" alt="' + dj.name + '" style="width:100%;aspect-ratio:1;object-fit:cover;object-position:top;filter:grayscale(50%);transition:filter 0.3s;" onmouseover="this.style.filter='grayscale(0%)'" onmouseout="this.style.filter='grayscale(50%)'">'
+      : '<div style="width:100%;aspect-ratio:1;background:#111;display:flex;align-items:center;justify-content:center;color:rgba(242,242,242,0.15);font-size:0.7rem;font-family:Barlow Condensed,sans-serif;letter-spacing:0.1em;">NO PHOTO</div>';
+    return '<a href="/rock/dj.html?id=' + dj.slug + '" style="display:block;background:#0a0a0a;text-decoration:none;overflow:hidden;">'
+      + photo
+      + '<div style="padding:0.5rem 0.6rem;border-top:1px solid #1a1a1a;">'
+      + '<div style="font-family:Barlow Condensed,sans-serif;font-size:0.78rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#f2f2f2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + dj.name + '</div>'
+      + '</div></a>';
+  }).join('');
+})
+.catch(function(e){ console.warn('Team grid failed:', e); });
 </script>
 </body>
 </html>
