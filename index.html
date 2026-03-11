@@ -702,5 +702,26 @@ fetch(SUPA_URL + '/rest/v1/djs?is_active=eq.true&order=display_order.asc,name.as
 })
 .catch(function(e){ console.warn('Team grid failed:', e); });
 </script>
+
+<script>
+fetch('/rock/rates-proxy.php?t=' + Date.now())
+  .then(function(r){ return r.json(); })
+  .then(function(rows){
+    var r = {};
+    rows.forEach(function(row){ r[row.key] = parseFloat(row.value) || 0; });
+    function fmt(p){ return '£' + Math.round(p).toLocaleString('en-GB'); }
+    function set(id, val){ var el = document.getElementById(id); if(el) el.textContent = val; }
+    set('idx-card-reg',          fmt(r.single_inverclyde  || 495));
+    set('idx-card-multi',        fmt(r.multi_regional     || 1295));
+    set('idx-card-toh',          fmt(r.top_of_hour        || 2495));
+    set('idx-reg-aeo',           fmt(r.single_inverclyde  || 495));
+    set('idx-bolt-aeo',          fmt(r.production_bolt_on || 350));
+    set('idx-faq-reg',           fmt(r.single_inverclyde  || 495));
+    set('idx-faq-multi',         fmt(r.multi_regional     || 1295));
+    set('idx-faq-toh',           fmt(r.top_of_hour        || 2495));
+    set('idx-faq-bolt',          fmt(r.production_bolt_on || 350));
+  })
+  .catch(function(e){ console.warn('Rates fetch failed:', e); });
+</script>
 </body>
 </html>

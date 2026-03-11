@@ -1283,5 +1283,23 @@
     </script>
 
 <script src="js/header.js"></script>
+
+<script>
+fetch('rates-proxy.php?t=' + Date.now())
+  .then(function(r){ return r.json(); })
+  .then(function(rows){
+    var r = {};
+    rows.forEach(function(row){ r[row.key] = parseFloat(row.value) || 0; });
+    if(r.vat_rate)          window.VAT_RATE_LIVE        = r.vat_rate / 100;
+    if(r.rush_fee)          window.RUSH_PENCE_LIVE      = r.rush_fee * 100;
+    if(r.production_bolt_on) window.BOLT_ON_PENCE_LIVE  = r.production_bolt_on * 100;
+    document.querySelectorAll('[data-rate]').forEach(function(el){
+      var key = el.getAttribute('data-rate');
+      if(r[key]) el.textContent = '£' + Math.round(r[key]).toLocaleString('en-GB');
+    });
+    if(typeof calculateQuote === 'function') calculateQuote();
+  })
+  .catch(function(e){ console.warn('Rates fetch failed:', e); });
+</script>
 </body>
 </html>
