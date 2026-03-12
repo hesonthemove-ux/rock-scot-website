@@ -710,7 +710,7 @@
             showEl.textContent  = onAirSlot.show_name || 'Rock.Scot Continuous';
             timeEl.textContent  = fmtTime(onAirSlot.start_time) + ' – ' + fmtTime(onAirSlot.end_time);
             var dj = onAirSlot.dj_id ? djs[onAirSlot.dj_id] : null;
-            djEl.textContent = dj ? (dj.name || dj.dj_name || '') : (onAirSlot.dj_name || '');
+            djEl.textContent = dj ? (dj.name || '') : (onAirSlot.dj_name || '');
             if (dj && dj.photo_url) {
                 photoWrap.innerHTML = '<img class="on-air-dj-photo" src="' + dj.photo_url + '" alt="' + (dj.name||'DJ') + '">';
             } else {
@@ -775,7 +775,7 @@
 
             daySlots.forEach(function(slot, idx) {
                 var dj = slot.dj_id ? djs[slot.dj_id] : null;
-                var djName = dj ? (dj.name || dj.dj_name || slot.dj_name || '') : (slot.dj_name || '');
+                var djName = dj ? (dj.name || slot.dj_name || '') : (slot.dj_name || '');
                 var photoUrl = dj ? dj.photo_url : null;
                 var isContinuous = !slot.show_name || slot.show_name.toLowerCase().includes('continuous');
                 var isNow = isOnAirNow(slot);
@@ -863,7 +863,7 @@
         // Load schedule + DJs in parallel
         Promise.all([
             sbFetch('schedule_slots?select=*&order=day_of_week.asc,start_time.asc'),
-            sbFetch('djs?select=id,name,dj_name,photo_url,genres')
+            sbFetch('djs?select=id,name,photo_url,genres')
         ]).then(function(results) {
             var slots = results[0] || [];
             var djList = results[1] || [];
