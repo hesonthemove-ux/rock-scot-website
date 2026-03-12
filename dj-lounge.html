@@ -19,136 +19,137 @@
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
         body{background:var(--black);color:var(--white);font-family:'Barlow',sans-serif;min-height:100vh}
 
-        /* ── ACKNOWLEDGEMENT MODAL ── */
-        .ack-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem}
-        .ack-modal{background:var(--panel);border:1px solid rgba(255,85,0,0.3);border-radius:16px;max-width:560px;width:100%;position:relative;overflow:hidden;animation:fadeUp 0.5s ease forwards}
+        /* ACK MODAL */
+        .ack-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.96);z-index:9999;display:none;align-items:center;justify-content:center;padding:1.5rem}
+        .ack-overlay.show{display:flex}
+        .ack-modal{background:var(--panel);border:1px solid rgba(255,85,0,0.3);border-radius:16px;max-width:560px;width:100%;position:relative;overflow:hidden;animation:fadeUp 0.4s ease}
         .ack-modal::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--orange),var(--gold),var(--orange))}
         @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
         .ack-header{padding:2rem 2rem 1rem;text-align:center}
-        .ack-icon{font-size:2.5rem;margin-bottom:1rem}
+        .ack-icon{font-size:2.5rem;margin-bottom:0.75rem}
         .ack-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:0.08em;color:var(--orange)}
         .ack-subtitle{font-size:0.85rem;color:var(--muted);margin-top:0.25rem}
-        .ack-body{padding:0 2rem;max-height:45vh;overflow-y:auto}
-        .ack-body::-webkit-scrollbar{width:4px}.ack-body::-webkit-scrollbar-track{background:var(--dark)}.ack-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+        .ack-body{padding:0 2rem;max-height:42vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
         .ack-section{margin-bottom:1.25rem}
-        .ack-section-title{font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:900;letter-spacing:0.2em;text-transform:uppercase;color:var(--orange);margin-bottom:0.5rem}
+        .ack-section-title{font-family:'Barlow Condensed',sans-serif;font-size:0.68rem;font-weight:900;letter-spacing:0.2em;text-transform:uppercase;color:var(--orange);margin-bottom:0.4rem}
         .ack-section p{font-size:0.85rem;color:rgba(242,242,242,0.75);line-height:1.6}
         .ack-footer{padding:1.5rem 2rem 2rem}
-        .ack-check{display:flex;gap:0.75rem;align-items:flex-start;margin-bottom:1.25rem;cursor:pointer}
-        .ack-check input{margin-top:3px;accent-color:var(--orange);flex-shrink:0;width:16px;height:16px}
-        .ack-check span{font-size:0.85rem;color:var(--muted);line-height:1.5}
-        .ack-btn{width:100%;background:linear-gradient(135deg,var(--orange),var(--orange2));color:#000;border:none;border-radius:8px;padding:1rem;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:0.1em;cursor:pointer;opacity:0.4;pointer-events:none;transition:opacity 0.2s}
-        .ack-btn.ready{opacity:1;pointer-events:auto}
-        .ack-btn.ready:hover{opacity:0.9}
+        .ack-check-label{display:flex;gap:0.75rem;align-items:flex-start;cursor:pointer;margin-bottom:1.25rem}
+        .ack-check-label input{margin-top:3px;accent-color:var(--orange);flex-shrink:0;width:16px;height:16px}
+        .ack-check-label span{font-size:0.85rem;color:var(--muted);line-height:1.5}
+        .ack-btn{width:100%;background:linear-gradient(135deg,var(--orange),var(--orange2));color:#000;border:none;border-radius:8px;padding:1rem;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:0.1em;cursor:pointer;opacity:0.35;pointer-events:none;transition:opacity 0.2s}
+        .ack-btn.active{opacity:1;pointer-events:auto}
+        .ack-btn.active:hover{opacity:0.9}
 
-        /* ── HEADER ── */
-        .dj-header{background:var(--dark);border-bottom:1px solid var(--border);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-        .dj-header-left{display:flex;align-items:center;gap:1rem}
-        .dj-header-logo{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:0.1em;color:var(--orange)}
-        .dj-header-sep{color:var(--border2);font-size:1.2rem}
-        .dj-header-label{font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted)}
-        .dj-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--border2)}
-        .dj-avatar-placeholder{width:36px;height:36px;border-radius:50%;background:var(--panel);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:1rem}
-        .dj-header-right{display:flex;align-items:center;gap:1rem}
-        .dj-name-label{font-size:0.85rem;color:var(--muted)}
-        .btn-signout{font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;background:none;border:1px solid var(--border2);border-radius:4px;color:var(--muted);padding:0.35rem 0.75rem;cursor:pointer;transition:all 0.2s}
+        /* HEADER */
+        .dj-header{background:var(--dark);border-bottom:1px solid var(--border);padding:0.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+        .dj-logo{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:0.1em;color:var(--orange)}
+        .dj-label{font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted)}
+        .dj-header-right{display:flex;align-items:center;gap:0.75rem}
+        .dj-greeting{font-size:0.85rem;color:var(--muted)}
+        .dj-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid var(--border2)}
+        .btn-signout{font-family:'Barlow Condensed',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;background:none;border:1px solid var(--border2);border-radius:4px;color:var(--muted);padding:0.3rem 0.7rem;cursor:pointer;transition:all 0.2s}
         .btn-signout:hover{border-color:var(--red);color:var(--red)}
 
-        /* ── ON AIR BANNER ── */
-        .on-air-bar{background:linear-gradient(135deg,rgba(255,85,0,0.15),rgba(255,85,0,0.05));border-bottom:1px solid rgba(255,85,0,0.2);padding:1rem 1.5rem;display:flex;align-items:center;gap:1rem}
-        .on-air-bar.off-air{background:var(--dark);border-bottom-color:var(--border)}
-        .pulse-dot{width:10px;height:10px;border-radius:50%;background:var(--orange);flex-shrink:0;box-shadow:0 0 0 0 rgba(255,85,0,0.7);animation:pulse 2s infinite}
-        .pulse-dot.off{background:var(--muted);animation:none}
+        /* ON AIR BAR */
+        .on-air-bar{padding:0.9rem 1.5rem;display:flex;align-items:center;gap:0.9rem;border-bottom:1px solid var(--border);background:var(--dark);transition:background 0.4s}
+        .on-air-bar.live{background:linear-gradient(135deg,rgba(255,85,0,0.12),rgba(255,85,0,0.03));border-bottom-color:rgba(255,85,0,0.2)}
+        .pulse{width:10px;height:10px;border-radius:50%;background:var(--muted);flex-shrink:0}
+        .pulse.live{background:var(--orange);box-shadow:0 0 0 0 rgba(255,85,0,0.7);animation:pulse 2s infinite}
         @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,85,0,0.7)}70%{box-shadow:0 0 0 8px rgba(255,85,0,0)}100%{box-shadow:0 0 0 0 rgba(255,85,0,0)}}
-        .on-air-status{font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:900;letter-spacing:0.2em;text-transform:uppercase;color:var(--orange)}
-        .on-air-bar.off-air .on-air-status{color:var(--muted)}
-        .on-air-show{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:0.06em}
-        .on-air-time{font-size:0.82rem;color:var(--muted);margin-left:auto}
+        .on-air-label{font-family:'Barlow Condensed',sans-serif;font-size:0.68rem;font-weight:900;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted)}
+        .on-air-bar.live .on-air-label{color:var(--orange)}
+        .on-air-show{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:0.05em}
+        .on-air-time{font-size:0.8rem;color:var(--muted);margin-left:auto}
 
-        /* ── LAYOUT ── */
-        .lounge-body{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;padding:1.5rem;max-width:1200px;margin:0 auto}
-        @media(max-width:768px){.lounge-body{grid-template-columns:1fr}}
+        /* DEBUG BAR */
+        .debug-bar{background:#0a0500;border-bottom:1px solid #331100;padding:0.4rem 1.5rem;font-family:monospace;font-size:0.72rem;color:#ff6622;display:flex;gap:0.75rem;flex-wrap:wrap;min-height:28px}
+        .debug-bar span.ok{color:#00cc88}
+        .debug-bar span.err{color:#ff3333}
+
+        /* MYRIAD BUTTON */
+        .myriad-btn{display:flex;align-items:center;justify-content:center;gap:0.6rem;background:linear-gradient(135deg,rgba(255,85,0,0.15),rgba(255,85,0,0.05));border:1px solid rgba(255,85,0,0.3);border-radius:10px;padding:0.9rem 1.5rem;margin:1.25rem 1.5rem 0;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:0.1em;color:var(--orange);text-decoration:none;transition:all 0.2s;position:relative;overflow:hidden}
+        .myriad-btn::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--orange),transparent)}
+        .myriad-btn:hover{background:linear-gradient(135deg,rgba(255,85,0,0.22),rgba(255,85,0,0.08));border-color:rgba(255,85,0,0.5)}
+
+        /* GRID */
+        .lounge-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;padding:1.25rem 1.5rem 5rem;max-width:1200px;margin:0 auto}
+        @media(max-width:720px){.lounge-grid{grid-template-columns:1fr}}
         .col-full{grid-column:1/-1}
 
-        /* ── PANEL ── */
+        /* PANELS */
         .panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-        .panel-head{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.6rem}
-        .panel-icon{font-size:1rem}
-        .panel-title{font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;font-weight:900;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)}
-        .panel-body{padding:1.25rem}
+        .panel-head{padding:0.9rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.5rem}
+        .panel-icon{font-size:0.95rem}
+        .panel-title{font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;font-weight:900;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)}
+        .panel-body{padding:1.2rem}
+        .panel-empty{font-size:0.85rem;color:var(--dim);text-align:center;padding:1.5rem 0}
 
-        /* ── SPONSOR PANEL ── */
-        .sponsor-card{background:linear-gradient(135deg,rgba(255,215,0,0.08),rgba(255,215,0,0.03));border:1px solid rgba(255,215,0,0.2);border-radius:10px;padding:1.25rem;position:relative;overflow:hidden}
+        /* SPONSOR */
+        .sponsor-card{background:linear-gradient(135deg,rgba(255,215,0,0.07),rgba(255,215,0,0.02));border:1px solid rgba(255,215,0,0.2);border-radius:10px;padding:1.2rem;position:relative;overflow:hidden}
         .sponsor-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
-        .sponsor-label{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:900;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem}
-        .sponsor-name{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:0.06em;color:var(--white);margin-bottom:0.75rem}
-        .sponsor-script-label{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem}
-        .sponsor-script{font-size:0.9rem;line-height:1.6;color:var(--white);background:rgba(0,0,0,0.3);border-left:3px solid var(--gold);padding:0.75rem 1rem;border-radius:0 6px 6px 0;font-style:italic}
-        .sponsor-when{font-size:0.8rem;color:var(--gold);margin-top:0.75rem;opacity:0.8}
-        .no-sponsor{font-size:0.85rem;color:var(--dim);text-align:center;padding:1.5rem 0}
+        .sponsor-tag{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:900;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem}
+        .sponsor-name{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:0.05em;margin-bottom:0.75rem}
+        .sponsor-script{font-size:0.88rem;line-height:1.6;background:rgba(0,0,0,0.3);border-left:3px solid var(--gold);padding:0.7rem 1rem;border-radius:0 6px 6px 0;font-style:italic;color:var(--white)}
+        .sponsor-when{font-size:0.8rem;color:var(--gold);margin-top:0.6rem;opacity:0.85}
 
-        /* ── FAN MESSAGES ── */
-        .messages-list{display:flex;flex-direction:column;gap:0.6rem;max-height:320px;overflow-y:auto;margin-bottom:1rem}
-        .messages-list::-webkit-scrollbar{width:3px}.messages-list::-webkit-scrollbar-track{background:transparent}.messages-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-        .msg{background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:0.75rem 1rem;animation:msgIn 0.3s ease}
-        @keyframes msgIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+        /* MESSAGES */
+        .msg-list{display:flex;flex-direction:column;gap:0.5rem;max-height:300px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+        .msg{background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:0.7rem 0.9rem;animation:msgIn 0.3s ease}
+        @keyframes msgIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
         .msg-fan{border-left:3px solid var(--orange)}
-        .msg-admin{border-left:3px solid var(--blue);background:rgba(68,136,255,0.05)}
-        .msg-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem}
-        .msg-from{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--orange)}
+        .msg-admin{border-left:3px solid var(--blue);background:rgba(68,136,255,0.04)}
+        .msg-meta{display:flex;justify-content:space-between;margin-bottom:0.25rem}
+        .msg-from{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--orange)}
         .msg-admin .msg-from{color:var(--blue)}
-        .msg-time{font-size:0.72rem;color:var(--dim)}
-        .msg-text{font-size:0.88rem;line-height:1.5;color:rgba(242,242,242,0.85)}
-        .no-msgs{font-size:0.85rem;color:var(--dim);text-align:center;padding:2rem 0}
-        .msg-count-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--orange);color:#000;font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:900;width:20px;height:20px;border-radius:50%;margin-left:0.5rem;animation:badgePop 0.3s ease}
-        @keyframes badgePop{from{transform:scale(0)}to{transform:scale(1)}}
+        .msg-time{font-size:0.7rem;color:var(--dim)}
+        .msg-text{font-size:0.86rem;line-height:1.5;color:rgba(242,242,242,0.85)}
+        .msg-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--orange);color:#000;font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:900;min-width:18px;height:18px;border-radius:9px;padding:0 4px;margin-left:0.4rem}
 
-        /* ── NEWS FEED ── */
-        .news-item{padding:0.75rem 0;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s}
+        /* NEWS */
+        .news-item{padding:0.7rem 0;border-bottom:1px solid var(--border);cursor:pointer}
         .news-item:last-child{border-bottom:none}
-        .news-item:hover{background:rgba(255,255,255,0.02);margin:0 -1.25rem;padding-left:1.25rem;padding-right:1.25rem}
-        .news-source{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--orange);margin-bottom:0.2rem}
-        .news-title{font-size:0.88rem;line-height:1.4;color:var(--white)}
-        .news-date{font-size:0.75rem;color:var(--dim);margin-top:0.2rem}
+        .news-item:hover .news-title{color:var(--orange)}
+        .news-source{font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--orange);margin-bottom:0.15rem}
+        .news-title{font-size:0.86rem;line-height:1.4;color:var(--white);transition:color 0.15s}
+        .news-date{font-size:0.72rem;color:var(--dim);margin-top:0.15rem}
 
-        /* ── STREAM STATS ── */
+        /* STATS */
         .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem}
-        .stat-card{background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
-        .stat-val{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:0.05em;color:var(--white);line-height:1}
-        .stat-val.live{color:var(--green)}
-        .stat-label{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--dim);margin-top:0.25rem}
+        .stat-box{background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+        .stat-val{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:0.04em;line-height:1}
+        .stat-lbl{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--dim);margin-top:0.2rem}
 
-        /* ── HANDBOOK ── */
-        .handbook-ack-list{max-height:200px;overflow-y:auto}
-        .handbook-ack-list::-webkit-scrollbar{width:3px}.handbook-ack-list::-webkit-scrollbar-track{background:transparent}.handbook-ack-list::-webkit-scrollbar-thumb{background:var(--border2)}
-        .ack-row{display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid var(--border);font-size:0.82rem}
-        .ack-row:last-child{border-bottom:none}
-        .ack-ts{color:var(--dim);font-size:0.75rem}
-        .btn-handbook{display:inline-flex;align-items:center;gap:0.5rem;background:var(--dark);border:1px solid var(--border2);border-radius:8px;padding:0.75rem 1.25rem;color:var(--white);font-family:'Barlow Condensed',sans-serif;font-size:0.85rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;text-decoration:none;margin-bottom:1rem;width:100%;justify-content:center}
-        .btn-handbook:hover{border-color:var(--orange);color:var(--orange)}
-
-        /* ── SCHEDULE PREVIEW ── */
-        .sched-slot{display:flex;gap:1rem;align-items:flex-start;padding:0.75rem 0;border-bottom:1px solid var(--border)}
+        /* SCHEDULE SLOTS */
+        .sched-slot{display:flex;align-items:center;gap:0.9rem;padding:0.7rem 0;border-bottom:1px solid var(--border)}
         .sched-slot:last-child{border-bottom:none}
-        .sched-time{font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--orange);flex-shrink:0;width:80px}
-        .sched-show{font-size:0.88rem;color:var(--white)}
-        .sched-day{font-size:0.75rem;color:var(--dim)}
+        .sched-photo{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0}
+        .sched-photo-placeholder{width:36px;height:36px;border-radius:50%;background:var(--dark);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+        .sched-info{}
+        .sched-when{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--orange)}
+        .sched-show{font-size:0.9rem;font-weight:500;margin-top:0.1rem}
+        .sched-dj{font-size:0.78rem;color:var(--muted)}
 
-        /* ── SPINNER ── */
-        .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(242,242,242,0.1);border-top-color:var(--orange);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle}
-        @keyframes spin{to{transform:rotate(360deg)}}
-        .loading-text{font-size:0.82rem;color:var(--dim);display:flex;align-items:center;gap:0.5rem;padding:1rem 0}
+        /* HANDBOOK */
+        .handbook-btn{display:flex;align-items:center;justify-content:center;gap:0.5rem;background:var(--dark);border:1px solid var(--border2);border-radius:8px;padding:0.8rem 1.2rem;color:var(--white);font-family:'Barlow Condensed',sans-serif;font-size:0.85rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;text-decoration:none;width:100%;justify-content:center;margin-bottom:0.75rem}
+        .handbook-btn:hover{border-color:var(--orange);color:var(--orange)}
+        .handbook-note{font-size:0.8rem;color:var(--dim);line-height:1.5}
+
+        /* SPINNER */
+        .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(242,242,242,0.1);border-top-color:var(--orange);border-radius:50%;animation:sp 0.7s linear infinite;vertical-align:middle;margin-right:5px}
+        @keyframes sp{to{transform:rotate(360deg)}}
+        .loading{font-size:0.82rem;color:var(--dim);display:flex;align-items:center;gap:0.4rem;padding:0.75rem 0}
     </style>
 </head>
 <body>
 
-<!-- ACKNOWLEDGEMENT MODAL -->
-<div class="ack-overlay" id="ack-overlay" style="display:none">
+<!-- ACK MODAL -->
+<div class="ack-overlay" id="ack-overlay">
     <div class="ack-modal">
         <div class="ack-header">
             <div class="ack-icon">📋</div>
             <div class="ack-title">Broadcasting Responsibilities</div>
-            <div class="ack-subtitle">You must acknowledge these responsibilities before accessing the DJ Lounge</div>
+            <div class="ack-subtitle">Read and acknowledge before entering the lounge</div>
         </div>
         <div class="ack-body">
             <div class="ack-section">
@@ -169,11 +170,11 @@
             </div>
             <div class="ack-section">
                 <div class="ack-section-title">Accuracy & Fairness</div>
-                <p>News and factual content must be accurate and presented with due impartiality. Do not broadcast unverified information as fact. If you are unsure whether something is appropriate to broadcast, do not broadcast it — contact the station manager first.</p>
+                <p>News and factual content must be accurate and presented with due impartiality. Do not broadcast unverified information as fact. If you are unsure whether something is appropriate, do not broadcast it — contact the station manager first.</p>
             </div>
             <div class="ack-section">
                 <div class="ack-section-title">Emergency Protocols</div>
-                <p>In the event of a major national incident (death of a senior Royal, national emergency, etc.) cease normal programming immediately and contact the station manager. Do not speculate on air. Default to the station's emergency playlist until instructed otherwise. Emergency contact details are in the Broadcasting Handbook.</p>
+                <p>In the event of a major national incident (death of a senior Royal, national emergency, etc.) cease normal programming immediately and contact the station manager. Do not speculate on air. Default to the station emergency playlist until instructed otherwise.</p>
             </div>
             <div class="ack-section">
                 <div class="ack-section-title">Sponsorship & Advertising</div>
@@ -181,13 +182,13 @@
             </div>
             <div class="ack-section">
                 <div class="ack-section-title">Confidentiality</div>
-                <p>Station operational details, staff information, and commercial arrangements are confidential. Do not discuss internal station matters on air or on personal social media channels in a way that could bring ROCK.SCOT into disrepute.</p>
+                <p>Station operational details, staff information, and commercial arrangements are confidential. Do not discuss internal station matters on air or on personal social media in a way that could bring ROCK.SCOT into disrepute.</p>
             </div>
         </div>
         <div class="ack-footer">
-            <label class="ack-check" onclick="toggleAck()">
-                <input type="checkbox" id="ack-check">
-                <span>I have read and understood my broadcasting responsibilities. I acknowledge that I am aware of Ofcom's Broadcasting Code and ROCK.SCOT's standards, and I accept responsibility for compliance during my broadcasts.</span>
+            <label class="ack-check-label">
+                <input type="checkbox" id="ack-checkbox" onchange="document.getElementById('ack-btn').classList.toggle('active',this.checked)">
+                <span>I have read and understood my broadcasting responsibilities and accept responsibility for compliance during my broadcasts.</span>
             </label>
             <button class="ack-btn" id="ack-btn" onclick="submitAck()">I Acknowledge — Enter the Lounge</button>
         </div>
@@ -196,71 +197,69 @@
 
 <!-- HEADER -->
 <header class="dj-header">
-    <div class="dj-header-left">
-        <span class="dj-header-logo">ROCK.SCOT</span>
-        <span class="dj-header-sep">|</span>
-        <span class="dj-header-label">DJ Lounge</span>
+    <div style="display:flex;align-items:center;gap:0.75rem">
+        <span class="dj-logo">ROCK.SCOT</span>
+        <span style="color:var(--border2)">|</span>
+        <span class="dj-label">DJ Lounge</span>
     </div>
     <div class="dj-header-right">
-        <span class="dj-name-label" id="dj-greeting"></span>
-        <div id="dj-avatar-wrap"><div class="dj-avatar-placeholder">🎙</div></div>
+        <span class="dj-greeting" id="dj-greeting"></span>
+        <div id="dj-avatar-wrap" style="width:34px;height:34px;border-radius:50%;background:var(--panel);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:1rem">🎙</div>
         <button class="btn-signout" onclick="signOut()">Sign Out</button>
     </div>
 </header>
 
 <!-- ON AIR BAR -->
-<div class="on-air-bar off-air" id="on-air-bar">
-    <div class="pulse-dot off" id="on-air-dot"></div>
-    <div class="on-air-status" id="on-air-status">Checking schedule...</div>
+<div class="on-air-bar" id="on-air-bar">
+    <div class="pulse" id="on-air-pulse"></div>
+    <div class="on-air-label" id="on-air-label">Loading...</div>
     <div class="on-air-show" id="on-air-show"></div>
     <div class="on-air-time" id="on-air-time"></div>
 </div>
 
-<div id="debug-bar" style="background:#1a0a00;border-bottom:1px solid #ff5500;padding:0.5rem 1.5rem;font-family:monospace;font-size:0.75rem;color:#ff8844;display:flex;gap:1rem;flex-wrap:wrap"></div>
-<div id="debug-bar" style="background:#1a0a00;border-bottom:1px solid #ff5500;padding:0.5rem 1.5rem;font-family:monospace;font-size:0.75rem;color:#ff8844;display:flex;gap:1rem;flex-wrap:wrap"></div>
-<!-- MAIN LOUNGE -->
-<div class="lounge-body">
+<!-- DEBUG BAR -->
+<div class="debug-bar" id="debug-bar"></div>
 
-    <!-- SPONSOR SCRIPT -->
+<!-- MYRIAD BUTTON -->
+<a href="https://my.radio/station/9400/anywhere" target="_blank" class="myriad-btn">
+    ⚡ Launch Myriad
+</a>
+
+<!-- LOUNGE GRID -->
+<div class="lounge-grid">
+
+    <!-- SPONSOR — only shown when active -->
     <div class="panel col-full" id="panel-sponsor" style="display:none">
-        <div class="panel-head">
-            <span class="panel-icon">⭐</span>
-            <span class="panel-title">Sponsor / Programme Partner</span>
-        </div>
-        <div class="panel-body" id="sponsor-body">
-            <div class="no-sponsor">No active sponsor for this slot</div>
-        </div>
+        <div class="panel-head"><span class="panel-icon">⭐</span><span class="panel-title">Programme Sponsor</span></div>
+        <div class="panel-body" id="sponsor-body"></div>
     </div>
 
-    <!-- ADMIN MESSAGES + FAN MESSAGES -->
+    <!-- MESSAGES -->
     <div class="panel">
         <div class="panel-head">
             <span class="panel-icon">💬</span>
             <span class="panel-title">Messages</span>
-            <span id="msg-badge" style="display:none" class="msg-count-badge">0</span>
+            <span id="msg-badge" class="msg-badge" style="display:none">0</span>
         </div>
         <div class="panel-body">
-            <div class="messages-list" id="messages-list">
-                <div class="loading-text"><span class="spinner"></span> Loading messages...</div>
+            <div class="msg-list" id="msg-list">
+                <div class="loading"><span class="spin"></span>Loading...</div>
             </div>
         </div>
     </div>
 
     <!-- STREAM STATS -->
     <div class="panel">
-        <div class="panel-head">
-            <span class="panel-icon">📡</span>
-            <span class="panel-title">Stream Stats</span>
-        </div>
+        <div class="panel-head"><span class="panel-icon">📡</span><span class="panel-title">Stream</span></div>
         <div class="panel-body">
             <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-val live" id="stat-listeners">—</div>
-                    <div class="stat-label">Live Listeners</div>
+                <div class="stat-box">
+                    <div class="stat-val" id="stat-listeners" style="color:var(--white)">—</div>
+                    <div class="stat-lbl">Listeners</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-val" id="stat-status">—</div>
-                    <div class="stat-label">Stream Status</div>
+                <div class="stat-box">
+                    <div class="stat-val" id="stat-status" style="color:var(--muted)">—</div>
+                    <div class="stat-lbl">Status</div>
                 </div>
             </div>
         </div>
@@ -268,439 +267,356 @@
 
     <!-- MY SCHEDULE -->
     <div class="panel">
-        <div class="panel-head">
-            <span class="panel-icon">🗓</span>
-            <span class="panel-title">My Schedule This Week</span>
-        </div>
+        <div class="panel-head"><span class="panel-icon">🗓</span><span class="panel-title">My Schedule</span></div>
         <div class="panel-body" id="my-schedule">
-            <div class="loading-text"><span class="spinner"></span> Loading...</div>
+            <div class="loading"><span class="spin"></span>Loading...</div>
         </div>
     </div>
 
-    <!-- GENRE NEWS -->
+    <!-- UP NEXT -->
     <div class="panel">
-        <div class="panel-head">
-            <span class="panel-icon">📰</span>
-            <span class="panel-title">Music News — Your Genres</span>
-        </div>
-        <div class="panel-body" id="genre-news">
-            <div class="loading-text"><span class="spinner"></span> Fetching news...</div>
+        <div class="panel-head"><span class="panel-icon">⏭</span><span class="panel-title">Up Next</span></div>
+        <div class="panel-body" id="up-next">
+            <div class="loading"><span class="spin"></span>Loading...</div>
         </div>
     </div>
 
-    <!-- BROADCASTING HANDBOOK -->
+    <!-- NEWS -->
     <div class="panel col-full">
-        <div class="panel-head">
-            <span class="panel-icon">📖</span>
-            <span class="panel-title">Broadcasting Handbook</span>
+        <div class="panel-head"><span class="panel-icon">📰</span><span class="panel-title">Music News</span></div>
+        <div class="panel-body" id="genre-news">
+            <div class="loading"><span class="spin"></span>Loading...</div>
         </div>
+    </div>
+
+    <!-- HANDBOOK -->
+    <div class="panel col-full">
+        <div class="panel-head"><span class="panel-icon">📖</span><span class="panel-title">Broadcasting Handbook</span></div>
         <div class="panel-body">
-            <a class="btn-handbook" href="dj-handbook.html" target="_blank">📖 Open Broadcasting Handbook</a>
-            <div id="ack-history">
-                <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--dim);margin-bottom:0.5rem">Your Acknowledgement History</div>
-                <div class="handbook-ack-list" id="ack-list">
-                    <div class="loading-text"><span class="spinner"></span> Loading...</div>
-                </div>
-            </div>
+            <a class="handbook-btn" href="dj-handbook.html" target="_blank">📖 Open Broadcasting Handbook</a>
+            <p class="handbook-note">Contains Ofcom compliance rules, what to say, what not to say, and emergency protocols including national incidents.</p>
         </div>
     </div>
 
 </div>
 
 <script>
-// ── CONFIG ────────────────────────────────────────────────────────
-var SUPABASE_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
-var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
-var PUSHER_KEY    = '829db0071d7d65b2440f';
+var SB_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
+var PUSHER_KEY = '829db0071d7d65b2440f';
 var PUSHER_CLUSTER = 'eu';
-var STREAM_URL    = 'https://streaming.broadcastradio.com:8128/rockscot'; // update if needed
 
-var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+var sb = supabase.createClient(SB_URL, SB_KEY);
 var currentUser = null;
-var currentDJ   = null;
-var unreadCount = 0;
+var currentDJ = null;
+var unread = 0;
 
-// ── UTILS ─────────────────────────────────────────────────────────
-function fmtTime(t){var p=t.split(':');var h=parseInt(p[0]);var m=p[1];var ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+m+' '+ap;}
-function fmtTs(ts){return new Date(ts).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}
-function timeToMins(t){var p=t.split(':');return parseInt(p[0])*60+parseInt(p[1]);}
-function nowMins(){var n=new Date();return n.getHours()*60+n.getMinutes();}
+// ── HELPERS ───────────────────────────────────────────────
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtTime(t){ var p=t.split(':'); var h=parseInt(p[0]); var m=p[1]; var ap=h>=12?'PM':'AM'; h=h%12||12; return h+':'+m+' '+ap; }
+function fmtDate(ts){ return new Date(ts).toLocaleDateString('en-GB',{day:'numeric',month:'short'}); }
+function fmtTs(ts){ return new Date(ts).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}); }
+function toMins(t){ var p=t.split(':'); return parseInt(p[0])*60+parseInt(p[1]); }
+function nowMins(){ var n=new Date(); return n.getHours()*60+n.getMinutes(); }
 var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
-// ── ACK MODAL ─────────────────────────────────────────────────────
-function toggleAck(){
-    var checked=document.getElementById('ack-check').checked;
-    var btn=document.getElementById('ack-btn');
-    btn.classList.toggle('ready',checked);
+function dbg(msg, ok){
+    var bar = document.getElementById('debug-bar');
+    if(!bar) return;
+    var s = document.createElement('span');
+    s.textContent = msg;
+    if(ok===true) s.className='ok';
+    if(ok===false) s.className='err';
+    bar.appendChild(s);
 }
 
+// ── ACK ───────────────────────────────────────────────────
 async function submitAck(){
-    if(!document.getElementById('ack-check').checked) return;
-    var btn=document.getElementById('ack-btn');
-    btn.textContent='Saving...';
-    btn.style.pointerEvents='none';
-
-    await sb.from('handbook_acknowledgements').insert({
-        dj_id: currentUser.id,
-        dj_name: currentDJ ? currentDJ.name : currentUser.email,
-        acknowledged_at: new Date().toISOString(),
-        handbook_version: '1.0',
-        ip_address: null
-    });
-
-    document.getElementById('ack-overlay').style.display='none';
-}
-
-async function checkNeedsAck(){
-    // Check if they've acked in the last 30 days
-    var since=new Date(Date.now()-30*24*60*60*1000).toISOString();
-    var {data}=await sb.from('handbook_acknowledgements')
-        .select('id').eq('dj_id',currentUser.id)
-        .gte('acknowledged_at',since).limit(1);
-    if(!data||!data.length){
-        document.getElementById('ack-overlay').style.display='flex';
-    } else {
-        document.getElementById('ack-overlay').style.display='none';
-    }
-}
-
-async function loadAckHistory(){
-    var {data}=await sb.from('handbook_acknowledgements')
-        .select('acknowledged_at,handbook_version')
-        .eq('dj_id',currentUser.id)
-        .order('acknowledged_at',{ascending:false}).limit(10);
-    var el=document.getElementById('ack-list');
-    if(!data||!data.length){el.innerHTML='<div style="font-size:0.82rem;color:var(--dim);padding:0.5rem 0">No acknowledgements on record yet</div>';return;}
-    el.innerHTML=data.map(function(a){
-        return '<div class="ack-row"><span style="color:var(--green)">✓ Acknowledged v'+a.handbook_version+'</span><span class="ack-ts">'+fmtTs(a.acknowledged_at)+'</span></div>';
-    }).join('');
-}
-
-// ── ON AIR STATUS ─────────────────────────────────────────────────
-async function checkOnAir(){
-    if(!currentDJ) return;
-    var today=new Date().getDay();
-    var {data:slots}=await sb.from('schedule_slots')
-        .select('*').eq('dj_id',currentDJ.id).eq('day_of_week',today).eq('is_active',true);
-
-    var bar=document.getElementById('on-air-bar');
-    var dot=document.getElementById('on-air-dot');
-    var statusEl=document.getElementById('on-air-status');
-    var showEl=document.getElementById('on-air-show');
-    var timeEl=document.getElementById('on-air-time');
-
-    if(!slots||!slots.length){
-        bar.className='on-air-bar off-air';
-        dot.className='pulse-dot off';
-        statusEl.textContent='Not scheduled today';
-        showEl.textContent='';timeEl.textContent='';
-        return;
-    }
-
-    var now=nowMins();
-    var active=null;
-    var next=null;
-    slots.forEach(function(s){
-        var start=timeToMins(s.start_time);
-        var end=timeToMins(s.end_time);
-        if(now>=start&&now<end) active=s;
-        else if(now<start&&(!next||start<timeToMins(next.start_time))) next=s;
-    });
-
-    if(active){
-        bar.className='on-air-bar';
-        dot.className='pulse-dot';
-        statusEl.textContent='ON AIR NOW';
-        showEl.textContent=active.show_name||'';
-        timeEl.textContent=fmtTime(active.start_time)+' – '+fmtTime(active.end_time);
-        loadSponsor(active.id);
-    } else if(next){
-        bar.className='on-air-bar off-air';
-        dot.className='pulse-dot off';
-        statusEl.textContent='Up Next';
-        showEl.textContent=(next.show_name||'')+' at '+fmtTime(next.start_time);
-        timeEl.textContent='';
-    } else {
-        bar.className='on-air-bar off-air';
-        dot.className='pulse-dot off';
-        statusEl.textContent='No more shows today';
-        showEl.textContent='';timeEl.textContent='';
-    }
-}
-
-// ── SPONSOR SCRIPTS ───────────────────────────────────────────────
-async function loadSponsor(slotId){
-    var now=new Date().toISOString().split('T')[0];
-    var {data}=await sb.from('sponsor_scripts')
-        .select('*')
-        .eq('slot_id',slotId)
-        .eq('is_active',true)
-        .lte('start_date',now)
-        .gte('end_date',now)
-        .limit(1);
-
-    var panel=document.getElementById('panel-sponsor');
-    var body=document.getElementById('sponsor-body');
-
-    if(data&&data.length){
-        var s=data[0];
-        panel.style.display='block';
-        body.innerHTML=
-            '<div class="sponsor-card">'+
-            '<div class="sponsor-label">Programme Sponsor</div>'+
-            '<div class="sponsor-name">'+escH(s.sponsor_name)+'</div>'+
-            '<div class="sponsor-script-label">What to say</div>'+
-            '<div class="sponsor-script">'+escH(s.script_text)+'</div>'+
-            (s.when_to_read?'<div class="sponsor-when">⏰ '+escH(s.when_to_read)+'</div>':'')+
-            '</div>';
-    } else {
-        panel.style.display='none';
-    }
-}
-
-// ── MY SCHEDULE ───────────────────────────────────────────────────
-async function loadMySchedule(){
-    if(!currentDJ){document.getElementById('my-schedule').innerHTML='<div style="font-size:0.85rem;color:var(--dim)">No DJ profile linked to your account</div>';return;}
-    var {data}=await sb.from('schedule_slots').select('*').eq('dj_id',currentDJ.id).eq('is_active',true).order('day_of_week').order('start_time');
-    var el=document.getElementById('my-schedule');
-    if(!data||!data.length){el.innerHTML='<div style="font-size:0.85rem;color:var(--dim);text-align:center;padding:1rem">No scheduled shows found</div>';return;}
-    el.innerHTML=data.map(function(s){
-        return '<div class="sched-slot">'+
-            '<div class="sched-time">'+fmtTime(s.start_time)+'</div>'+
-            '<div><div class="sched-show">'+(s.show_name||'Untitled Show')+'</div>'+
-            '<div class="sched-day">'+DAYS[s.day_of_week]+' · '+fmtTime(s.start_time)+' – '+fmtTime(s.end_time)+'</div></div>'+
-            '</div>';
-    }).join('');
-}
-
-// ── GENRE NEWS ────────────────────────────────────────────────────
-async function loadGenreNews(){
-    var el=document.getElementById('genre-news');
-    var djGenres=[];
-    if(currentDJ&&currentDJ.genres){
-        djGenres=currentDJ.genres.split(',').map(function(g){return g.trim().toLowerCase();});
-    }
-    var {data,error}=await sb.from('wire_news')
-        .select('id,title,source_name,genre,url,created_at')
-        .order('created_at',{ascending:false}).limit(40);
-    if(error||!data||!data.length){
-        el.innerHTML='<div style="font-size:0.85rem;color:var(--dim);text-align:center;padding:1.5rem 0">No news items yet</div>';
-        return;
-    }
-    var filtered=data;
-    if(djGenres.length){
-        filtered=data.filter(function(item){
-            if(!item.genre) return true;
-            var ig=item.genre.toLowerCase();
-            return djGenres.some(function(g){return ig.includes(g)||g.includes(ig);});
+    var btn = document.getElementById('ack-btn');
+    btn.textContent = 'Saving...';
+    btn.style.pointerEvents = 'none';
+    try {
+        await sb.from('handbook_acknowledgements').insert({
+            dj_id: currentUser.id,
+            dj_name: currentDJ ? currentDJ.name : (currentUser.email||''),
+            acknowledged_at: new Date().toISOString(),
+            handbook_version: '1.0'
         });
-        if(!filtered.length) filtered=data;
+        dbg('ack saved', true);
+    } catch(e) {
+        dbg('ack save failed:'+e.message, false);
     }
-    el.innerHTML=filtered.slice(0,10).map(function(item){
-        var date=new Date(item.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-        var link=item.url||'#';
-        return '<div class="news-item"'+(link!=='#'?' onclick="window.open(''+escH(link)+'','_blank')"':'')+'>'+
-            '<div class="news-source">'+escH(item.source_name||'The Wire')+'</div>'+
-            '<div class="news-title">'+escH(item.title||'')+'</div>'+
-            '<div class="news-date">'+date+'</div></div>';
-    }).join('');
+    document.getElementById('ack-overlay').classList.remove('show');
+    document.body.style.overflow = '';
 }
 
-// ── STREAM STATS ──────────────────────────────────────────────────
-async function loadStreamStats(){
-    // Get stream status and listener count from site_settings
-    var {data:rows}=await sb.from('site_settings').select('key,value')
-        .in('key',['stream_status','stream_listeners','stream_url']);
-    var settings={};
-    if(rows) rows.forEach(function(r){settings[r.key]=r.value;});
+// ── ON AIR ────────────────────────────────────────────────
+async function loadOnAir(){
+    var today = new Date().getDay();
+    var now = nowMins();
+    var bar = document.getElementById('on-air-bar');
+    var label = document.getElementById('on-air-label');
+    var showEl = document.getElementById('on-air-show');
+    var timeEl = document.getElementById('on-air-time');
 
-    // Status
-    var status=settings['stream_status']||'live';
-    var isLive=status.toLowerCase()==='live'||status.toLowerCase()==='online';
-    document.getElementById('stat-status').textContent=isLive?'LIVE':'OFFLINE';
-    document.getElementById('stat-status').style.color=isLive?'var(--green)':'var(--red)';
-
-    // Listeners
-    var listeners=settings['stream_listeners']||'—';
-    document.getElementById('stat-listeners').textContent=listeners;
-}
-
-// ── MESSAGES (PUSHER) ─────────────────────────────────────────────
-function initPusher(){
-    if(!currentDJ) return;
-    var pusher=new Pusher(PUSHER_KEY,{cluster:PUSHER_CLUSTER});
-    var channelName='dj-'+currentDJ.id;
-    var channel=pusher.subscribe(channelName);
-
-    channel.bind('fan-message',function(data){
-        addMessage({
-            from: data.name||'Fan',
-            text: data.message,
-            time: new Date().toISOString(),
-            type: 'fan'
-        });
-        unreadCount++;
-        var badge=document.getElementById('msg-badge');
-        badge.style.display='inline-flex';
-        badge.textContent=unreadCount;
-    });
-
-    channel.bind('admin-message',function(data){
-        addMessage({
-            from: 'Station Admin',
-            text: data.message,
-            time: new Date().toISOString(),
-            type: 'admin'
-        });
-    });
-
-    // Also subscribe to station-wide channel
-    var stationChannel=pusher.subscribe('station-all');
-    stationChannel.bind('admin-message',function(data){
-        addMessage({from:'Station Admin (All DJs)',text:data.message,time:new Date().toISOString(),type:'admin'});
-    });
-}
-
-function addMessage(msg){
-    var list=document.getElementById('messages-list');
-    // Remove loading/empty state
-    var empty=list.querySelector('.loading-text,.no-msgs');
-    if(empty) empty.remove();
-
-    var div=document.createElement('div');
-    div.className='msg msg-'+msg.type;
-    div.innerHTML=
-        '<div class="msg-meta">'+
-        '<span class="msg-from">'+escH(msg.from)+'</span>'+
-        '<span class="msg-time">'+fmtTs(msg.time)+'</span>'+
-        '</div>'+
-        '<div class="msg-text">'+escH(msg.text)+'</div>';
-    list.insertBefore(div,list.firstChild);
-}
-
-async function loadRecentMessages(){
-    var list=document.getElementById('messages-list');
-    // Load last 20 messages from Supabase
-    var {data}=await sb.from('dj_messages')
-        .select('*')
-        .or('dj_id.eq.'+(currentDJ?currentDJ.id:'null')+',dj_id.is.null')
-        .order('created_at',{ascending:false}).limit(20);
-
-    if(!data||!data.length){
-        list.innerHTML='<div class="no-msgs">No messages yet — fan messages will appear here in real time</div>';
-        return;
-    }
-    list.innerHTML='';
-    data.reverse().forEach(function(m){
-        addMessage({from:m.sender_name||'Fan',text:m.message,time:m.created_at,type:m.message_type||'fan'});
-    });
-}
-
-// ── HELPERS ───────────────────────────────────────────────────────
-function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
-async function signOut(){
-    await sb.auth.signOut();
-    window.location.href='dj-login.html';
-}
-
-
-async function loadUpNext(){
-    var el=document.getElementById('up-next');
-    if(!el) return;
-    var today=new Date().getDay();
-    var now=nowMins();
-
-    // Get all of today's slots sorted by start time
-    var {data:todaySlots}=await sb.from('schedule_slots')
-        .select('*,djs(name,photo_url)')
-        .eq('day_of_week',today).eq('is_active',true)
+    // Get all today's slots (not just this DJ)
+    var { data: slots, error } = await sb.from('schedule_slots')
+        .select('*').eq('day_of_week', today).eq('is_active', true)
         .order('start_time');
 
-    // Get tomorrow's first slot too
-    var tomorrow=(today+1)%7;
-    var {data:tomorrowSlots}=await sb.from('schedule_slots')
-        .select('*,djs(name,photo_url)')
-        .eq('day_of_week',tomorrow).eq('is_active',true)
-        .order('start_time').limit(1);
+    if(error || !slots){ label.textContent='Schedule unavailable'; return; }
 
-    var upcoming=[];
-    if(todaySlots){
-        todaySlots.forEach(function(s){
-            if(timeToMins(s.start_time)>now) upcoming.push({slot:s,label:'Today'});
-        });
-    }
-    if(tomorrowSlots&&tomorrowSlots.length&&upcoming.length<2){
-        upcoming.push({slot:tomorrowSlots[0],label:'Tomorrow'});
-    }
+    var active = null;
+    var myNext = null;
+    slots.forEach(function(s){
+        var start = toMins(s.start_time);
+        var end = toMins(s.end_time);
+        var isOn = end > start ? (now >= start && now < end) : (now >= start || now < end);
+        if(isOn && !active) active = s;
+        if(currentDJ && s.dj_id === currentDJ.id && start > now && !myNext) myNext = s;
+    });
 
-    if(!upcoming.length){
-        el.innerHTML='<div style="font-size:0.85rem;color:var(--dim)">No more shows scheduled today</div>';
+    if(active && currentDJ && active.dj_id === currentDJ.id){
+        bar.className = 'on-air-bar live';
+        document.getElementById('on-air-pulse').className = 'pulse live';
+        label.textContent = 'ON AIR NOW';
+        showEl.textContent = active.show_name || '';
+        timeEl.textContent = fmtTime(active.start_time)+' – '+fmtTime(active.end_time);
+        loadSponsor(active.id);
+    } else if(active){
+        bar.className = 'on-air-bar';
+        label.textContent = 'Now on air:';
+        showEl.textContent = active.show_name || 'Rock.Scot Continuous';
+        timeEl.textContent = fmtTime(active.start_time)+' – '+fmtTime(active.end_time);
+    } else {
+        label.textContent = 'No scheduled show';
+        showEl.textContent = 'Rock.Scot Continuous';
+    }
+    dbg('on-air OK', true);
+}
+
+// ── SPONSOR ───────────────────────────────────────────────
+async function loadSponsor(slotId){
+    var today = new Date().toISOString().split('T')[0];
+    var { data } = await sb.from('sponsor_scripts')
+        .select('*').eq('slot_id', slotId).eq('is_active', true)
+        .lte('start_date', today).gte('end_date', today).limit(1);
+    if(!data || !data.length){ document.getElementById('panel-sponsor').style.display='none'; return; }
+    var s = data[0];
+    document.getElementById('panel-sponsor').style.display = 'block';
+    document.getElementById('sponsor-body').innerHTML =
+        '<div class="sponsor-card">'+
+        '<div class="sponsor-tag">Programme Sponsor</div>'+
+        '<div class="sponsor-name">'+esc(s.sponsor_name)+'</div>'+
+        '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:0.35rem">What to say</div>'+
+        '<div class="sponsor-script">'+esc(s.script_text)+'</div>'+
+        (s.when_to_read ? '<div class="sponsor-when">⏰ '+esc(s.when_to_read)+'</div>' : '')+
+        '</div>';
+}
+
+// ── MY SCHEDULE ───────────────────────────────────────────
+async function loadMySchedule(){
+    var el = document.getElementById('my-schedule');
+    if(!currentDJ){ el.innerHTML='<p class="panel-empty">No DJ profile linked</p>'; dbg('sched: no DJ'); return; }
+    var { data, error } = await sb.from('schedule_slots')
+        .select('*').eq('dj_id', currentDJ.id).eq('is_active', true)
+        .order('day_of_week').order('start_time');
+    if(error){ el.innerHTML='<p class="panel-empty">Error loading schedule</p>'; dbg('sched ERR:'+error.message, false); return; }
+    if(!data || !data.length){ el.innerHTML='<p class="panel-empty">No scheduled shows yet</p>'; dbg('sched: empty', true); return; }
+    el.innerHTML = data.map(function(s){
+        return '<div class="sched-slot">'+
+            '<div class="sched-photo-placeholder">🎙</div>'+
+            '<div class="sched-info">'+
+            '<div class="sched-when">'+DAYS[s.day_of_week]+' · '+fmtTime(s.start_time)+' – '+fmtTime(s.end_time)+'</div>'+
+            '<div class="sched-show">'+(s.show_name||'Untitled Show')+'</div>'+
+            '</div></div>';
+    }).join('');
+    dbg('sched OK', true);
+}
+
+// ── UP NEXT ───────────────────────────────────────────────
+async function loadUpNext(){
+    var el = document.getElementById('up-next');
+    var today = new Date().getDay();
+    var tomorrow = (today+1)%7;
+    var now = nowMins();
+
+    var { data: todaySlots } = await sb.from('schedule_slots')
+        .select('*, djs(name, photo_url)').eq('day_of_week', today)
+        .eq('is_active', true).order('start_time');
+    var { data: tmrSlots } = await sb.from('schedule_slots')
+        .select('*, djs(name, photo_url)').eq('day_of_week', tomorrow)
+        .eq('is_active', true).order('start_time').limit(2);
+
+    var upcoming = [];
+    if(todaySlots) todaySlots.forEach(function(s){ if(toMins(s.start_time)>now) upcoming.push({s:s,lbl:'Today'}); });
+    if(tmrSlots) tmrSlots.forEach(function(s){ if(upcoming.length<3) upcoming.push({s:s,lbl:'Tomorrow'}); });
+
+    if(!upcoming.length){ el.innerHTML='<p class="panel-empty">No more shows scheduled today</p>'; dbg('upnext: empty', true); return; }
+
+    el.innerHTML = upcoming.slice(0,3).map(function(item){
+        var s=item.s; var dj=s.djs;
+        var djName = dj ? dj.name : (s.dj_name||'Rock.Scot');
+        var photo = dj && dj.photo_url
+            ? '<img class="sched-photo" src="'+esc(dj.photo_url)+'" alt="'+esc(djName)+'">'
+            : '<div class="sched-photo-placeholder">🎙</div>';
+        return '<div class="sched-slot">'+photo+
+            '<div class="sched-info">'+
+            '<div class="sched-when">'+item.lbl+' · '+fmtTime(s.start_time)+'</div>'+
+            '<div class="sched-show">'+(s.show_name||'Rock.Scot Continuous')+'</div>'+
+            '<div class="sched-dj">'+esc(djName)+'</div>'+
+            '</div></div>';
+    }).join('');
+    dbg('upnext OK', true);
+}
+
+// ── NEWS FROM WIRE ────────────────────────────────────────
+async function loadNews(){
+    var el = document.getElementById('genre-news');
+    var { data, error } = await sb.from('wire_news')
+        .select('id,title,source_name,genre,created_at')
+        .order('created_at', {ascending:false}).limit(30);
+    if(error){ el.innerHTML='<p class="panel-empty">News unavailable</p>'; dbg('news ERR:'+error.message, false); return; }
+    if(!data||!data.length){ el.innerHTML='<p class="panel-empty">No news items yet</p>'; dbg('news: empty', true); return; }
+
+    // Filter by DJ genres if available
+    var djGenres = currentDJ && currentDJ.genres
+        ? currentDJ.genres.split(',').map(function(g){return g.trim().toLowerCase();})
+        : [];
+    var filtered = djGenres.length
+        ? data.filter(function(i){ if(!i.genre) return true; var g=i.genre.toLowerCase(); return djGenres.some(function(dg){return g.includes(dg)||dg.includes(g);}); })
+        : data;
+    if(!filtered.length) filtered = data;
+
+    el.innerHTML = filtered.slice(0,10).map(function(item){
+        var link = item.url||'#';
+        return '<div class="news-item"'+(link!=='#'?' onclick="window.open(\''+esc(link)+'\',\'_blank\')"':'')+'>'+
+            '<div class="news-source">'+esc(item.source_name||'The Wire')+'</div>'+
+            '<div class="news-title">'+esc(item.title||'')+'</div>'+
+            '<div class="news-date">'+fmtDate(item.created_at)+'</div>'+
+            '</div>';
+    }).join('');
+    dbg('news OK', true);
+}
+
+// ── STREAM STATS ──────────────────────────────────────────
+async function loadStreamStats(){
+    var { data: rows } = await sb.from('site_settings').select('key,value')
+        .in('key',['stream_status','stream_listeners']);
+    var s = {};
+    if(rows) rows.forEach(function(r){s[r.key]=r.value;});
+    var isLive = !s.stream_status || s.stream_status.toLowerCase()==='live';
+    var statusEl = document.getElementById('stat-status');
+    statusEl.textContent = isLive ? 'LIVE' : 'OFFLINE';
+    statusEl.style.color = isLive ? 'var(--green)' : 'var(--red)';
+    document.getElementById('stat-listeners').textContent = s.stream_listeners||'—';
+    dbg('stream OK', true);
+}
+
+// ── MESSAGES ──────────────────────────────────────────────
+async function loadMessages(){
+    var list = document.getElementById('msg-list');
+    var djId = currentDJ ? currentDJ.id : null;
+    var query = sb.from('dj_messages').select('*').order('created_at',{ascending:false}).limit(20);
+    if(djId) query = query.or('dj_id.eq.'+djId+',dj_id.is.null');
+    var { data, error } = await query;
+    if(error){ list.innerHTML='<p class="panel-empty">Messages unavailable</p>'; dbg('msgs ERR:'+error.message, false); return; }
+    if(!data||!data.length){ list.innerHTML='<p class="panel-empty">No messages yet — fan messages appear here in real time</p>'; dbg('msgs: empty', true); return; }
+    list.innerHTML = '';
+    data.reverse().forEach(function(m){ addMsg(m.sender_name||'Fan', m.message, m.created_at, m.message_type||'fan'); });
+    dbg('msgs OK', true);
+}
+
+function addMsg(from, text, ts, type){
+    var list = document.getElementById('msg-list');
+    var empty = list.querySelector('.panel-empty,.loading');
+    if(empty) empty.remove();
+    var div = document.createElement('div');
+    div.className = 'msg msg-'+(type||'fan');
+    div.innerHTML = '<div class="msg-meta"><span class="msg-from">'+esc(from)+'</span><span class="msg-time">'+fmtTs(ts)+'</span></div><div class="msg-text">'+esc(text)+'</div>';
+    list.insertBefore(div, list.firstChild);
+}
+
+// ── PUSHER ────────────────────────────────────────────────
+function initPusher(){
+    if(!currentDJ) return;
+    try {
+        var pusher = new Pusher(PUSHER_KEY, {cluster:PUSHER_CLUSTER});
+        var ch = pusher.subscribe('dj-'+currentDJ.id);
+        ch.bind('fan-message', function(d){ addMsg(d.name||'Fan', d.message, new Date().toISOString(), 'fan'); unread++; var b=document.getElementById('msg-badge'); b.style.display='inline-flex'; b.textContent=unread; });
+        ch.bind('admin-message', function(d){ addMsg('Admin', d.message, new Date().toISOString(), 'admin'); });
+        var all = pusher.subscribe('station-all');
+        all.bind('admin-message', function(d){ addMsg('Admin (All)', d.message, new Date().toISOString(), 'admin'); });
+        dbg('pusher OK', true);
+    } catch(e){ dbg('pusher ERR:'+e.message, false); }
+}
+
+// ── SIGN OUT ──────────────────────────────────────────────
+async function signOut(){ await sb.auth.signOut(); window.location.href='dj-login.html'; }
+
+// ── INIT ──────────────────────────────────────────────────
+async function init(){
+    dbg('init...');
+
+    var { data: { session } } = await sb.auth.getSession();
+    if(!session){ window.location.href='dj-login.html'; return; }
+    currentUser = session.user;
+    dbg('auth OK', true);
+
+    var { data: profile, error: profErr } = await sb.from('user_profiles')
+        .select('*').eq('id', currentUser.id).single();
+
+    if(profErr || !profile){
+        dbg('profile ERR:'+(profErr?profErr.message:'not found'), false);
+        window.location.href='dj-login.html';
         return;
     }
 
-    el.innerHTML=upcoming.slice(0,3).map(function(item){
-        var s=item.slot;
-        var dj=s.djs;
-        var djName=dj?dj.name:(s.dj_name||'Rock.Scot');
-        var photo=dj&&dj.photo_url?'<img style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0" src="'+dj.photo_url+'" alt="'+djName+'">':'<div style="width:36px;height:36px;border-radius:50%;background:var(--dark);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">🎙</div>';
-        return '<div style="display:flex;align-items:center;gap:1rem;padding:0.75rem 0;border-bottom:1px solid var(--border)">'+
-            photo+
-            '<div>'+
-            '<div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--orange)">'+item.label+' · '+fmtTime(s.start_time)+'</div>'+
-            '<div style="font-size:0.92rem;font-weight:500;margin-top:0.1rem">'+(s.show_name||'Rock.Scot Continuous')+'</div>'+
-            '<div style="font-size:0.8rem;color:var(--muted)">'+djName+'</div>'+
-            '</div></div>';
-    }).join('');
-}
+    var validRoles = ['dj','admin','super_admin','superadmin'];
+    if(!validRoles.includes(profile.role)){
+        dbg('role denied:'+profile.role, false);
+        await sb.auth.signOut();
+        window.location.href='dj-login.html';
+        return;
+    }
+    dbg('role:'+profile.role, true);
 
-// ── INIT ──────────────────────────────────────────────────────────
-async function init(){
-    var {data:{session},error}=await sb.auth.getSession();
-    if(!session){window.location.href='dj-login.html';return;}
-    currentUser=session.user;
-
-    // Load user profile + DJ record
-    var {data:profile}=await sb.from('user_profiles').select('*').eq('id',currentUser.id).single();
-    var validRoles=['dj','admin','super_admin','superadmin'];
-    if(!profile||!validRoles.includes(profile.role)){window.location.href='dj-login.html';return;}
-
-    // Look up DJ record — prioritise dj_id link, fallback to name match
-    var currentDJData=null;
+    // Load DJ record via dj_id first, then name fallback
     if(profile.dj_id){
-        var {data:djById}=await sb.from('djs').select('*').eq('id',profile.dj_id).single();
-        if(djById) currentDJData=djById;
+        var { data: djById } = await sb.from('djs').select('*').eq('id', profile.dj_id).single();
+        if(djById) currentDJ = djById;
     }
-    if(!currentDJData&&profile.first_name){
-        var {data:djByName}=await sb.from('djs').select('*').eq('is_active',true).ilike('name',profile.first_name+'%').limit(1);
-        if(djByName&&djByName.length) currentDJData=djByName[0];
+    if(!currentDJ && profile.first_name){
+        var { data: djByName } = await sb.from('djs').select('*').eq('is_active',true).ilike('name',profile.first_name+'%').limit(1);
+        if(djByName && djByName.length) currentDJ = djByName[0];
     }
-    currentDJ=currentDJData;
+    dbg(currentDJ ? 'DJ:'+currentDJ.name : 'DJ:unlinked', !!currentDJ);
 
-    // Update header
-    document.getElementById('dj-greeting').textContent=profile.first_name||session.user.email;
-    if(currentDJ&&currentDJ.photo_url){
-        document.getElementById('dj-avatar-wrap').innerHTML='<img class="dj-avatar" src="'+currentDJ.photo_url+'" alt="'+currentDJ.name+'">';
+    // Header
+    document.getElementById('dj-greeting').textContent = profile.first_name || currentUser.email;
+    if(currentDJ && currentDJ.photo_url){
+        document.getElementById('dj-avatar-wrap').innerHTML = '<img class="dj-avatar" src="'+esc(currentDJ.photo_url)+'" alt="'+esc(currentDJ.name)+'">';
     }
 
-    // Check acknowledgement
-    await checkNeedsAck();
+    // Show ack modal every login
+    document.getElementById('ack-overlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
 
-    // Load all panels
-    checkOnAir();
-    loadMySchedule();
-    loadRecentMessages();
-    loadGenreNews();
-    loadStreamStats();
+    // Load panels
+    await loadOnAir();
+    await loadMySchedule();
+    await loadUpNext();
+    await loadNews();
+    await loadStreamStats();
+    await loadMessages();
     initPusher();
 
     // Refresh on-air every minute
-    setInterval(checkOnAir,60000);
-    // Refresh stream stats every 2 mins
-    setInterval(loadStreamStats,120000);
+    setInterval(loadOnAir, 60000);
+    setInterval(loadStreamStats, 120000);
 }
 
-document.addEventListener('DOMContentLoaded',init);
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
