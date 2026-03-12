@@ -1529,5 +1529,54 @@ fetch('rates-proxy.php?t=' + Date.now())
   })
   .catch(function(e){ console.warn('Rates fetch failed:', e); });
 </script>
+
+<!-- TEMP DEBUG PANEL — REMOVE AFTER FIXING -->
+<div id="rs-debug" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#000;color:#0f0;font-family:monospace;font-size:11px;padding:8px;max-height:45vh;overflow-y:auto;border-bottom:2px solid #f50;"></div>
+<script>
+(function(){
+  var d = document.getElementById('rs-debug');
+  function log(msg, col){ var l = document.createElement('div'); l.style.color = col||'#0f0'; l.textContent = msg; d.appendChild(l); d.scrollTop=d.scrollHeight; }
+
+  // 1. Check key DOM elements exist
+  ['package','start-date','campaign-length','bolt-on','quote-result','quote-total','quote-breakdown','submit-btn'].forEach(function(id){
+    var el = document.getElementById(id);
+    log((el ? '✅' : '❌') + ' #' + id + (el ? ' found' : ' MISSING'), el ? '#0f0' : '#f44');
+  });
+
+  // 2. Check window functions
+  ['selectPackage','calculateQuote','onPackageChange'].forEach(function(fn){
+    log((typeof window[fn]==='function' ? '✅' : '❌') + ' window.' + fn + ' = ' + typeof window[fn], typeof window[fn]==='function' ? '#0f0' : '#f44');
+  });
+
+  // 3. Check PACKAGES
+  setTimeout(function(){
+    log('── After 500ms ──', '#ff0');
+    var P = window.PACKAGES;
+    if(!P){ log('❌ window.PACKAGES is undefined', '#f44'); }
+    else {
+      ['regional','multi-regional','top-of-hour'].forEach(function(k){
+        log((P[k] ? '✅' : '❌') + ' PACKAGES["'+k+'"] pricePence=' + (P[k]?P[k].pricePence:'MISSING'), P[k]?'#0f0':'#f44');
+      });
+    }
+    // 4. Try calling selectPackage and catch error
+    try {
+      log('▶ Calling selectPackage("regional")...', '#ff0');
+      window.selectPackage('regional');
+      log('✅ selectPackage ran without throwing', '#0f0');
+    } catch(e) {
+      log('❌ selectPackage threw: ' + e.message, '#f44');
+    }
+    // 5. Check calculateQuote
+    try {
+      log('▶ Calling calculateQuote()...', '#ff0');
+      window.calculateQuote();
+      log('✅ calculateQuote ran without throwing', '#0f0');
+    } catch(e) {
+      log('❌ calculateQuote threw: ' + e.message, '#f44');
+    }
+  }, 500);
+})();
+</script>
+<!-- END DEBUG PANEL -->
 </body>
 </html>
