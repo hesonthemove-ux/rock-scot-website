@@ -1039,7 +1039,7 @@
     };
 
     // ── PACKAGES ─────────────────────────────────────────────────
-    const PACKAGES = {
+    window.PACKAGES = {
         'regional': {
             name:        'Regional',
             productId:   'regional',
@@ -1053,7 +1053,7 @@
         'multi-regional': {
             name:        'Multi-Regional',
             productId:   'multi_regional',
-            pricePence:  99500,
+            pricePence:  129500,
             muxType:     'multi',
             muxWeight:   3,
             plays:       BC.playsStandard,
@@ -1063,7 +1063,7 @@
         'top-of-hour': {
             name:        'Top of Hour',
             productId:   'top_of_hour',
-            pricePence:  250000,
+            pricePence:  249500,
             muxType:     'toh',
             muxWeight:   3,
             plays:       BC.playsTOH,
@@ -1093,7 +1093,7 @@
 
     // ── PACKAGE SHORTCUT BUTTONS ──────────────────────────────────
     window.selectPackage = function(pkgKey) {
-        /* Scroll immediately — don't wait for PACKAGES */
+        /* Use window.PACKAGES so it's accessible from onclick */
         const target = document.querySelector('.quote-calculator') || document.getElementById('quote-form');
         if (target) {
             const offset = target.getBoundingClientRect().top + window.scrollY - 110;
@@ -1103,8 +1103,11 @@
         const packageSelect = document.getElementById('package');
         if (packageSelect) {
             packageSelect.value = pkgKey;
-            if (typeof onPackageChange === 'function') onPackageChange();
-            if (typeof calculateQuote === 'function') calculateQuote();
+            // Give DOM a tick then fire
+            setTimeout(function() {
+                if (typeof window.onPackageChange === 'function') window.onPackageChange();
+                if (typeof window.calculateQuote === 'function') window.calculateQuote();
+            }, 50);
         }
     };
 
