@@ -502,7 +502,7 @@ async function loadNews(){
 // ── STREAM STATS ──────────────────────────────────────────
 async function loadStreamStats(){
     var { data: rows } = await sb.from('site_settings').select('key,value')
-        .in('key',['stream_status','stream_listeners']);
+        .in('key',['stream_status','stream_listeners','myriad_url']);
     var s = {};
     if(rows) rows.forEach(function(r){s[r.key]=r.value;});
     var isLive = !s.stream_status || s.stream_status.toLowerCase()==='live';
@@ -510,6 +510,7 @@ async function loadStreamStats(){
     statusEl.textContent = isLive ? 'LIVE' : 'OFFLINE';
     statusEl.style.color = isLive ? 'var(--green)' : 'var(--red)';
     document.getElementById('stat-listeners').textContent = s.stream_listeners||'—';
+    if(s.myriad_url){ var mb=document.getElementById('myriad-btn'); if(mb) mb.href=s.myriad_url; }
     dbg('stream OK', true);
 }
 
