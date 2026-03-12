@@ -778,24 +778,28 @@
             var netPence = basePrice + boltPrice + rushPrice;
 
             var lead = {
-                first_name:       g('first-name'),
-                last_name:        g('last-name'),
-                company:          g('company-name'),
-                email:            g('email'),
-                phone:            g('phone'),
-                product_id:       pkgVal,
-                product_name:     pkgObj.name || pkgVal,
-                selected_mux:     muxVal,
-                mux_type:         muxType,
-                start_date:       startDateVal,
-                campaign_days:    parseInt(g('campaign-length')) || 28,
-                bolt_on_included: boltChecked,
-                is_rush:          isRushVal,
-                final_price_pence: netPence,
-                discount_code:    g('discount-code'),
-                notes:            g('notes'),
-                status:           'submitted',
-                submitted_at:     new Date().toISOString()
+                first_name:           g('first-name'),
+                last_name:            g('last-name'),
+                company:              g('company-name'),
+                email:                g('email'),
+                phone:                g('phone'),
+                product_id:           pkgVal,
+                product_name:         pkgObj.name || pkgVal,
+                selected_mux:         muxVal,
+                mux_type:             muxType,
+                mux_weight:           pkgVal === 'regional' ? 1 : 3,
+                start_date:           startDateVal,
+                campaign_length_days: parseInt(g('campaign-length')) || 28,
+                bolt_on_included:     boltChecked,
+                bolt_on_cost_pence:   boltPrice,
+                is_rush:              isRushVal,
+                product_net_pence:    basePrice,
+                final_price_pence:    netPence,
+                discount_code:        g('discount-code'),
+                message:              g('notes'),
+                submitted_via:        'website',
+                status:               'submitted',
+                submitted_at:         new Date().toISOString()
             };
             var subBtn=document.getElementById('submit-btn');
             if(subBtn){subBtn.disabled=true;subBtn.textContent='Submitting...';}
