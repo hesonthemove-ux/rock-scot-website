@@ -663,14 +663,17 @@ async function init(){
     var validRoles=['dj','admin','super_admin','superadmin'];
     if(!profile||!validRoles.includes(profile.role)){window.location.href='dj-login.html';return;}
 
-    // Try to find matching DJ record by email
-    var {data:djRecord}=await sb.from('djs').select('*').eq('is_active',true).ilike('name',profile.first_name+'%').limit(1);
-    // Fallback: try matching by a dj_user_id column if it exists
-    if(!djRecord||!djRecord.length){
-        var {data:djById}=await sb.from('djs').select('*').eq('id',profile.dj_id||'none').limit(1);
-        if(djById&&djById.length) djRecord=djById;
+    // Look up DJ record — prioritise dj_id link, fallback to name match
+    var currentDJData=null;
+    if(profile.dj_id){
+        var {data:djById}=await sb.from('djs').select('*').eq('id',profile.dj_id).single();
+        if(djById) currentDJData=djById;
     }
-    currentDJ=djRecord&&djRecord.length?djRecord[0]:null;
+    if(!currentDJData&&profile.first_name){
+        var {data:djByName}=await sb.from('djs').select('*').eq('is_active',true).ilike('name',profile.first_name+'%').limit(1);
+        if(djByName&&djByName.length) currentDJData=djByName[0];
+    }
+    currentDJ=currentDJData;
 
     // Update header
     document.getElementById('dj-greeting').textContent=profile.first_name||session.user.email;
