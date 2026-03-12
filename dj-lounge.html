@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJ Lounge — ROCK.SCOT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <style>
+        :root {
+            --black:#060606; --dark:#0e0e0e; --panel:#161616; --panel2:#1a1a1a;
+            --border:#1e1e1e; --border2:#2a2a2a;
+            --orange:#ff5500; --orange2:#ff7722; --gold:#ffd700;
+            --green:#00cc88; --red:#dd1111; --blue:#4488ff;
+            --white:#f2f2f2; --muted:rgba(242,242,242,0.5); --dim:rgba(242,242,242,0.25);
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        body{background:var(--black);color:var(--white);font-family:'Barlow',sans-serif;min-height:100vh}
+
+        /* ── ACKNOWLEDGEMENT MODAL ── */
+        .ack-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+        .ack-modal{background:var(--panel);border:1px solid rgba(255,85,0,0.3);border-radius:16px;max-width:560px;width:100%;position:relative;overflow:hidden;animation:fadeUp 0.5s ease forwards}
+        .ack-modal::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--orange),var(--gold),var(--orange))}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        .ack-header{padding:2rem 2rem 1rem;text-align:center}
+        .ack-icon{font-size:2.5rem;margin-bottom:1rem}
+        .ack-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:0.08em;color:var(--orange)}
+        .ack-subtitle{font-size:0.85rem;color:var(--muted);margin-top:0.25rem}
+        .ack-body{padding:0 2rem;max-height:45vh;overflow-y:auto}
+        .ack-body::-webkit-scrollbar{width:4px}.ack-body::-webkit-scrollbar-track{background:var(--dark)}.ack-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+        .ack-section{margin-bottom:1.25rem}
+        .ack-section-title{font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:900;letter-spacing:0.2em;text-transform:uppercase;color:var(--orange);margin-bottom:0.5rem}
+        .ack-section p{font-size:0.85rem;color:rgba(242,242,242,0.75);line-height:1.6}
+        .ack-footer{padding:1.5rem 2rem 2rem}
+        .ack-check{display:flex;gap:0.75rem;align-items:flex-start;margin-bottom:1.25rem;cursor:pointer}
+        .ack-check input{margin-top:3px;accent-color:var(--orange);flex-shrink:0;width:16px;height:16px}
+        .ack-check span{font-size:0.85rem;color:var(--muted);line-height:1.5}
+        .ack-btn{width:100%;background:linear-gradient(135deg,var(--orange),var(--orange2));color:#000;border:none;border-radius:8px;padding:1rem;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:0.1em;cursor:pointer;opacity:0.4;pointer-events:none;transition:opacity 0.2s}
+        .ack-btn.ready{opacity:1;pointer-events:auto}
+        .ack-btn.ready:hover{opacity:0.9}
+
+        /* ── HEADER ── */
+        .dj-header{background:var(--dark);border-bottom:1px solid var(--border);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+        .dj-header-left{display:flex;align-items:center;gap:1rem}
+        .dj-header-logo{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:0.1em;color:var(--orange)}
+        .dj-header-sep{color:var(--border2);font-size:1.2rem}
+        .dj-header-label{font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted)}
+        .dj-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--border2)}
+        .dj-avatar-placeholder{width:36px;height:36px;border-radius:50%;background:var(--panel);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:1rem}
+        .dj-header-right{display:flex;align-items:center;gap:1rem}
+        .dj-name-label{font-size:0.85rem;color:var(--muted)}
+        .btn-signout{font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;background:none;border:1px solid var(--border2);border-radius:4px;color:var(--muted);padding:0.35rem 0.75rem;cursor:pointer;transition:all 0.2s}
+        .btn-signout:hover{border-color:var(--red);color:var(--red)}
+
+        /* ── ON AIR BANNER ── */
+        .on-air-bar{background:linear-gradient(135deg,rgba(255,85,0,0.15),rgba(255,85,0,0.05));border-bottom:1px solid rgba(255,85,0,0.2);padding:1rem 1.5rem;display:flex;align-items:center;gap:1rem}
+        .on-air-bar.off-air{background:var(--dark);border-bottom-color:var(--border)}
+        .pulse-dot{width:10px;height:10px;border-radius:50%;background:var(--orange);flex-shrink:0;box-shadow:0 0 0 0 rgba(255,85,0,0.7);animation:pulse 2s infinite}
+        .pulse-dot.off{background:var(--muted);animation:none}
+        @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,85,0,0.7)}70%{box-shadow:0 0 0 8px rgba(255,85,0,0)}100%{box-shadow:0 0 0 0 rgba(255,85,0,0)}}
+        .on-air-status{font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:900;letter-spacing:0.2em;text-transform:uppercase;color:var(--orange)}
+        .on-air-bar.off-air .on-air-status{color:var(--muted)}
+        .on-air-show{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:0.06em}
+        .on-air-time{font-size:0.82rem;color:var(--muted);margin-left:auto}
+
+        /* ── LAYOUT ── */
+        .lounge-body{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;padding:1.5rem;max-width:1200px;margin:0 auto}
+        @media(max-width:768px){.lounge-body{grid-template-columns:1fr}}
+        .col-full{grid-column:1/-1}
+
+        /* ── PANEL ── */
+        .panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+        .panel-head{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.6rem}
+        .panel-icon{font-size:1rem}
+        .panel-title{font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;font-weight:900;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)}
+        .panel-body{padding:1.25rem}
+
+        /* ── SPONSOR PANEL ── */
+        .sponsor-card{background:linear-gradient(135deg,rgba(255,215,0,0.08),rgba(255,215,0,0.03));border:1px solid rgba(255,215,0,0.2);border-radius:10px;padding:1.25rem;position:relative;overflow:hidden}
+        .sponsor-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+        .sponsor-label{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:900;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem}
+        .sponsor-name{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:0.06em;color:var(--white);margin-bottom:0.75rem}
+        .sponsor-script-label{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem}
+        .sponsor-script{font-size:0.9rem;line-height:1.6;color:var(--white);background:rgba(0,0,0,0.3);border-left:3px solid var(--gold);padding:0.75rem 1rem;border-radius:0 6px 6px 0;font-style:italic}
+        .sponsor-when{font-size:0.8rem;color:var(--gold);margin-top:0.75rem;opacity:0.8}
+        .no-sponsor{font-size:0.85rem;color:var(--dim);text-align:center;padding:1.5rem 0}
+
+        /* ── FAN MESSAGES ── */
+        .messages-list{display:flex;flex-direction:column;gap:0.6rem;max-height:320px;overflow-y:auto;margin-bottom:1rem}
+        .messages-list::-webkit-scrollbar{width:3px}.messages-list::-webkit-scrollbar-track{background:transparent}.messages-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+        .msg{background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:0.75rem 1rem;animation:msgIn 0.3s ease}
+        @keyframes msgIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+        .msg-fan{border-left:3px solid var(--orange)}
+        .msg-admin{border-left:3px solid var(--blue);background:rgba(68,136,255,0.05)}
+        .msg-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem}
+        .msg-from{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--orange)}
+        .msg-admin .msg-from{color:var(--blue)}
+        .msg-time{font-size:0.72rem;color:var(--dim)}
+        .msg-text{font-size:0.88rem;line-height:1.5;color:rgba(242,242,242,0.85)}
+        .no-msgs{font-size:0.85rem;color:var(--dim);text-align:center;padding:2rem 0}
+        .msg-count-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--orange);color:#000;font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:900;width:20px;height:20px;border-radius:50%;margin-left:0.5rem;animation:badgePop 0.3s ease}
+        @keyframes badgePop{from{transform:scale(0)}to{transform:scale(1)}}
+
+        /* ── NEWS FEED ── */
+        .news-item{padding:0.75rem 0;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s}
+        .news-item:last-child{border-bottom:none}
+        .news-item:hover{background:rgba(255,255,255,0.02);margin:0 -1.25rem;padding-left:1.25rem;padding-right:1.25rem}
+        .news-source{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--orange);margin-bottom:0.2rem}
+        .news-title{font-size:0.88rem;line-height:1.4;color:var(--white)}
+        .news-date{font-size:0.75rem;color:var(--dim);margin-top:0.2rem}
+
+        /* ── STREAM STATS ── */
+        .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem}
+        .stat-card{background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+        .stat-val{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:0.05em;color:var(--white);line-height:1}
+        .stat-val.live{color:var(--green)}
+        .stat-label{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--dim);margin-top:0.25rem}
+
+        /* ── HANDBOOK ── */
+        .handbook-ack-list{max-height:200px;overflow-y:auto}
+        .handbook-ack-list::-webkit-scrollbar{width:3px}.handbook-ack-list::-webkit-scrollbar-track{background:transparent}.handbook-ack-list::-webkit-scrollbar-thumb{background:var(--border2)}
+        .ack-row{display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid var(--border);font-size:0.82rem}
+        .ack-row:last-child{border-bottom:none}
+        .ack-ts{color:var(--dim);font-size:0.75rem}
+        .btn-handbook{display:inline-flex;align-items:center;gap:0.5rem;background:var(--dark);border:1px solid var(--border2);border-radius:8px;padding:0.75rem 1.25rem;color:var(--white);font-family:'Barlow Condensed',sans-serif;font-size:0.85rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;text-decoration:none;margin-bottom:1rem;width:100%;justify-content:center}
+        .btn-handbook:hover{border-color:var(--orange);color:var(--orange)}
+
+        /* ── SCHEDULE PREVIEW ── */
+        .sched-slot{display:flex;gap:1rem;align-items:flex-start;padding:0.75rem 0;border-bottom:1px solid var(--border)}
+        .sched-slot:last-child{border-bottom:none}
+        .sched-time{font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--orange);flex-shrink:0;width:80px}
+        .sched-show{font-size:0.88rem;color:var(--white)}
+        .sched-day{font-size:0.75rem;color:var(--dim)}
+
+        /* ── SPINNER ── */
+        .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(242,242,242,0.1);border-top-color:var(--orange);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .loading-text{font-size:0.82rem;color:var(--dim);display:flex;align-items:center;gap:0.5rem;padding:1rem 0}
+    </style>
+</head>
+<body>
+
+<!-- ACKNOWLEDGEMENT MODAL -->
+<div class="ack-overlay" id="ack-overlay">
+    <div class="ack-modal">
+        <div class="ack-header">
+            <div class="ack-icon">📋</div>
+            <div class="ack-title">Broadcasting Responsibilities</div>
+            <div class="ack-subtitle">You must acknowledge these responsibilities before accessing the DJ Lounge</div>
+        </div>
+        <div class="ack-body">
+            <div class="ack-section">
+                <div class="ack-section-title">Ofcom Broadcast Standards</div>
+                <p>As a broadcaster on ROCK.SCOT you are subject to Ofcom's Broadcasting Code. All content must comply with standards on harm and offence, accuracy, and fairness. Violations may result in formal investigation and sanctions against the station's licence.</p>
+            </div>
+            <div class="ack-section">
+                <div class="ack-section-title">Language & Content</div>
+                <p>Strong language, profanity, and offensive material are strictly prohibited at all times. ROCK.SCOT broadcasts 24/7 on DAB+ and must be suitable for all audiences. There are no watershed exemptions on digital radio.</p>
+            </div>
+            <div class="ack-section">
+                <div class="ack-section-title">Political Impartiality</div>
+                <p>You must not express personal political opinions on air, advocate for any political party, candidate, or campaign, or present political content in a way that is not duly impartial. This applies equally to local, national, and international politics.</p>
+            </div>
+            <div class="ack-section">
+                <div class="ack-section-title">Harm Avoidance</div>
+                <p>Content that could encourage or incite crime, lead to public disorder, or cause physical, mental, moral or social harm to listeners must never be broadcast. This includes material glorifying self-harm, drug use, or violence.</p>
+            </div>
+            <div class="ack-section">
+                <div class="ack-section-title">Accuracy & Fairness</div>
+                <p>News and factual content must be accurate and presented with due impartiality. Do not broadcast unverified information as fact. If you are unsure whether something is appropriate to broadcast, do not broadcast it — contact the station manager first.</p>
+            </div>
+            <div class="ack-section">
+                <div class="ack-section-title">Emergency Protocols</div>
+                <p>In the event of a major national incident (death of a senior Royal, national emergency, etc.) cease normal programming immediately and contact the station manager. Do not speculate on air. Default to the station's emergency playlist until instructed otherwise. Emergency contact details are in the Broadcasting Handbook.</p>
+            </div>
+            <div class="ack-section">
+                <div class="ack-section-title">Sponsorship & Advertising</div>
+                <p>Sponsored content must be clearly identified as such. Read sponsor scripts as provided — do not ad-lib around commercial content. Do not endorse products or services beyond what has been agreed with the station.</p>
+            </div>
+            <div class="ack-section">
+                <div class="ack-section-title">Confidentiality</div>
+                <p>Station operational details, staff information, and commercial arrangements are confidential. Do not discuss internal station matters on air or on personal social media channels in a way that could bring ROCK.SCOT into disrepute.</p>
+            </div>
+        </div>
+        <div class="ack-footer">
+            <label class="ack-check" onclick="toggleAck()">
+                <input type="checkbox" id="ack-check">
+                <span>I have read and understood my broadcasting responsibilities. I acknowledge that I am aware of Ofcom's Broadcasting Code and ROCK.SCOT's standards, and I accept responsibility for compliance during my broadcasts.</span>
+            </label>
+            <button class="ack-btn" id="ack-btn" onclick="submitAck()">I Acknowledge — Enter the Lounge</button>
+        </div>
+    </div>
+</div>
+
+<!-- HEADER -->
+<header class="dj-header">
+    <div class="dj-header-left">
+        <span class="dj-header-logo">ROCK.SCOT</span>
+        <span class="dj-header-sep">|</span>
+        <span class="dj-header-label">DJ Lounge</span>
+    </div>
+    <div class="dj-header-right">
+        <span class="dj-name-label" id="dj-greeting"></span>
+        <div id="dj-avatar-wrap"><div class="dj-avatar-placeholder">🎙</div></div>
+        <button class="btn-signout" onclick="signOut()">Sign Out</button>
+    </div>
+</header>
+
+<!-- ON AIR BAR -->
+<div class="on-air-bar off-air" id="on-air-bar">
+    <div class="pulse-dot off" id="on-air-dot"></div>
+    <div class="on-air-status" id="on-air-status">Checking schedule...</div>
+    <div class="on-air-show" id="on-air-show"></div>
+    <div class="on-air-time" id="on-air-time"></div>
+</div>
+
+<!-- MAIN LOUNGE -->
+<div class="lounge-body">
+
+    <!-- SPONSOR SCRIPT -->
+    <div class="panel col-full" id="panel-sponsor" style="display:none">
+        <div class="panel-head">
+            <span class="panel-icon">⭐</span>
+            <span class="panel-title">Sponsor / Programme Partner</span>
+        </div>
+        <div class="panel-body" id="sponsor-body">
+            <div class="no-sponsor">No active sponsor for this slot</div>
+        </div>
+    </div>
+
+    <!-- ADMIN MESSAGES + FAN MESSAGES -->
+    <div class="panel">
+        <div class="panel-head">
+            <span class="panel-icon">💬</span>
+            <span class="panel-title">Messages</span>
+            <span id="msg-badge" style="display:none" class="msg-count-badge">0</span>
+        </div>
+        <div class="panel-body">
+            <div class="messages-list" id="messages-list">
+                <div class="loading-text"><span class="spinner"></span> Loading messages...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STREAM STATS -->
+    <div class="panel">
+        <div class="panel-head">
+            <span class="panel-icon">📡</span>
+            <span class="panel-title">Stream Stats</span>
+        </div>
+        <div class="panel-body">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-val live" id="stat-listeners">—</div>
+                    <div class="stat-label">Live Listeners</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-val" id="stat-status">—</div>
+                    <div class="stat-label">Stream Status</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MY SCHEDULE -->
+    <div class="panel">
+        <div class="panel-head">
+            <span class="panel-icon">🗓</span>
+            <span class="panel-title">My Schedule This Week</span>
+        </div>
+        <div class="panel-body" id="my-schedule">
+            <div class="loading-text"><span class="spinner"></span> Loading...</div>
+        </div>
+    </div>
+
+    <!-- GENRE NEWS -->
+    <div class="panel">
+        <div class="panel-head">
+            <span class="panel-icon">📰</span>
+            <span class="panel-title">Music News — Your Genres</span>
+        </div>
+        <div class="panel-body" id="genre-news">
+            <div class="loading-text"><span class="spinner"></span> Fetching news...</div>
+        </div>
+    </div>
+
+    <!-- BROADCASTING HANDBOOK -->
+    <div class="panel col-full">
+        <div class="panel-head">
+            <span class="panel-icon">📖</span>
+            <span class="panel-title">Broadcasting Handbook</span>
+        </div>
+        <div class="panel-body">
+            <a class="btn-handbook" href="dj-handbook.html" target="_blank">📖 Open Broadcasting Handbook</a>
+            <div id="ack-history">
+                <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--dim);margin-bottom:0.5rem">Your Acknowledgement History</div>
+                <div class="handbook-ack-list" id="ack-list">
+                    <div class="loading-text"><span class="spinner"></span> Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────
+var SUPABASE_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
+var PUSHER_KEY    = '829db0071d7d65b2440f';
+var PUSHER_CLUSTER = 'eu';
+var STREAM_URL    = 'https://streaming.broadcastradio.com:8128/rockscot'; // update if needed
+
+var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+var currentUser = null;
+var currentDJ   = null;
+var unreadCount = 0;
+
+// ── UTILS ─────────────────────────────────────────────────────────
+function fmtTime(t){var p=t.split(':');var h=parseInt(p[0]);var m=p[1];var ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+m+' '+ap;}
+function fmtTs(ts){return new Date(ts).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+function timeToMins(t){var p=t.split(':');return parseInt(p[0])*60+parseInt(p[1]);}
+function nowMins(){var n=new Date();return n.getHours()*60+n.getMinutes();}
+var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+// ── ACK MODAL ─────────────────────────────────────────────────────
+function toggleAck(){
+    var checked=document.getElementById('ack-check').checked;
+    var btn=document.getElementById('ack-btn');
+    btn.classList.toggle('ready',checked);
+}
+
+async function submitAck(){
+    if(!document.getElementById('ack-check').checked) return;
+    var btn=document.getElementById('ack-btn');
+    btn.textContent='Saving...';
+    btn.style.pointerEvents='none';
+
+    await sb.from('handbook_acknowledgements').insert({
+        dj_id: currentUser.id,
+        dj_name: currentDJ ? currentDJ.name : currentUser.email,
+        acknowledged_at: new Date().toISOString(),
+        handbook_version: '1.0',
+        ip_address: null
+    });
+
+    document.getElementById('ack-overlay').style.display='none';
+    loadAckHistory();
+}
+
+async function checkNeedsAck(){
+    // Check if they've acked in the last 30 days
+    var since=new Date(Date.now()-30*24*60*60*1000).toISOString();
+    var {data}=await sb.from('handbook_acknowledgements')
+        .select('id').eq('dj_id',currentUser.id)
+        .gte('acknowledged_at',since).limit(1);
+    if(!data||!data.length){
+        document.getElementById('ack-overlay').style.display='flex';
+    } else {
+        document.getElementById('ack-overlay').style.display='none';
+    }
+}
+
+async function loadAckHistory(){
+    var {data}=await sb.from('handbook_acknowledgements')
+        .select('acknowledged_at,handbook_version')
+        .eq('dj_id',currentUser.id)
+        .order('acknowledged_at',{ascending:false}).limit(10);
+    var el=document.getElementById('ack-list');
+    if(!data||!data.length){el.innerHTML='<div style="font-size:0.82rem;color:var(--dim);padding:0.5rem 0">No acknowledgements on record yet</div>';return;}
+    el.innerHTML=data.map(function(a){
+        return '<div class="ack-row"><span style="color:var(--green)">✓ Acknowledged v'+a.handbook_version+'</span><span class="ack-ts">'+fmtTs(a.acknowledged_at)+'</span></div>';
+    }).join('');
+}
+
+// ── ON AIR STATUS ─────────────────────────────────────────────────
+async function checkOnAir(){
+    if(!currentDJ) return;
+    var today=new Date().getDay();
+    var {data:slots}=await sb.from('schedule_slots')
+        .select('*').eq('dj_id',currentDJ.id).eq('day_of_week',today).eq('is_active',true);
+
+    var bar=document.getElementById('on-air-bar');
+    var dot=document.getElementById('on-air-dot');
+    var statusEl=document.getElementById('on-air-status');
+    var showEl=document.getElementById('on-air-show');
+    var timeEl=document.getElementById('on-air-time');
+
+    if(!slots||!slots.length){
+        bar.className='on-air-bar off-air';
+        dot.className='pulse-dot off';
+        statusEl.textContent='Not scheduled today';
+        showEl.textContent='';timeEl.textContent='';
+        return;
+    }
+
+    var now=nowMins();
+    var active=null;
+    var next=null;
+    slots.forEach(function(s){
+        var start=timeToMins(s.start_time);
+        var end=timeToMins(s.end_time);
+        if(now>=start&&now<end) active=s;
+        else if(now<start&&(!next||start<timeToMins(next.start_time))) next=s;
+    });
+
+    if(active){
+        bar.className='on-air-bar';
+        dot.className='pulse-dot';
+        statusEl.textContent='ON AIR NOW';
+        showEl.textContent=active.show_name||'';
+        timeEl.textContent=fmtTime(active.start_time)+' – '+fmtTime(active.end_time);
+        loadSponsor(active.id);
+    } else if(next){
+        bar.className='on-air-bar off-air';
+        dot.className='pulse-dot off';
+        statusEl.textContent='Up Next';
+        showEl.textContent=(next.show_name||'')+' at '+fmtTime(next.start_time);
+        timeEl.textContent='';
+    } else {
+        bar.className='on-air-bar off-air';
+        dot.className='pulse-dot off';
+        statusEl.textContent='No more shows today';
+        showEl.textContent='';timeEl.textContent='';
+    }
+}
+
+// ── SPONSOR SCRIPTS ───────────────────────────────────────────────
+async function loadSponsor(slotId){
+    var now=new Date().toISOString().split('T')[0];
+    var {data}=await sb.from('sponsor_scripts')
+        .select('*')
+        .eq('slot_id',slotId)
+        .eq('is_active',true)
+        .lte('start_date',now)
+        .gte('end_date',now)
+        .limit(1);
+
+    var panel=document.getElementById('panel-sponsor');
+    var body=document.getElementById('sponsor-body');
+
+    if(data&&data.length){
+        var s=data[0];
+        panel.style.display='block';
+        body.innerHTML=
+            '<div class="sponsor-card">'+
+            '<div class="sponsor-label">Programme Sponsor</div>'+
+            '<div class="sponsor-name">'+escH(s.sponsor_name)+'</div>'+
+            '<div class="sponsor-script-label">What to say</div>'+
+            '<div class="sponsor-script">'+escH(s.script_text)+'</div>'+
+            (s.when_to_read?'<div class="sponsor-when">⏰ '+escH(s.when_to_read)+'</div>':'')+
+            '</div>';
+    } else {
+        panel.style.display='none';
+    }
+}
+
+// ── MY SCHEDULE ───────────────────────────────────────────────────
+async function loadMySchedule(){
+    if(!currentDJ){document.getElementById('my-schedule').innerHTML='<div style="font-size:0.85rem;color:var(--dim)">No DJ profile linked to your account</div>';return;}
+    var {data}=await sb.from('schedule_slots').select('*').eq('dj_id',currentDJ.id).eq('is_active',true).order('day_of_week').order('start_time');
+    var el=document.getElementById('my-schedule');
+    if(!data||!data.length){el.innerHTML='<div style="font-size:0.85rem;color:var(--dim);text-align:center;padding:1rem">No scheduled shows found</div>';return;}
+    el.innerHTML=data.map(function(s){
+        return '<div class="sched-slot">'+
+            '<div class="sched-time">'+fmtTime(s.start_time)+'</div>'+
+            '<div><div class="sched-show">'+(s.show_name||'Untitled Show')+'</div>'+
+            '<div class="sched-day">'+DAYS[s.day_of_week]+' · '+fmtTime(s.start_time)+' – '+fmtTime(s.end_time)+'</div></div>'+
+            '</div>';
+    }).join('');
+}
+
+// ── GENRE NEWS ────────────────────────────────────────────────────
+async function loadGenreNews(){
+    var el=document.getElementById('genre-news');
+    var genres=(currentDJ&&currentDJ.genres)?currentDJ.genres:'rock';
+    var genreList=genres.split(',').map(function(g){return g.trim().toLowerCase();})[0]||'rock';
+
+    // Use RSS2JSON free service
+    var rssUrl='https://www.loudersound.com/rss';
+    var apiUrl='https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(rssUrl)+'&count=6';
+
+    try {
+        var r=await fetch(apiUrl);
+        var d=await r.json();
+        if(d.status==='ok'&&d.items&&d.items.length){
+            el.innerHTML=d.items.map(function(item){
+                return '<div class="news-item" onclick="window.open(\''+item.link+'\',\'_blank\')">'+
+                    '<div class="news-source">'+(item.author||'Louder Sound')+'</div>'+
+                    '<div class="news-title">'+escH(item.title)+'</div>'+
+                    '<div class="news-date">'+new Date(item.pubDate).toLocaleDateString('en-GB',{day:'numeric',month:'short'})+'</div>'+
+                    '</div>';
+            }).join('');
+        } else {
+            el.innerHTML='<div style="font-size:0.85rem;color:var(--dim);text-align:center;padding:1rem">News feed temporarily unavailable</div>';
+        }
+    } catch(e){
+        el.innerHTML='<div style="font-size:0.85rem;color:var(--dim);text-align:center;padding:1rem">News feed temporarily unavailable</div>';
+    }
+}
+
+// ── STREAM STATS ──────────────────────────────────────────────────
+async function loadStreamStats(){
+    // Poll the stream URL for a head request — if it responds it's live
+    try {
+        var r=await fetch(STREAM_URL,{method:'HEAD',mode:'no-cors'});
+        document.getElementById('stat-status').textContent='LIVE';
+        document.getElementById('stat-status').style.color='var(--green)';
+    } catch(e){
+        document.getElementById('stat-status').textContent='OFFLINE';
+        document.getElementById('stat-status').style.color='var(--red)';
+    }
+    // Listener count from site_settings if available
+    var {data}=await sb.from('site_settings').select('value').eq('key','stream_listeners').single();
+    if(data) document.getElementById('stat-listeners').textContent=data.value||'—';
+}
+
+// ── MESSAGES (PUSHER) ─────────────────────────────────────────────
+function initPusher(){
+    if(!currentDJ) return;
+    var pusher=new Pusher(PUSHER_KEY,{cluster:PUSHER_CLUSTER});
+    var channelName='dj-'+currentDJ.id;
+    var channel=pusher.subscribe(channelName);
+
+    channel.bind('fan-message',function(data){
+        addMessage({
+            from: data.name||'Fan',
+            text: data.message,
+            time: new Date().toISOString(),
+            type: 'fan'
+        });
+        unreadCount++;
+        var badge=document.getElementById('msg-badge');
+        badge.style.display='inline-flex';
+        badge.textContent=unreadCount;
+    });
+
+    channel.bind('admin-message',function(data){
+        addMessage({
+            from: 'Station Admin',
+            text: data.message,
+            time: new Date().toISOString(),
+            type: 'admin'
+        });
+    });
+
+    // Also subscribe to station-wide channel
+    var stationChannel=pusher.subscribe('station-all');
+    stationChannel.bind('admin-message',function(data){
+        addMessage({from:'Station Admin (All DJs)',text:data.message,time:new Date().toISOString(),type:'admin'});
+    });
+}
+
+function addMessage(msg){
+    var list=document.getElementById('messages-list');
+    // Remove loading/empty state
+    var empty=list.querySelector('.loading-text,.no-msgs');
+    if(empty) empty.remove();
+
+    var div=document.createElement('div');
+    div.className='msg msg-'+msg.type;
+    div.innerHTML=
+        '<div class="msg-meta">'+
+        '<span class="msg-from">'+escH(msg.from)+'</span>'+
+        '<span class="msg-time">'+fmtTs(msg.time)+'</span>'+
+        '</div>'+
+        '<div class="msg-text">'+escH(msg.text)+'</div>';
+    list.insertBefore(div,list.firstChild);
+}
+
+async function loadRecentMessages(){
+    var list=document.getElementById('messages-list');
+    // Load last 20 messages from Supabase
+    var {data}=await sb.from('dj_messages')
+        .select('*')
+        .or('dj_id.eq.'+(currentDJ?currentDJ.id:'null')+',dj_id.is.null')
+        .order('created_at',{ascending:false}).limit(20);
+
+    if(!data||!data.length){
+        list.innerHTML='<div class="no-msgs">No messages yet — fan messages will appear here in real time</div>';
+        return;
+    }
+    list.innerHTML='';
+    data.reverse().forEach(function(m){
+        addMessage({from:m.sender_name||'Fan',text:m.message,time:m.created_at,type:m.message_type||'fan'});
+    });
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────
+function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+async function signOut(){
+    await sb.auth.signOut();
+    window.location.href='dj-login.html';
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+async function init(){
+    var {data:{session},error}=await sb.auth.getSession();
+    if(!session){window.location.href='dj-login.html';return;}
+    currentUser=session.user;
+
+    // Load user profile + DJ record
+    var {data:profile}=await sb.from('user_profiles').select('*').eq('id',currentUser.id).single();
+    if(!profile||profile.role!=='dj'){window.location.href='dj-login.html';return;}
+
+    // Try to find matching DJ record by email
+    var {data:djRecord}=await sb.from('djs').select('*').eq('is_active',true).ilike('name',profile.first_name+'%').limit(1);
+    // Fallback: try matching by a dj_user_id column if it exists
+    if(!djRecord||!djRecord.length){
+        var {data:djById}=await sb.from('djs').select('*').eq('id',profile.dj_id||'none').limit(1);
+        if(djById&&djById.length) djRecord=djById;
+    }
+    currentDJ=djRecord&&djRecord.length?djRecord[0]:null;
+
+    // Update header
+    document.getElementById('dj-greeting').textContent=profile.first_name||session.user.email;
+    if(currentDJ&&currentDJ.photo_url){
+        document.getElementById('dj-avatar-wrap').innerHTML='<img class="dj-avatar" src="'+currentDJ.photo_url+'" alt="'+currentDJ.name+'">';
+    }
+
+    // Check acknowledgement
+    await checkNeedsAck();
+
+    // Load all panels
+    checkOnAir();
+    loadMySchedule();
+    loadRecentMessages();
+    loadGenreNews();
+    loadStreamStats();
+    loadAckHistory();
+    initPusher();
+
+    // Refresh on-air every minute
+    setInterval(checkOnAir,60000);
+    // Refresh stream stats every 2 mins
+    setInterval(loadStreamStats,120000);
+}
+
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
