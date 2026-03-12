@@ -503,18 +503,21 @@ async function loadGenreNews(){
 
 // ── STREAM STATS ──────────────────────────────────────────────────
 async function loadStreamStats(){
-    // Poll the stream URL for a head request — if it responds it's live
-    try {
-        var r=await fetch(STREAM_URL,{method:'HEAD',mode:'no-cors'});
-        document.getElementById('stat-status').textContent='LIVE';
-        document.getElementById('stat-status').style.color='var(--green)';
-    } catch(e){
-        document.getElementById('stat-status').textContent='OFFLINE';
-        document.getElementById('stat-status').style.color='var(--red)';
-    }
-    // Listener count from site_settings if available
-    var {data}=await sb.from('site_settings').select('value').eq('key','stream_listeners').single();
-    if(data) document.getElementById('stat-listeners').textContent=data.value||'—';
+    // Get stream status and listener count from site_settings
+    var {data:rows}=await sb.from('site_settings').select('key,value')
+        .in('key',['stream_status','stream_listeners','stream_url']);
+    var settings={};
+    if(rows) rows.forEach(function(r){settings[r.key]=r.value;});
+
+    // Status
+    var status=settings['stream_status']||'live';
+    var isLive=status.toLowerCase()==='live'||status.toLowerCase()==='online';
+    document.getElementById('stat-status').textContent=isLive?'LIVE':'OFFLINE';
+    document.getElementById('stat-status').style.color=isLive?'var(--green)':'var(--red)';
+
+    // Listeners
+    var listeners=settings['stream_listeners']||'—';
+    document.getElementById('stat-listeners').textContent=listeners;
 }
 
 // ── MESSAGES (PUSHER) ─────────────────────────────────────────────
