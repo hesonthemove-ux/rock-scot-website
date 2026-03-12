@@ -387,226 +387,7 @@
   }
   </script>
   
-  
-<style>
-/* ── ADV HERO ─────────────────────────────────────── */
-.adv-hero {
-  position: relative;
-  min-height: 92vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  margin-top: 98px;
-  background: #060606;
-}
-
-.adv-hero-img-wrap {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-}
-
-.adv-hero-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center top;
-  opacity: 0;
-  transform: scale(1.06);
-  animation: advImgIn 2s cubic-bezier(0.2,0,0,1) forwards 0.2s;
-  filter: drop-shadow(0 0 80px rgba(255,85,0,0.15));
-}
-
-@keyframes advImgIn {
-  to { opacity: 1; transform: scale(1); }
-}
-
-.adv-hero-overlay {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse at center, transparent 30%, rgba(6,6,6,0.7) 100%),
-    linear-gradient(to bottom, rgba(6,6,6,0.4) 0%, rgba(6,6,6,0.1) 40%, rgba(6,6,6,0.85) 85%, #060606 100%);
-}
-
-.adv-hero-content {
-  position: relative;
-  z-index: 2;
-  text-align: center;
-  padding: 4rem 2rem 2rem;
-  max-width: 860px;
-}
-
-.adv-hero-tag {
-  font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
-  font-size: 0.72rem;
-  font-weight: 900;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: var(--orange);
-  opacity: 0;
-  transform: translateY(16px);
-  animation: advUp 0.7s cubic-bezier(0.2,0,0,1) forwards 0.8s;
-  margin-bottom: 1rem;
-}
-
-.adv-hero-title {
-  font-family: 'Bebas Neue', Impact, sans-serif;
-  font-size: clamp(3rem, 10vw, 6.5rem);
-  line-height: 0.95;
-  color: var(--white);
-  letter-spacing: 0.04em;
-  opacity: 0;
-  transform: translateY(24px) scale(0.96);
-  animation: advTitleIn 1s cubic-bezier(0.34,1.3,0.64,1) forwards 1s;
-  margin-bottom: 1.25rem;
-}
-
-.adv-hero-brand {
-  color: var(--orange);
-  display: block;
-  text-shadow: 0 0 60px rgba(255,85,0,0.5), 0 0 120px rgba(255,85,0,0.2);
-  animation: advBrandGlow 3s ease-in-out infinite alternate 2s;
-}
-
-@keyframes advTitleIn {
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes advBrandGlow {
-  from { text-shadow: 0 0 40px rgba(255,85,0,0.4), 0 0 80px rgba(255,85,0,0.15); }
-  to   { text-shadow: 0 0 80px rgba(255,85,0,0.7), 0 0 160px rgba(255,85,0,0.3); }
-}
-
-@keyframes advUp {
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.adv-hero-sub {
-  font-size: clamp(1rem, 2.5vw, 1.25rem);
-  color: rgba(242,242,242,0.75);
-  line-height: 1.6;
-  opacity: 0;
-  transform: translateY(16px);
-  animation: advUp 0.7s cubic-bezier(0.2,0,0,1) forwards 1.3s;
-  margin-bottom: 2rem;
-}
-
-.adv-hero-sub strong { color: var(--white); }
-
-.adv-hero-cta {
-  display: inline-block;
-  background: var(--orange);
-  color: #000;
-  font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
-  font-size: 0.95rem;
-  font-weight: 900;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  padding: 0.75rem 2.5rem;
-  border-radius: 3px;
-  text-decoration: none;
-  opacity: 0;
-  transform: translateY(12px);
-  animation: advUp 0.6s cubic-bezier(0.2,0,0,1) forwards 1.6s;
-  transition: background 0.2s, transform 0.2s;
-}
-
-.adv-hero-cta:hover {
-  background: var(--orange2);
-  transform: translateY(-2px);
-  color: #000;
-}
-
-/* ── STATS BAR ────────────────────────────────────── */
-.adv-hero-stats {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 0;
-  background: rgba(14,14,14,0.9);
-  border-top: 1px solid rgba(255,85,0,0.3);
-  border-bottom: 1px solid var(--border);
-  width: 100%;
-  padding: 1.25rem 2rem;
-  opacity: 0;
-  animation: advUp 0.6s cubic-bezier(0.2,0,0,1) forwards 1.9s;
-  justify-content: center;
-}
-
-.adv-hero-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0 2.5rem;
-}
-
-.adv-hero-stat-num {
-  font-family: 'Bebas Neue', Impact, sans-serif;
-  font-size: 2rem;
-  color: var(--orange);
-  letter-spacing: 0.05em;
-  line-height: 1;
-}
-
-.adv-hero-stat-label {
-  font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(242,242,242,0.45);
-  margin-top: 0.25rem;
-}
-
-.adv-hero-stat-div {
-  width: 1px;
-  height: 2.5rem;
-  background: var(--border);
-  flex-shrink: 0;
-}
-
-/* ── SCROLL REVEAL for package cards ─────────────── */
-.package-card {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.6s cubic-bezier(0.2,0,0,1), transform 0.6s cubic-bezier(0.2,0,0,1);
-}
-
-/* ── MOBILE ───────────────────────────────────────── */
-@media (max-width: 768px) {
-  .adv-hero { min-height: 60vh; margin-top: 98px; }
-  .adv-hero-img { object-fit: cover; }
-  @keyframes advImgIn { to { opacity: 0.7; transform: scale(1); } }
-  .adv-hero-stats { flex-wrap: wrap; gap: 1rem; padding: 1rem; }
-  .adv-hero-stat { padding: 0 1rem; }
-  .adv-hero-stat-div { display: none; }
-}
-</style>
-
-<style>
-.btn-calculate {
-  background: var(--orange);
-  color: #000;
-  font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
-  font-size: 1rem;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  padding: 0.85rem 2.5rem;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-  width: 100%;
-  margin-top: 1rem;
-  transition: background 0.2s, transform 0.15s;
-}
-.btn-calculate:hover { background: #ff7722; transform: translateY(-1px); }
-</style>
-</head>
+  </head>
 <body>
     
         
@@ -624,7 +405,7 @@
     </div>
 
     <!-- PACKAGES -->
-    <section id="packages" style="padding: 4rem 2rem;">
+    <section style="padding: 4rem 2rem;">
         <div style="max-width: 1400px; margin: 0 auto;">
             <h2>Advertising Packages</h2>
             <p class="intro">Professional radio advertising with guaranteed plays</p>
@@ -721,7 +502,7 @@
                             <label>Package *</label>
                             <select id="package" required onchange="onPackageChange()">
                                 <option value="">Select package...</option>
-                                <option value="regional">Regional — Single Mux (£495 ex. VAT)</option>
+                                <option value="regional">Regional — Single Mux (£495)</option>
                                 <option value="multi-regional">Multi-Regional — All 3 Mux (£1,295 ex. VAT)</option>
                                 <option value="top-of-hour">Top of Hour — Station Ident (£2,495 ex. VAT)</option>
                             </select>
@@ -776,7 +557,7 @@
                         <textarea id="notes" rows="4" placeholder="Tell us about your business and campaign goals..."></textarea>
                     </div>
                     
-                    <button type="button" class="btn-calculate" onclick="if(typeof calculateQuote==='function') calculateQuote(); else console.warn('calculateQuote not ready')">Calculate Quote</button>
+                    <button type="button" class="btn-calculate" onclick="calculateQuote()">Calculate Quote</button>
                     
                     <div class="quote-result" id="quote-result">
                         <h3 style="font-family: 'Bebas Neue'; font-size: 2rem; margin-bottom: 1rem; letter-spacing: 0.1em;">Your Quote</h3>
@@ -914,7 +695,7 @@
     async function loadLiveRates() {
         try {
             const resp = await fetch(
-                'rates-proxy.php?t=' + Date.now()
+                '/rock/rates-proxy.php'
             );
             if (!resp.ok) throw new Error('rates fetch failed');
             const rows = await resp.json();
@@ -1053,7 +834,7 @@
         'multi-regional': {
             name:        'Multi-Regional',
             productId:   'multi_regional',
-            pricePence:  129500,
+            pricePence:  99500,
             muxType:     'multi',
             muxWeight:   3,
             plays:       BC.playsStandard,
@@ -1063,7 +844,7 @@
         'top-of-hour': {
             name:        'Top of Hour',
             productId:   'top_of_hour',
-            pricePence:  249500,
+            pricePence:  250000,
             muxType:     'toh',
             muxWeight:   3,
             plays:       BC.playsTOH,
@@ -1072,8 +853,8 @@
         },
     };
 
-    const BOLT_ON_PENCE = 35000;  // £350 production add-on
-    const RUSH_PENCE     = 19500;  // £195 rush surcharge
+    const BOLT_ON_PENCE = 25000;  // £250 production add-on
+    const RUSH_PENCE     = 5000;   // £50 rush surcharge
 
     function defaultStartDate(daysAhead = 28) {
         const d = new Date();
@@ -1093,28 +874,22 @@
 
     // ── PACKAGE SHORTCUT BUTTONS ──────────────────────────────────
     window.selectPackage = function(pkgKey) {
-        /* Use window.PACKAGES so it's accessible from onclick */
-        const target = document.querySelector('.quote-calculator') || document.getElementById('quote-form');
+        var target = document.querySelector('.quote-calculator') || document.getElementById('quote-form');
         if (target) {
-            const offset = target.getBoundingClientRect().top + window.scrollY - 110;
+            var offset = target.getBoundingClientRect().top + window.scrollY - 110;
             window.scrollTo({ top: offset, behavior: 'smooth' });
         }
-        /* Set the package select value directly */
-        const packageSelect = document.getElementById('package');
+        var packageSelect = document.getElementById('package');
         if (packageSelect) {
             packageSelect.value = pkgKey;
-            // Give DOM a tick then fire
             setTimeout(function() {
-                if (typeof window.onPackageChange === 'function') window.onPackageChange();
-                if (typeof window.calculateQuote === 'function') window.calculateQuote();
+                if (typeof onPackageChange === 'function') onPackageChange();
+                if (typeof calculateQuote === 'function') calculateQuote();
             }, 50);
         }
     };
 
     // ── PACKAGE CHANGE: show/hide mux selector ───────────────────
-      } catch(err) { console.error('calculateQuote error:', err); }
-    };
-
     window.onPackageChange = function() {
         const pkg = document.getElementById('package').value;
         const muxGroup = document.getElementById('mux-selector-group');
@@ -1153,7 +928,7 @@
             return;
         }
 
-        const pkg = PACKAGES[pkgKey];
+        const pkg = (window.PACKAGES || {})[pkgKey];
         if (!pkg) return;
 
         indicator.style.display = 'block';
@@ -1205,7 +980,6 @@
 
     // ── QUOTE CALCULATOR ─────────────────────────────────────────
     window.calculateQuote = function() {
-      try {
         const pkgKey    = document.getElementById('package').value;
         let startDate   = document.getElementById('start-date').value;
         const length    = parseInt(document.getElementById('campaign-length').value) || 28;
@@ -1215,13 +989,10 @@
         const quoteBreakdown = document.getElementById('quote-breakdown');
         const submitBtn = document.getElementById('submit-btn');
 
-        // Use window.PACKAGES to ensure correct scope
-        const PKGS = window.PACKAGES || {};
-
         if (!pkgKey) {
-            if (quoteResult) quoteResult.classList.add('show');
-            if (quoteTotal) quoteTotal.textContent = '—';
-            if (quoteBreakdown) quoteBreakdown.innerHTML = '<p style="color:rgba(255,255,255,0.7);">Select a <strong>package</strong> above, then click <strong>Calculate Quote</strong> to see your price.</p>';
+            quoteResult.classList.add('show');
+            quoteTotal.textContent = '—';
+            quoteBreakdown.innerHTML = '<p style="color:rgba(255,255,255,0.7);">Select a <strong>package</strong> above, then click <strong>Calculate Quote</strong> to see your price.</p>';
             if (submitBtn) submitBtn.style.display = 'none';
             return;
         }
@@ -1238,11 +1009,11 @@
             return;
         }
 
-        const pkg = PKGS[pkgKey];
+        const pkg = PACKAGES[pkgKey];
         if (!pkg) {
-            if (quoteResult) quoteResult.classList.add('show');
-            if (quoteTotal) quoteTotal.textContent = '—';
-            if (quoteBreakdown) quoteBreakdown.innerHTML = '<p style="color:rgba(255,255,255,0.7);">Package not found — please refresh and try again.</p>';
+            quoteResult.classList.add('show');
+            quoteTotal.textContent = '—';
+            quoteBreakdown.innerHTML = '<p style="color:rgba(255,255,255,0.7);">Please select a package and start date.</p>';
             if (submitBtn) submitBtn.style.display = 'none';
             return;
         }
@@ -1529,54 +1300,5 @@ fetch('rates-proxy.php?t=' + Date.now())
   })
   .catch(function(e){ console.warn('Rates fetch failed:', e); });
 </script>
-
-<!-- TEMP DEBUG PANEL — REMOVE AFTER FIXING -->
-<div id="rs-debug" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#000;color:#0f0;font-family:monospace;font-size:11px;padding:8px;max-height:45vh;overflow-y:auto;border-bottom:2px solid #f50;"></div>
-<script>
-(function(){
-  var d = document.getElementById('rs-debug');
-  function log(msg, col){ var l = document.createElement('div'); l.style.color = col||'#0f0'; l.textContent = msg; d.appendChild(l); d.scrollTop=d.scrollHeight; }
-
-  // 1. Check key DOM elements exist
-  ['package','start-date','campaign-length','bolt-on','quote-result','quote-total','quote-breakdown','submit-btn'].forEach(function(id){
-    var el = document.getElementById(id);
-    log((el ? '✅' : '❌') + ' #' + id + (el ? ' found' : ' MISSING'), el ? '#0f0' : '#f44');
-  });
-
-  // 2. Check window functions
-  ['selectPackage','calculateQuote','onPackageChange'].forEach(function(fn){
-    log((typeof window[fn]==='function' ? '✅' : '❌') + ' window.' + fn + ' = ' + typeof window[fn], typeof window[fn]==='function' ? '#0f0' : '#f44');
-  });
-
-  // 3. Check PACKAGES
-  setTimeout(function(){
-    log('── After 500ms ──', '#ff0');
-    var P = window.PACKAGES;
-    if(!P){ log('❌ window.PACKAGES is undefined', '#f44'); }
-    else {
-      ['regional','multi-regional','top-of-hour'].forEach(function(k){
-        log((P[k] ? '✅' : '❌') + ' PACKAGES["'+k+'"] pricePence=' + (P[k]?P[k].pricePence:'MISSING'), P[k]?'#0f0':'#f44');
-      });
-    }
-    // 4. Try calling selectPackage and catch error
-    try {
-      log('▶ Calling selectPackage("regional")...', '#ff0');
-      window.selectPackage('regional');
-      log('✅ selectPackage ran without throwing', '#0f0');
-    } catch(e) {
-      log('❌ selectPackage threw: ' + e.message, '#f44');
-    }
-    // 5. Check calculateQuote
-    try {
-      log('▶ Calling calculateQuote()...', '#ff0');
-      window.calculateQuote();
-      log('✅ calculateQuote ran without throwing', '#0f0');
-    } catch(e) {
-      log('❌ calculateQuote threw: ' + e.message, '#f44');
-    }
-  }, 500);
-})();
-</script>
-<!-- END DEBUG PANEL -->
 </body>
 </html>
