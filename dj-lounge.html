@@ -143,7 +143,7 @@
 <body>
 
 <!-- ACKNOWLEDGEMENT MODAL -->
-<div class="ack-overlay" id="ack-overlay">
+<div class="ack-overlay" id="ack-overlay" style="display:none">
     <div class="ack-modal">
         <div class="ack-header">
             <div class="ack-icon">📋</div>
@@ -475,30 +475,34 @@ async function loadMySchedule(){
 // ── GENRE NEWS ────────────────────────────────────────────────────
 async function loadGenreNews(){
     var el=document.getElementById('genre-news');
-    var genres=(currentDJ&&currentDJ.genres)?currentDJ.genres:'rock';
-    var genreList=genres.split(',').map(function(g){return g.trim().toLowerCase();})[0]||'rock';
-
-    // Use RSS2JSON free service
-    var rssUrl='https://www.loudersound.com/rss';
-    var apiUrl='https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(rssUrl)+'&count=6';
-
-    try {
-        var r=await fetch(apiUrl);
-        var d=await r.json();
-        if(d.status==='ok'&&d.items&&d.items.length){
-            el.innerHTML=d.items.map(function(item){
-                return '<div class="news-item" onclick="window.open(\''+item.link+'\',\'_blank\')">'+
-                    '<div class="news-source">'+(item.author||'Louder Sound')+'</div>'+
-                    '<div class="news-title">'+escH(item.title)+'</div>'+
-                    '<div class="news-date">'+new Date(item.pubDate).toLocaleDateString('en-GB',{day:'numeric',month:'short'})+'</div>'+
-                    '</div>';
-            }).join('');
-        } else {
-            el.innerHTML='<div style="font-size:0.85rem;color:var(--dim);text-align:center;padding:1rem">News feed temporarily unavailable</div>';
-        }
-    } catch(e){
-        el.innerHTML='<div style="font-size:0.85rem;color:var(--dim);text-align:center;padding:1rem">News feed temporarily unavailable</div>';
+    var djGenres=[];
+    if(currentDJ&&currentDJ.genres){
+        djGenres=currentDJ.genres.split(',').map(function(g){return g.trim().toLowerCase();});
     }
+    var {data,error}=await sb.from('wire_news')
+        .select('id,title,source_name,genre,url,created_at')
+        .order('created_at',{ascending:false}).limit(40);
+    if(error||!data||!data.length){
+        el.innerHTML='<div style="font-size:0.85rem;color:var(--dim);text-align:center;padding:1.5rem 0">No news items yet</div>';
+        return;
+    }
+    var filtered=data;
+    if(djGenres.length){
+        filtered=data.filter(function(item){
+            if(!item.genre) return true;
+            var ig=item.genre.toLowerCase();
+            return djGenres.some(function(g){return ig.includes(g)||g.includes(ig);});
+        });
+        if(!filtered.length) filtered=data;
+    }
+    el.innerHTML=filtered.slice(0,10).map(function(item){
+        var date=new Date(item.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+        var link=item.url||'#';
+        return '<div class="news-item"'+(link!=='#'?' onclick="window.open(''+escH(link)+'','_blank')"':'')+'>'+
+            '<div class="news-source">'+escH(item.source_name||'The Wire')+'</div>'+
+            '<div class="news-title">'+escH(item.title||'')+'</div>'+
+            '<div class="news-date">'+date+'</div></div>';
+    }).join('');
 }
 
 // ── STREAM STATS ──────────────────────────────────────────────────
@@ -607,7 +611,8 @@ async function init(){
 
     // Load user profile + DJ record
     var {data:profile}=await sb.from('user_profiles').select('*').eq('id',currentUser.id).single();
-    if(!profile||profile.role!=='dj'){window.location.href='dj-login.html';return;}
+    var validRoles=['dj','admin','super_admin','superadmin'];
+    if(!profile||!validRoles.includes(profile.role)){window.location.href='dj-login.html';return;}
 
     // Try to find matching DJ record by email
     var {data:djRecord}=await sb.from('djs').select('*').eq('is_active',true).ilike('name',profile.first_name+'%').limit(1);
