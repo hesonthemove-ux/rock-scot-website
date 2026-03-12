@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJ Login — ROCK.SCOT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --black:#060606; --dark:#0e0e0e; --panel:#161616; --border:#1e1e1e;
+            --orange:#ff5500; --orange2:#ff7722; --red:#dd1111; --white:#f2f2f2;
+            --muted:rgba(242,242,242,0.5);
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        html,body{height:100%}
+        body{background:var(--black);color:var(--white);font-family:'Barlow',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+        body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 50%,rgba(255,85,0,0.08) 0%,transparent 70%),repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(255,85,0,0.02) 60px,rgba(255,85,0,0.02) 61px),repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(255,85,0,0.02) 60px,rgba(255,85,0,0.02) 61px);pointer-events:none;z-index:0}
+        .wrap{position:relative;z-index:1;width:100%;max-width:420px;padding:2rem;animation:fadeIn 0.6s ease forwards}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+        .logo{text-align:center;margin-bottom:2.5rem}
+        .logo img{height:64px}
+        .logo-name{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:0.12em}
+        .logo-sub{font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;color:var(--orange);margin-top:0.25rem}
+        .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:2.5rem 2rem;position:relative;overflow:hidden}
+        .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--orange),transparent)}
+        .card-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:0.08em;margin-bottom:0.25rem}
+        .card-sub{font-size:0.85rem;color:var(--muted);margin-bottom:2rem}
+        .fg{margin-bottom:1.25rem}
+        .fl{display:block;font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:0.5rem}
+        .fi{width:100%;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:0.85rem 1rem;color:var(--white);font-family:'Barlow',sans-serif;font-size:0.95rem;transition:border-color 0.2s,box-shadow 0.2s;outline:none}
+        .fi:focus{border-color:rgba(255,85,0,0.5);box-shadow:0 0 0 3px rgba(255,85,0,0.1)}
+        .fi::placeholder{color:rgba(242,242,242,0.2)}
+        .btn{width:100%;background:linear-gradient(135deg,var(--orange),var(--orange2));color:#000;border:none;border-radius:8px;padding:1rem;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:0.12em;cursor:pointer;transition:opacity 0.2s,transform 0.1s;margin-top:0.5rem}
+        .btn:hover{opacity:0.9}.btn:active{transform:scale(0.98)}.btn:disabled{opacity:0.5;cursor:not-allowed}
+        .err{background:rgba(221,17,17,0.1);border:1px solid rgba(221,17,17,0.3);border-radius:8px;padding:0.75rem 1rem;font-size:0.85rem;color:#ff6666;margin-top:1rem;display:none}
+        .footer{text-align:center;margin-top:1.5rem;font-size:0.8rem;color:rgba(242,242,242,0.25)}
+        .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px}
+        @keyframes spin{to{transform:rotate(360deg)}}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="logo">
+        <img src="images/rockscot-logo.png" alt="ROCK.SCOT" onerror="this.style.display='none'">
+        <div class="logo-name">ROCK.SCOT</div>
+        <div class="logo-sub">DJ Portal</div>
+    </div>
+    <div class="card">
+        <div class="card-title">Welcome Back</div>
+        <div class="card-sub">Sign in to access your DJ lounge</div>
+        <div class="fg">
+            <label class="fl" for="email">Email Address</label>
+            <input type="email" id="email" class="fi" placeholder="your@email.com" autocomplete="email">
+        </div>
+        <div class="fg">
+            <label class="fl" for="password">Password</label>
+            <input type="password" id="password" class="fi" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button class="btn" id="btn-login" onclick="doLogin()">Sign In</button>
+        <div class="err" id="err"></div>
+    </div>
+    <div class="footer">ROCK.SCOT — Scotland's DAB+ Rock Station<br>Having trouble? Contact your station manager.</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+var sb = supabase.createClient(
+    'https://pwzeapvopeeoahpyicdm.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk'
+);
+
+document.getElementById('password').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+
+async function doLogin(){
+    var email=document.getElementById('email').value.trim();
+    var pass=document.getElementById('password').value;
+    var btn=document.getElementById('btn-login');
+    var err=document.getElementById('err');
+    err.style.display='none';
+    if(!email||!pass){showErr('Please enter your email and password.');return;}
+    btn.disabled=true;
+    btn.innerHTML='<span class="spinner"></span>Signing in...';
+    var {data,error}=await sb.auth.signInWithPassword({email,password:pass});
+    if(error){btn.disabled=false;btn.innerHTML='Sign In';showErr('Invalid email or password.');return;}
+    var {data:profile}=await sb.from('user_profiles').select('role').eq('id',data.user.id).single();
+    var role=profile?profile.role:null;
+    if(role==='superadmin'||role==='super_admin'||role==='admin'){window.location.href='admin-dashboard.html';}
+    else if(role==='dj'){window.location.href='dj-lounge.html';}
+    else{await sb.auth.signOut();showErr('Your account does not have DJ access. Contact your station manager.');btn.disabled=false;btn.innerHTML='Sign In';}
+}
+
+function showErr(m){var e=document.getElementById('err');e.textContent=m;e.style.display='block';}
+
+sb.auth.getSession().then(function(r){
+    if(r.data&&r.data.session){
+        sb.from('user_profiles').select('role').eq('id',r.data.session.user.id).single().then(function(p){
+            var role=p.data?p.data.role:null;
+            if(role==='dj')window.location.href='dj-lounge.html';
+            else if(role==='admin'||role==='superadmin')window.location.href='admin-dashboard.html';
+        });
+    }
+});
+</script>
+</body>
+</html>
