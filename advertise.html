@@ -643,643 +643,185 @@
     
     <script>
     // ================================================================
-    // ROCK.SCOT ADVERTISE PAGE — ENTERPRISE BOOKING SYSTEM
-
-    // Functions are assigned directly to window as they're defined below
-    // Script runs at end of body, DOM is ready, no deferred wrapper needed
-
-    // Mux-aware capacity checking + Edge Function submission
+    // ROCK.SCOT ADVERTISE PAGE — BOOKING SYSTEM
     // ================================================================
 
-    const SUPABASE_URL  = window.SUPABASE_URL || 'https://pwzeapvopeeoahpyicdm.supabase.co';
-    const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
-    const EDGE_URL      = `${SUPABASE_URL}/functions/v1/book_campaign`;
-    // Supabase via direct REST (no CDN needed - works in Brave)
-    const supabase = { rest: true, _url: SUPABASE_URL, _key: SUPABASE_KEY };
-    supabase.from = function(table) {
-        const base = SUPABASE_URL + '/rest/v1/' + table;
-        const headers = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
-        return {
-            select: function(cols) { this._sel = cols || '*'; return this; },
-            eq: function(col, val) { this._filters = (this._filters||[]).concat(col+'=eq.'+encodeURIComponent(val)); return this; },
-            order: function(col, opts) { this._order = col + (opts&&opts.ascending===false?'.desc':'.asc'); return this; },
-            limit: function(n) { this._limit = n; return this; },
-            insert: function(data) {
-                return fetch(base, { method:'POST', headers: Object.assign({}, headers), body: JSON.stringify(data) })
-                    .then(r => r.json()).then(d => ({ data: d, error: null })).catch(e => ({ data: null, error: e }));
-            },
-            then: function(resolve, reject) {
-                let url = base + '?select=' + (this._sel||'*');
-                if (this._filters) this._filters.forEach(f => url += '&' + f);
-                if (this._order) url += '&order=' + this._order;
-                if (this._limit) url += '&limit=' + this._limit;
-                return fetch(url, { headers }).then(r => r.json())
-                    .then(d => resolve({ data: Array.isArray(d)?d:[], error: null }))
-                    .catch(e => resolve({ data: [], error: e }));
-            }
-        };
-    };
-    supabase.rpc = function(fn, params) {
-        return fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
-            method: 'POST',
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
-            body: JSON.stringify(params || {})
-        }).then(r => r.json()).then(d => ({ data: d, error: null })).catch(e => ({ data: null, error: e }));
-    };
+    var SUPABASE_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
+    var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
 
-    if (!supabase) {
-        console.warn('Supabase client failed to initialise. Quote UI will still work; live capacity checks may be skipped.');
-    }
+    var RATES = { regional:49500, multi:129500, toh:249500, bolt_on:35000, rush:19500, vat:0.20 };
 
-    // ── LIVE RATES FROM site_settings ────────────────────────────
-    async function loadLiveRates() {
-        try {
-            const resp = await fetch(
-                '/rock/rates-proxy.php'
-            );
-            if (!resp.ok) throw new Error('rates fetch failed');
-            const rows = await resp.json();
-            if (!Array.isArray(rows) || !rows.length) throw new Error('no rates returned');
-
-            const r = {};
-            rows.forEach(row => { r[row.key] = parseFloat(row.value) || 0; });
-
-            // ── Update PACKAGES in place ──────────────────────────
-            PACKAGES['regional'].pricePence       = Math.round((r.single_inverclyde  || 495)  * 100);
-            PACKAGES['multi-regional'].pricePence = Math.round((r.multi_regional     || 1295) * 100);
-            PACKAGES['top-of-hour'].pricePence    = Math.round((r.top_of_hour        || 2495) * 100);
-            BOLT_ON_PENCE_LIVE                    = Math.round((r.production_bolt_on || 350)  * 100);
-            RUSH_PENCE_LIVE                       = Math.round((r.rush_fee           || 195)  * 100);
-            VAT_RATE_LIVE                         = (r.vat_rate || 20) / 100;
-
-            // ── Helpers ───────────────────────────────────────────
-            const fmtEx  = p => '£' + (p/100).toLocaleString('en-GB', {minimumFractionDigits:0});
-            const fmtInc = p => '£' + (p/100 * (1 + VAT_RATE_LIVE)).toLocaleString('en-GB', {minimumFractionDigits:0});
-            const vatPct = Math.round(VAT_RATE_LIVE * 100);
-
-            const regEx  = PACKAGES['regional'].pricePence;
-            const mulEx  = PACKAGES['multi-regional'].pricePence;
-            const tohEx  = PACKAGES['top-of-hour'].pricePence;
-            const boltEx = BOLT_ON_PENCE_LIVE;
-            const rushEx = RUSH_PENCE_LIVE;
-
-            // ── Package cards — ex-VAT headline, inc-VAT sub ──────
-            const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-            set('card-price-regional', fmtEx(regEx));
-            set('card-incvat-regional', `${fmtInc(regEx)} inc. VAT`);
-            set('card-price-multi',    fmtEx(mulEx));
-            set('card-incvat-multi',   `${fmtInc(mulEx)} inc. VAT`);
-            set('card-price-toh',      fmtEx(tohEx));
-            set('card-incvat-toh',     `${fmtInc(tohEx)} inc. VAT`);
-
-            // ── Dropdown options ──────────────────────────────────
-            const pkgSelect = document.getElementById('package');
-            if (pkgSelect) {
-                Array.from(pkgSelect.options).forEach(opt => {
-                    if (opt.value === 'regional')       opt.text = `Regional — Single Mux (${fmtEx(regEx)} +VAT)`;
-                    if (opt.value === 'multi-regional') opt.text = `Multi-Regional — All 3 Mux (${fmtEx(mulEx)} +VAT)`;
-                    if (opt.value === 'top-of-hour')    opt.text = `Top of Hour — Station Ident (${fmtEx(tohEx)} +VAT)`;
-                });
-            }
-
-            // ── Bolt-on and rush labels ───────────────────────────
-            set('bolt-on-price', `+${fmtEx(boltEx)} +VAT`);
-            set('rush-price',    `+${fmtEx(rushEx)} +VAT`);
-
-            // ── Footer prices ─────────────────────────────────────
-            set('footer-price-from',     fmtEx(regEx));
-            set('footer-price-regional', fmtEx(regEx));
-            set('footer-price-multi',    fmtEx(mulEx));
-            set('footer-price-toh',      fmtEx(tohEx));
-
-            // ── Meta tags (title, description, og, twitter) ───────
-            document.title = document.title.replace(/£[\d,]+/, fmtEx(regEx));
-            document.querySelector('meta[name="description"]')?.setAttribute('content',
-                `Reach 410,000+ dedicated rock fans across Scotland on DAB+ digital radio. Advertising packages from ${fmtEx(regEx)} +VAT. Regional, Multi-Regional & Top of Hour spots. Professional production available.`);
-            document.querySelector('meta[property="og:title"]')?.setAttribute('content',
-                `Advertise on ROCK.SCOT — Reach Scotland's Rock Audience from ${fmtEx(regEx)} +VAT`);
-            document.querySelector('meta[property="og:description"]')?.setAttribute('content',
-                `410,000+ dedicated rock fans. DAB+ digital radio advertising across Inverclyde, North Ayrshire & South Lanarkshire. Packages from ${fmtEx(regEx)} +VAT + professional production.`);
-            document.querySelector('meta[name="twitter:title"]')?.setAttribute('content',
-                `Advertise on ROCK.SCOT — Scottish DAB+ Radio Advertising from ${fmtEx(regEx)} +VAT`);
-            document.querySelector('meta[name="twitter:description"]')?.setAttribute('content',
-                `Reach 410,000+ rock fans across Scotland on DAB+ digital radio. Packages from ${fmtEx(regEx)} +VAT. Professional production available.`);
-
-            // ── JSON-LD schema — replace price tokens ─────────────
-            const updateSchema = (id, replacements) => {
-                const el = document.getElementById(id);
-                if (!el) return;
-                let json = el.textContent;
-                Object.entries(replacements).forEach(([token, val]) => {
-                    json = json.split(token).join(val);
-                });
-                el.textContent = json;
-            };
-            const tokens = {
-                'PRICE_REGIONAL': (regEx/100).toFixed(2),
-                'PRICE_MULTI':    (mulEx/100).toFixed(2),
-                'PRICE_TOH':      (tohEx/100).toFixed(2),
-                'PRICE_BOLT':     (boltEx/100).toFixed(2),
-            };
-            updateSchema('schema-service', tokens);
-
-            // FAQ schema uses formatted strings in text
-            const faqEl = document.getElementById('schema-faq');
-            if (faqEl) {
-                let faqJson = faqEl.textContent;
-                faqJson = faqJson
-                    .split('PRICE_REGIONAL').join((regEx/100).toFixed(0))
-                    .split('PRICE_MULTI').join((mulEx/100).toFixed(0))
-                    .split('PRICE_TOH').join((tohEx/100).toFixed(0))
-                    .split('PRICE_BOLT').join((boltEx/100).toFixed(0));
-                faqEl.textContent = faqJson;
-            }
-
-        } catch(e) {
-            console.warn('Live rates unavailable, using defaults:', e.message);
-        }
-    }
-
-    // Live rate vars — overridden by loadLiveRates, fallback to hardcoded defaults
-    let BOLT_ON_PENCE_LIVE = BOLT_ON_PENCE;
-    let RUSH_PENCE_LIVE    = RUSH_PENCE;
-    let VAT_RATE_LIVE      = 0.20;
-
-    loadLiveRates();
-
-    // ── BROADCAST CONSTANTS (mirrors broadcast_constants table) ──
-    const BC = {
-        playsStandard:  134,   // single + multi campaigns
-        playsTOH:       672,   // top of hour (1/hr × 24 × 28)
-        maxCapacity:    120,   // 40 × weight_3
-        weightMulti:    3,
-        weightSingle:   1,
-        weightTOH:      3,
-        breakTimes:     ['20', '40'],  // :20 and :40 past each hour
-        spotsPerBreak:  4,
-    };
-
-    // ── PACKAGES ─────────────────────────────────────────────────
     window.PACKAGES = {
-        'regional': {
-            name:        'Regional',
-            productId:   'regional',
-            pricePence:  49500,
-            muxType:     'single',
-            muxWeight:   1,
-            plays:       BC.playsStandard,
-            boltOnAvail: true,
-            description: '134 plays over 28 days on your chosen mux',
-        },
-        'multi-regional': {
-            name:        'Multi-Regional',
-            productId:   'multi_regional',
-            pricePence:  99500,
-            muxType:     'multi',
-            muxWeight:   3,
-            plays:       BC.playsStandard,
-            boltOnAvail: true,
-            description: '134 plays over 28 days across all 3 mux areas',
-        },
-        'top-of-hour': {
-            name:        'Top of Hour',
-            productId:   'top_of_hour',
-            pricePence:  250000,
-            muxType:     'toh',
-            muxWeight:   3,
-            plays:       BC.playsTOH,
-            boltOnAvail: false,
-            description: '672 plays — integrated into the station ident every hour',
-        },
+        'regional':      { name:'Regional',      plays:'134 plays over 28 days',              boltOn:true,  getPrice:function(){ return RATES.regional; } },
+        'multi-regional':{ name:'Multi-Regional', plays:'134 plays over 28 days, all 3 areas', boltOn:true,  getPrice:function(){ return RATES.multi; } },
+        'top-of-hour':   { name:'Top of Hour',    plays:'672 plays — every hour, 24/7',         boltOn:false, getPrice:function(){ return RATES.toh; } }
     };
 
-    const BOLT_ON_PENCE = 25000;  // £250 production add-on
-    const RUSH_PENCE     = 5000;   // £50 rush surcharge
+    function fmt(p){ return '£'+(p/100).toLocaleString('en-GB',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+    function fmtInc(p){ return '£'+(p/100*(1+RATES.vat)).toLocaleString('en-GB',{minimumFractionDigits:0,maximumFractionDigits:0}); }
 
-    function defaultStartDate(daysAhead = 28) {
-        const d = new Date();
-        d.setHours(0, 0, 0, 0);
-        d.setDate(d.getDate() + daysAhead);
-        return d.toISOString().split('T')[0];
+    function updatePriceDisplays(){
+        var s=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+        s('card-price-regional',fmt(RATES.regional)); s('card-incvat-regional',fmtInc(RATES.regional)+' inc. VAT');
+        s('card-price-multi',fmt(RATES.multi));        s('card-incvat-multi',fmtInc(RATES.multi)+' inc. VAT');
+        s('card-price-toh',fmt(RATES.toh));            s('card-incvat-toh',fmtInc(RATES.toh)+' inc. VAT');
+        var sel=document.getElementById('package');
+        if(sel) Array.from(sel.options).forEach(function(o){
+            if(o.value==='regional')        o.text='Regional — Single Mux ('+fmt(RATES.regional)+' +VAT)';
+            if(o.value==='multi-regional')  o.text='Multi-Regional — All 3 Mux ('+fmt(RATES.multi)+' +VAT)';
+            if(o.value==='top-of-hour')     o.text='Top of Hour — Station Ident ('+fmt(RATES.toh)+' +VAT)';
+        });
     }
 
-    function ensureStartDate() {
-        const startInput = document.getElementById('start-date');
-        if (!startInput) return '';
-        if (!startInput.value) {
-            startInput.value = defaultStartDate();
-        }
-        return startInput.value;
+    function loadRates(){
+        fetch('rates-proxy.php?t='+Date.now())
+            .then(function(r){return r.json();})
+            .then(function(rows){
+                if(!Array.isArray(rows)) return;
+                var r={};
+                rows.forEach(function(row){r[row.key]=parseFloat(row.value)||0;});
+                if(r.single_inverclyde)  RATES.regional=Math.round(r.single_inverclyde*100);
+                if(r.multi_regional)     RATES.multi   =Math.round(r.multi_regional*100);
+                if(r.top_of_hour)        RATES.toh     =Math.round(r.top_of_hour*100);
+                if(r.production_bolt_on) RATES.bolt_on =Math.round(r.production_bolt_on*100);
+                if(r.rush_fee)           RATES.rush    =Math.round(r.rush_fee*100);
+                if(r.vat_rate)           RATES.vat     =r.vat_rate/100;
+                updatePriceDisplays();
+            })
+            .catch(function(e){console.warn('Rates failed, using defaults');});
     }
 
-    // ── PACKAGE SHORTCUT BUTTONS ──────────────────────────────────
-    window.selectPackage = function(pkgKey) {
-        var target = document.querySelector('.quote-calculator') || document.getElementById('quote-form');
-        if (target) {
-            var offset = target.getBoundingClientRect().top + window.scrollY - 110;
-            window.scrollTo({ top: offset, behavior: 'smooth' });
-        }
-        var packageSelect = document.getElementById('package');
-        if (packageSelect) {
-            packageSelect.value = pkgKey;
-            setTimeout(function() {
-                if (typeof onPackageChange === 'function') onPackageChange();
-                if (typeof calculateQuote === 'function') calculateQuote();
-            }, 50);
-        }
+    window.selectPackage = function(pkgKey){
+        var form=document.getElementById('quote-form');
+        if(form){ var off=form.getBoundingClientRect().top+window.scrollY-120; window.scrollTo({top:off,behavior:'smooth'}); }
+        var sel=document.getElementById('package');
+        if(sel){ sel.value=pkgKey; showHideMux(pkgKey); }
     };
 
-    // ── PACKAGE CHANGE: show/hide mux selector ───────────────────
-    window.onPackageChange = function() {
-        const pkg = document.getElementById('package').value;
-        const muxGroup = document.getElementById('mux-selector-group');
-        const muxSelect = document.getElementById('selected-mux');
-
-        if (pkg === 'regional') {
-            muxGroup.style.display = 'block';
-            muxSelect.required = true;
-        } else {
-            muxGroup.style.display = 'none';
-            muxSelect.required = false;
-            muxSelect.value = '';
-        }
-
-        const boltOnGroup = document.getElementById('bolt-on-group');
-        if (boltOnGroup) boltOnGroup.style.display = (pkg && PACKAGES[pkg] && PACKAGES[pkg].boltOnAvail) ? 'block' : 'none';
-
-        // Reset capacity indicator
-        document.getElementById('capacity-indicator').style.display = 'none';
-
-        if (pkg) {
-            ensureStartDate();
-        }
-
-        if (pkg) checkCapacityLive(pkg);
-        calculateQuote();
-    };
-
-    // ── LIVE CAPACITY CHECK ───────────────────────────────────────
-    async function checkCapacityLive(pkgKey) {
-        const indicator = document.getElementById('capacity-indicator');
-        const startDate = document.getElementById('start-date').value;
-        if (!pkgKey || !startDate) return;
-        if (!supabase) {
-            indicator.style.display = 'none';
-            return;
-        }
-
-        const pkg = (window.PACKAGES || {})[pkgKey];
-        if (!pkg) return;
-
-        indicator.style.display = 'block';
-        indicator.style.background = '#1a1a1a';
-        indicator.style.border = '1px solid #333';
-        indicator.style.color = '#999';
-        indicator.innerHTML = '⏳ Checking availability...';
-
-        try {
-            // Get current capacity used via RPC
-            const endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 28);
-            const endStr = endDate.toISOString().split('T')[0];
-
-            const { data, error } = await supabase
-                .rpc('check_capacity', {
-                    p_mux_type:   pkg.muxType,
-                    p_start_date: startDate,
-                    p_end_date:   endStr,
-                });
-
-            if (error) throw error;
-
-            const result = typeof data === 'string' ? JSON.parse(data) : data;
-            const remaining = result.capacity_remaining;
-            const pct = Math.round((result.capacity_used / BC.maxCapacity) * 100);
-
-            if (!result.can_approve) {
-                indicator.style.background = '#2a0000';
-                indicator.style.border = '1px solid #aa0000';
-                indicator.style.color = '#ff6666';
-                indicator.innerHTML = `⛔ <strong>${result.reason}</strong> — <a href="mailto:advertise@rock.scot" style="color:#FF6600;">Contact us</a> to join the waitlist.`;
-            } else if (remaining <= 15) {
-                indicator.style.background = '#2a1500';
-                indicator.style.border = '1px solid #FF6600';
-                indicator.style.color = '#FF9933';
-                indicator.innerHTML = `⚠️ <strong>Limited availability</strong> — only ${remaining} capacity unit${remaining !== 1 ? 's' : ''} remaining. Book now.`;
-            } else {
-                indicator.style.background = '#002a00';
-                indicator.style.border = '1px solid #006600';
-                indicator.style.color = '#00cc44';
-                indicator.innerHTML = `✅ <strong>Available</strong> — ${remaining} of ${BC.maxCapacity} capacity units free. ${pct}% booked.`;
-            }
-        } catch (err) {
-            indicator.style.display = 'none';
-            console.warn('Capacity check failed:', err.message);
-        }
+    function showHideMux(pkgKey){
+        var mg=document.getElementById('mux-selector-group');
+        if(mg) mg.style.display=(pkgKey==='regional')?'block':'none';
     }
 
-    // ── QUOTE CALCULATOR ─────────────────────────────────────────
-    window.calculateQuote = function() {
-        const pkgKey    = document.getElementById('package').value;
-        let startDate   = document.getElementById('start-date').value;
-        const length    = parseInt(document.getElementById('campaign-length').value) || 28;
-        const hasBoltOn = document.getElementById('bolt-on') && document.getElementById('bolt-on').checked;
-        const quoteResult = document.getElementById('quote-result');
-        const quoteTotal = document.getElementById('quote-total');
-        const quoteBreakdown = document.getElementById('quote-breakdown');
-        const submitBtn = document.getElementById('submit-btn');
-
-        if (!pkgKey) {
-            quoteResult.classList.add('show');
-            quoteTotal.textContent = '—';
-            quoteBreakdown.innerHTML = '<p style="color:rgba(255,255,255,0.7);">Select a <strong>package</strong> above, then click <strong>Calculate Quote</strong> to see your price.</p>';
-            if (submitBtn) submitBtn.style.display = 'none';
-            return;
-        }
-
-        if (!startDate) {
-            startDate = ensureStartDate();
-        }
-
-        if (!startDate) {
-            quoteResult.classList.add('show');
-            quoteTotal.textContent = '—';
-            quoteBreakdown.innerHTML = '<p style="color:rgba(255,255,255,0.7);">Please pick a valid start date.</p>';
-            if (submitBtn) submitBtn.style.display = 'none';
-            return;
-        }
-
-        const pkg = PACKAGES[pkgKey];
-        if (!pkg) {
-            quoteResult.classList.add('show');
-            quoteTotal.textContent = '—';
-            quoteBreakdown.innerHTML = '<p style="color:rgba(255,255,255,0.7);">Please select a package and start date.</p>';
-            if (submitBtn) submitBtn.style.display = 'none';
-            return;
-        }
-
-        const today    = new Date();
-        const start    = new Date(startDate);
-        const daysOut  = Math.ceil((start - today) / 86400000);
-        const isRush   = daysOut >= 0 && daysOut < 27;
-        const rushAmt  = isRush ? RUSH_PENCE_LIVE : 0;
-        const boltAmt  = (hasBoltOn && pkg.boltOnAvail) ? BOLT_ON_PENCE_LIVE : 0;
-
-        const netPence = pkg.pricePence + rushAmt + boltAmt;
-        const vatPence = Math.round(netPence * VAT_RATE_LIVE);
-        const totPence = netPence + vatPence;
-
-        // Show/hide rush warning
-        const warn = document.getElementById('surcharge-warning');
-        if (warn) warn.classList.toggle('show', isRush);
-
-        // Plays display
-        const playsText = pkgKey === 'top-of-hour'
-            ? `672 plays (every hour, 24/7, all 3 mux)`
-            : `${BC.playsStandard} plays over ${length} days` +
-              (pkgKey === 'multi-regional' ? ` across all 3 mux areas` : ` on your selected mux`);
-
-        // Mux display
-        const muxLabel = {
-            'single': 'Single Mux (1 area)',
-            'multi':  'Multi-Mux (all 3 areas — Inverclyde, N.Ayrshire, S.Lanarkshire)',
-            'toh':    'All 3 Mux (integrated station ident)',
-        }[pkg.muxType];
-
-        quoteTotal.textContent = `£${(netPence/100).toLocaleString()}`;
-        quoteBreakdown.innerHTML = `
-            <p><strong>Package:</strong> ${pkg.name}</p>
-            <p><strong>Coverage:</strong> ${muxLabel}</p>
-            <p><strong>Plays:</strong> ${playsText}</p>
-            <p><strong>Break times:</strong> :20 and :40 past each hour</p>
-            <p><strong>Base price:</strong> £${(pkg.pricePence/100).toLocaleString()}</p>
-            ${isRush   ? `<p><strong>Rush surcharge:</strong> £${(RUSH_PENCE_LIVE/100).toLocaleString()}</p>` : ''}
-            ${boltAmt  ? `<p><strong>Production add-on:</strong> £${(BOLT_ON_PENCE_LIVE/100).toLocaleString()}</p>` : ''}
-            <p><strong>Net (ex-VAT):</strong> £${(netPence/100).toLocaleString()}</p>
-            <p><strong>VAT (${Math.round(VAT_RATE_LIVE*100)}%):</strong> £${(vatPence/100).toLocaleString()}</p>
-            <p style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(255,255,255,0.2);">
-                <strong>Total inc. VAT:</strong> £${(totPence/100).toLocaleString()}
-            </p>
-        `;
-
-        quoteResult.classList.add('show');
-        if (submitBtn) submitBtn.style.display = 'block';
-
-        // Check capacity whenever quote is calculated
-        if (startDate) checkCapacityLive(pkgKey);
+    window.onPackageChange=function(){
+        showHideMux(document.getElementById('package').value);
     };
 
-    // Recalculate when start date changes
-    document.getElementById('start-date').addEventListener('change', () => {
-        calculateQuote();
-        const pkg = document.getElementById('package').value;
-        if (pkg) checkCapacityLive(pkg);
-    });
-
-    // ── FORM SUBMISSION ───────────────────────────────────────────
-    document.getElementById('quote-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const btn = document.getElementById('submit-btn');
-        btn.textContent = 'Submitting...';
-        btn.disabled = true;
-
-        const pkgKey        = document.getElementById('package').value;
-        const pkg           = PACKAGES[pkgKey];
-        const startDate     = ensureStartDate();
-        const length        = parseInt(document.getElementById('campaign-length').value) || 28;
-        const discountInput = document.getElementById('discount-code');
-        const selectedMuxEl = document.getElementById('selected-mux');
-        const boltOnEl      = document.getElementById('bolt-on');
-        const notesEl       = document.getElementById('notes');
-        const discountCode  = discountInput ? discountInput.value.trim().toUpperCase() : null;
-        const selectedMux   = selectedMuxEl ? selectedMuxEl.value : null;
-        const hasBoltOn     = boltOnEl ? boltOnEl.checked : false;
-        const notes         = notesEl ? notesEl.value : '';
-
-        if (!pkg) {
-            alert('Please select a campaign package.');
-            btn.textContent = 'Submit Booking Request';
-            btn.disabled = false;
+    window.calculateQuote=function(){
+        var pkgKey=document.getElementById('package').value;
+        var startDate=document.getElementById('start-date').value;
+        var length=parseInt(document.getElementById('campaign-length').value)||28;
+        var boltEl=document.getElementById('bolt-on');
+        var hasBolt=boltEl&&boltEl.checked;
+        var qRes=document.getElementById('quote-result');
+        var qTot=document.getElementById('quote-total');
+        var qBrk=document.getElementById('quote-breakdown');
+        var subBtn=document.getElementById('submit-btn');
+        if(!pkgKey){
+            if(qRes)qRes.classList.add('show');
+            if(qTot)qTot.textContent='—';
+            if(qBrk)qBrk.innerHTML='<p>Please select a package above.</p>';
             return;
         }
-
-        const today   = new Date();
-        const start   = new Date(startDate);
-        const daysOut = Math.ceil((start - today) / 86400000);
-        const isRush  = daysOut >= 0 && daysOut < 27;
-        const rushAmt = isRush ? RUSH_PENCE_LIVE : 0;
-        const boltAmt = (hasBoltOn && pkg.boltOnAvail) ? BOLT_ON_PENCE_LIVE : 0;
-        const netPence = pkg.pricePence + rushAmt + boltAmt;
-
-        // Validate: single-mux must have selected_mux
-        if (pkg.muxType === 'single' && !selectedMux) {
-            alert('Please select your broadcast region.');
-            btn.textContent = 'Submit Booking Request';
-            btn.disabled = false;
-            return;
+        var pkg=window.PACKAGES[pkgKey];
+        if(!pkg) return;
+        if(!startDate){
+            var d=new Date(); d.setDate(d.getDate()+28);
+            startDate=d.toISOString().split('T')[0];
+            var sdEl=document.getElementById('start-date');
+            if(sdEl) sdEl.value=startDate;
         }
+        var today=new Date();
+        var start=new Date(startDate);
+        var daysOut=Math.ceil((start-today)/86400000);
+        var isRush=daysOut>=0&&daysOut<27;
+        var rushAmt=isRush?RATES.rush:0;
+        var boltAmt=(hasBolt&&pkg.boltOn)?RATES.bolt_on:0;
+        var net=pkg.getPrice()+rushAmt+boltAmt;
+        var vat=Math.round(net*RATES.vat);
+        var total=net+vat;
+        var warn=document.getElementById('surcharge-warning');
+        if(warn) warn.style.display=isRush?'block':'none';
+        if(qRes) qRes.classList.add('show');
+        if(qTot) qTot.textContent=fmt(total)+' inc. VAT';
+        if(qBrk) qBrk.innerHTML=
+            '<p>'+pkg.name+' — '+pkg.plays+'</p>'+
+            (isRush?'<p style="color:#ff5500">⚡ Rush surcharge: '+fmt(rushAmt)+'</p>':'')+
+            (hasBolt&&pkg.boltOn?'<p>+ Production: '+fmt(boltAmt)+'</p>':'')+
+            '<p>Net ex-VAT: '+fmt(net)+'</p>'+
+            '<p>VAT ('+Math.round(RATES.vat*100)+'%): '+fmt(vat)+'</p>'+
+            '<p><strong>Total inc. VAT: '+fmt(total)+'</strong></p>';
+        if(subBtn) subBtn.style.display='block';
+    };
 
-        // Check capacity one final time before submitting
-        const endDate = new Date(startDate);
-        endDate.setDate(endDate.getDate() + length);
-        let cap = null;
-        if (supabase) {
-            const { data: capData, error: capError } = await supabase.rpc('check_capacity', {
-                p_mux_type:   pkg.muxType,
-                p_start_date: startDate,
-                p_end_date:   endDate.toISOString().split('T')[0],
-            });
-            if (capError) {
-                console.warn('Capacity RPC unavailable, continuing submit:', capError.message);
-            } else {
-                cap = typeof capData === 'string' ? JSON.parse(capData) : capData;
-            }
-        }
+    document.addEventListener('DOMContentLoaded',function(){
+        loadRates();
+        var form=document.getElementById('quote-form');
+        if(!form) return;
+        form.addEventListener('submit',function(e){
+            e.preventDefault();
+            var g=function(id){var el=document.getElementById(id);return el?el.value||'':'';};
+            var boltEl=document.getElementById('bolt-on');
+            var pkgVal = g('package');
+            var pkgObj = window.PACKAGES[pkgVal] || {};
+            var boltChecked = boltEl && boltEl.checked;
+            var muxVal = g('selected-mux') || 'inverclyde';
+            var muxType = pkgVal === 'regional' ? 'single' : pkgVal === 'top-of-hour' ? 'toh' : 'multi';
 
-        if (cap && !cap.can_approve) {
-            alert(`Sorry — ${cap.reason}. Please contact advertise@rock.scot.`);
-            btn.textContent = 'Submit Booking Request';
-            btn.disabled = false;
-            return;
-        }
+            // Calculate price to store
+            var basePrice = pkgObj.getPrice ? pkgObj.getPrice() : 0;
+            var boltPrice = (boltChecked && pkgObj.boltOn) ? RATES.bolt_on : 0;
+            var startDateVal = g('start-date');
+            var daysOut = startDateVal ? Math.ceil((new Date(startDateVal) - new Date()) / 86400000) : 999;
+            var isRushVal = daysOut >= 0 && daysOut < 27;
+            var rushPrice = isRushVal ? RATES.rush : 0;
+            var netPence = basePrice + boltPrice + rushPrice;
 
-        const payload = {
-            first_name:           document.getElementById('first-name').value.trim(),
-            last_name:            document.getElementById('last-name').value.trim(),
-            company:              document.getElementById('company').value.trim(),
-            email:                document.getElementById('email').value.trim().toLowerCase(),
-            phone:                document.getElementById('phone').value.trim(),
-            product_id:           pkg.productId,
-            product_name:         pkg.name,
-            campaign_length_days: length,
-            mux_type:             pkg.muxType,
-            mux_weight:           pkg.muxWeight,
-            selected_mux:         pkg.muxType === 'single' ? selectedMux : null,
-            product_net_pence:    netPence,
-            bolt_on_included:     hasBoltOn,
-            bolt_on_cost_pence:   boltAmt,
-            is_rush:              isRush,
-            discount_code:        discountCode,
-            final_price_pence:    netPence,
-            start_date:           startDate,
-            message:              notes,
-            submitted_via:        'web',
-        };
-
-        try {
-            // REST-only client - no auth session, always use anon key
-            const bearerToken = SUPABASE_KEY;
-
-            let result = null;
-            let usedFallback = false;
-
-            // Try Edge Function first (server-side validation + email trigger)
-            try {
-                const resp = await fetch(EDGE_URL, {
-                    method:  'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apikey':        SUPABASE_KEY,
-                        'Authorization': `Bearer ${bearerToken}`,
-                    },
-                    body: JSON.stringify(payload),
-                });
-                if (resp.ok) {
-                    result = await resp.json();
+            var lead = {
+                first_name:       g('first-name'),
+                last_name:        g('last-name'),
+                company:          g('company-name'),
+                email:            g('email'),
+                phone:            g('phone'),
+                product_id:       pkgVal,
+                product_name:     pkgObj.name || pkgVal,
+                selected_mux:     muxVal,
+                mux_type:         muxType,
+                start_date:       startDateVal,
+                campaign_days:    parseInt(g('campaign-length')) || 28,
+                bolt_on_included: boltChecked,
+                is_rush:          isRushVal,
+                final_price_pence: netPence,
+                discount_code:    g('discount-code'),
+                notes:            g('notes'),
+                status:           'submitted',
+                submitted_at:     new Date().toISOString()
+            };
+            var subBtn=document.getElementById('submit-btn');
+            if(subBtn){subBtn.disabled=true;subBtn.textContent='Submitting...';}
+            fetch(SUPABASE_URL+'/rest/v1/campaign_requests',{
+                method:'POST',
+                headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+                body:JSON.stringify(lead)
+            }).then(function(r){
+                if(r.ok||r.status===201){
+                    var suc=document.getElementById('success-message');
+                    if(suc){suc.style.display='block';suc.scrollIntoView({behavior:'smooth',block:'center'});}
+                    form.style.display='none';
                 } else {
-                    const errBody = await resp.json().catch(() => ({}));
-                    throw new Error(errBody.error || `Edge function returned ${resp.status}`);
+                    r.json().then(function(err){
+                        alert('Submission error: '+(err.message||err.error||'Unknown'));
+                        if(subBtn){subBtn.disabled=false;subBtn.textContent='Submit Booking Request';}
+                    });
                 }
-            } catch (edgeErr) {
-                console.warn('Edge function unavailable, falling back to direct insert:', edgeErr.message);
-                // Fallback: insert directly into campaign_requests table
-                const insertResp = await fetch(
-                    SUPABASE_URL + '/rest/v1/campaign_requests',
-                    {
-                        method: 'POST',
-                        headers: {
-                            'apikey': SUPABASE_KEY,
-                            'Authorization': 'Bearer ' + SUPABASE_KEY,
-                            'Content-Type': 'application/json',
-                            'Prefer': 'return=minimal',
-                        },
-                        body: JSON.stringify(payload),
-                    }
-                );
-                if (!insertResp.ok) {
-                    const insertErr = await insertResp.json().catch(() => ({}));
-                    throw new Error(insertErr.message || insertErr.error || insertErr.details || 'Direct insert failed');
-                }
-                // return=minimal gives 201 with no body - that's success
-                result = { booking_id: null };
-                usedFallback = true;
-            }
-
-            if (!result) throw new Error('No response from server');
-
-            // Success — hide form, show confirmation, scroll into view
-            const formEl = document.getElementById('quote-form');
-            const successEl = document.getElementById('success-message');
-            if (formEl) formEl.style.display = 'none';
-            const muxDesc = pkg.muxType === 'single'
-                ? selectedMux.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
-                : 'All 3 Mux Areas';
-            const bookingRef = result.booking_id ? String(result.booking_id).slice(0, 8).toUpperCase() : '';
-
-            successEl.innerHTML = `
-                <div style="text-align:center;padding:3rem 1rem;">
-                    <div style="font-size:4rem;margin-bottom:1rem;">✓</div>
-                    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:#00ff88;margin-bottom:1rem;">
-                        Request received
-                    </h3>
-                    <p style="font-size:1.2rem;margin-bottom:0.75rem;color:#fff;">
-                        Thank you, <strong>${payload.first_name}</strong>. Your <strong>${pkg.name}</strong> advertising enquiry has been submitted.
-                    </p>
-                    ${bookingRef ? `<p style="color:rgba(255,255,255,0.8);font-size:0.9rem;margin-bottom:1rem;">Reference: <strong>${bookingRef}</strong></p>` : ''}
-                    <p style="color:#ccc;margin-bottom:0.5rem;">Coverage: <strong>${muxDesc}</strong></p>
-                    <p style="color:#ccc;margin-bottom:1.5rem;">
-                        ${pkg.plays} plays${pkg.muxType === 'toh' ? ' — every hour' : ' over 28 days at :20 and :40 past each hour'}
-                    </p>
-                    <p style="color:#00ff88;font-size:1rem;margin-bottom:0;">
-                        We'll email you at <strong>${payload.email}</strong> within 24 hours to confirm next steps.
-                    </p>
-                </div>
-            `;
-            successEl.classList.add('show');
-            successEl.style.display = 'block';
-            successEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-        } catch (err) {
-            console.error('Submission error:', err);
-            // Show friendly message - hide technical detail
-            const isTableErr = err.message && err.message.includes('schema cache');
-            const msg = isTableErr
-                ? 'Our booking system is being set up. Your enquiry has been noted — please email advertise@rock.scot or call 0141 459 ROCK and we will get back to you within 24 hours.'
-                : `Something went wrong: ${err.message}\n\nPlease email advertise@rock.scot or call 0141 459 ROCK.`;
-            alert(msg);
-            btn.textContent = 'Submit Booking Request';
-            btn.disabled = false;
-        }
+            }).catch(function(){
+                alert('Network error — please email studio@rock.scot');
+                if(subBtn){subBtn.disabled=false;subBtn.textContent='Submit Booking Request';}
+            });
+        });
     });
 
-    // Functions already global — no wire-up needed
-
-    // Ensure users can calculate immediately after choosing a package.
-    ensureStartDate();
-
-    // Pre-select package if URL has ?package=... param
-    const urlParams = new URLSearchParams(window.location.search);
-    const preselect = urlParams.get('package');
-    if (preselect && PACKAGES[preselect]) {
-        document.getElementById('package').value = preselect;
-        onPackageChange();
-        document.getElementById('quote-form').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // Nav handled by header.js
-
-    </script>
+</script>
 
 <script src="js/header.js"></script>
 
