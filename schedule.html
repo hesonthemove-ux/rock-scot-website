@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule — ROCK.SCOT | Scotland's DAB+ Rock Station</title>
+    <meta name="description" content="ROCK.SCOT broadcast schedule — see who's on air across Scotland's DAB+ rock station.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+    <script src="js/header.js"></script>
+    <style>
+        :root {
+            --black:   #060606;
+            --dark:    #0e0e0e;
+            --panel:   #161616;
+            --border:  #1e1e1e;
+            --orange:  #ff5500;
+            --orange2: #ff7722;
+            --gold:    #ffd700;
+            --green:   #00cc88;
+            --red:     #dd1111;
+            --blue:    #4488ff;
+            --white:   #f2f2f2;
+            --muted:   rgba(242,242,242,0.5);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--black);
+            color: var(--white);
+            font-family: 'Barlow', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── HERO ─────────────────────────────────────────────── */
+        .sched-hero {
+            position: relative;
+            padding: 7rem 2rem 4rem;
+            margin-top: 98px;
+            text-align: center;
+            overflow: hidden;
+            background: var(--black);
+        }
+
+        .sched-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,85,0,0.12) 0%, transparent 70%),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 80px,
+                    rgba(255,85,0,0.02) 80px,
+                    rgba(255,85,0,0.02) 81px
+                );
+            pointer-events: none;
+        }
+
+        .sched-hero-eyebrow {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 900;
+            letter-spacing: 0.32em;
+            text-transform: uppercase;
+            color: var(--orange);
+            opacity: 0;
+            transform: translateY(12px);
+            animation: fadeUp 0.6s ease forwards 0.2s;
+            margin-bottom: 0.75rem;
+        }
+
+        .sched-hero-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(4rem, 14vw, 9rem);
+            line-height: 0.9;
+            letter-spacing: 0.03em;
+            color: var(--white);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.8s cubic-bezier(0.34,1.2,0.64,1) forwards 0.4s;
+        }
+
+        .sched-hero-title span {
+            color: var(--orange);
+            display: block;
+            text-shadow: 0 0 80px rgba(255,85,0,0.4);
+        }
+
+        .sched-hero-sub {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            text-transform: uppercase;
+            opacity: 0;
+            animation: fadeUp 0.6s ease forwards 0.7s;
+            margin-top: 1rem;
+        }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── ON AIR NOW BANNER ────────────────────────────────── */
+        .on-air-banner {
+            margin: 0 auto 3rem;
+            max-width: 900px;
+            padding: 0 1.5rem;
+            opacity: 0;
+            animation: fadeUp 0.7s ease forwards 0.9s;
+        }
+
+        .on-air-card {
+            background: linear-gradient(135deg, rgba(255,85,0,0.12), rgba(255,85,0,0.04));
+            border: 1px solid rgba(255,85,0,0.3);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .on-air-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--orange), transparent);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        .on-air-pulse {
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: var(--orange);
+            flex-shrink: 0;
+            box-shadow: 0 0 0 0 rgba(255,85,0,0.7);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%   { box-shadow: 0 0 0 0 rgba(255,85,0,0.7); }
+            70%  { box-shadow: 0 0 0 10px rgba(255,85,0,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,85,0,0); }
+        }
+
+        .on-air-label {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 900;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: var(--orange);
+        }
+
+        .on-air-dj-photo {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255,85,0,0.4);
+            flex-shrink: 0;
+        }
+
+        .on-air-dj-photo-placeholder {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            background: var(--panel);
+            border: 2px solid rgba(255,85,0,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .on-air-info { flex: 1; min-width: 0; }
+
+        .on-air-show {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.6rem;
+            letter-spacing: 0.06em;
+            color: var(--white);
+            line-height: 1;
+        }
+
+        .on-air-dj-name {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            margin-top: 0.2rem;
+        }
+
+        .on-air-time {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.4rem;
+            color: var(--orange);
+            letter-spacing: 0.05em;
+            flex-shrink: 0;
+        }
+
+        /* ── DAY TABS ─────────────────────────────────────────── */
+        .day-tabs-wrap {
+            position: sticky;
+            top: 98px;
+            z-index: 100;
+            background: rgba(6,6,6,0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 1rem;
+        }
+
+        .day-tabs {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow-x: auto;
+            scrollbar-width: none;
+            gap: 0;
+        }
+
+        .day-tabs::-webkit-scrollbar { display: none; }
+
+        .day-tab {
+            flex-shrink: 0;
+            padding: 1rem 1.4rem;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 900;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--muted);
+            cursor: pointer;
+            border: none;
+            background: none;
+            position: relative;
+            transition: color 0.2s;
+            white-space: nowrap;
+        }
+
+        .day-tab::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 50%; right: 50%;
+            height: 2px;
+            background: var(--orange);
+            transition: left 0.25s ease, right 0.25s ease;
+        }
+
+        .day-tab:hover { color: var(--white); }
+
+        .day-tab.active {
+            color: var(--orange);
+        }
+
+        .day-tab.active::after {
+            left: 0; right: 0;
+        }
+
+        .day-tab .today-dot {
+            display: inline-block;
+            width: 5px; height: 5px;
+            border-radius: 50%;
+            background: var(--orange);
+            margin-left: 5px;
+            vertical-align: middle;
+            position: relative;
+            top: -1px;
+        }
+
+        /* ── SCHEDULE GRID ────────────────────────────────────── */
+        .sched-main {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 6rem;
+        }
+
+        .day-panel { display: none; }
+        .day-panel.active { display: block; }
+
+        .day-header {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 3rem;
+            letter-spacing: 0.06em;
+            color: var(--white);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+        }
+
+        .day-header-date {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+        }
+
+        .slot-list { display: flex; flex-direction: column; gap: 0; }
+
+        .slot {
+            display: grid;
+            grid-template-columns: 90px 1fr;
+            gap: 0;
+            border-left: 2px solid var(--border);
+            position: relative;
+            opacity: 0;
+            transform: translateX(-8px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .slot.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .slot.on-air-now {
+            border-left-color: var(--orange);
+        }
+
+        .slot.on-air-now .slot-time-col::before {
+            content: '';
+            position: absolute;
+            left: -2px; top: 0; bottom: 0;
+            width: 2px;
+            background: var(--orange);
+            box-shadow: 0 0 12px rgba(255,85,0,0.8);
+            animation: glowPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 8px rgba(255,85,0,0.6); }
+            50% { box-shadow: 0 0 20px rgba(255,85,0,1); }
+        }
+
+        .slot-time-col {
+            padding: 1.25rem 1.25rem 1.25rem 0;
+            text-align: right;
+            position: relative;
+        }
+
+        .slot-time-col::after {
+            content: '';
+            position: absolute;
+            right: -5px; top: 1.75rem;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--border);
+            border: 2px solid var(--dark);
+        }
+
+        .slot.on-air-now .slot-time-col::after {
+            background: var(--orange);
+            box-shadow: 0 0 8px rgba(255,85,0,0.8);
+        }
+
+        .slot-time {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1rem;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+            line-height: 1;
+        }
+
+        .slot.on-air-now .slot-time { color: var(--orange); }
+
+        .slot-body {
+            padding: 1rem 1rem 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            transition: background 0.2s;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .slot:hover .slot-body {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .slot.on-air-now .slot-body {
+            background: rgba(255,85,0,0.05);
+        }
+
+        .slot-photo {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border);
+            flex-shrink: 0;
+            transition: border-color 0.2s;
+        }
+
+        .slot.on-air-now .slot-photo {
+            border-color: rgba(255,85,0,0.5);
+            box-shadow: 0 0 16px rgba(255,85,0,0.3);
+        }
+
+        .slot-photo-placeholder {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            background: var(--panel);
+            border: 2px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            color: var(--muted);
+        }
+
+        .slot-info { flex: 1; min-width: 0; }
+
+        .slot-show {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: var(--white);
+            line-height: 1.2;
+        }
+
+        .slot.on-air-now .slot-show { color: var(--orange); }
+
+        .slot-dj {
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin-top: 0.15rem;
+        }
+
+        .slot-tags {
+            display: flex;
+            gap: 0.4rem;
+            margin-top: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .slot-tag {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 0.15rem 0.5rem;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.06);
+            color: var(--muted);
+        }
+
+        .slot-tag.genre-rock    { background: rgba(255,85,0,0.12); color: #ff8855; }
+        .slot-tag.genre-metal   { background: rgba(180,180,180,0.1); color: #aaa; }
+        .slot-tag.genre-punk    { background: rgba(255,85,0,0.1); color: #ff6633; }
+        .slot-tag.genre-classic { background: rgba(255,215,0,0.1); color: #cc9900; }
+        .slot-tag.genre-alt     { background: rgba(68,136,255,0.1); color: #6699ff; }
+
+        .slot-now-badge {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.6rem;
+            font-weight: 900;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            background: var(--orange);
+            color: #000;
+            padding: 0.2rem 0.6rem;
+            border-radius: 2px;
+            flex-shrink: 0;
+            animation: badgePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* ── CONTINUOUS FILLER SLOT ───────────────────────────── */
+        .slot-continuous .slot-show {
+            color: var(--muted);
+            font-style: italic;
+            font-weight: 400;
+        }
+
+        .slot-continuous .slot-photo-placeholder {
+            background: transparent;
+            border-color: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.15);
+            font-size: 1rem;
+        }
+
+        /* ── EMPTY STATE ──────────────────────────────────────── */
+        .empty-day {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--muted);
+        }
+
+        .empty-day-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .empty-day-text {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            opacity: 0.4;
+        }
+
+        /* ── LOADING ──────────────────────────────────────────── */
+        .sched-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 4rem;
+            color: var(--muted);
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .sched-loading-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--orange);
+            animation: loadDot 1.2s ease-in-out infinite;
+        }
+
+        .sched-loading-dot:nth-child(2) { animation-delay: 0.2s; }
+        .sched-loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes loadDot {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* ── FOOTER RULE ──────────────────────────────────────── */
+        .sched-footer-rule {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 0;
+        }
+
+        /* ── MOBILE ───────────────────────────────────────────── */
+        @media (max-width: 600px) {
+            .sched-hero { padding: 5rem 1.5rem 2.5rem; }
+            .slot { grid-template-columns: 72px 1fr; }
+            .slot-time { font-size: 0.95rem; }
+            .on-air-card { flex-wrap: wrap; gap: 1rem; }
+            .on-air-time { width: 100%; text-align: left; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HERO -->
+    <section class="sched-hero">
+        <p class="sched-hero-eyebrow">Scotland's DAB+ Rock Station</p>
+        <h1 class="sched-hero-title">On <span>Air</span></h1>
+        <p class="sched-hero-sub">Full broadcast schedule — updated live</p>
+    </section>
+
+    <!-- ON AIR NOW -->
+    <div class="on-air-banner">
+        <div class="on-air-card" id="on-air-card">
+            <div class="on-air-pulse"></div>
+            <div id="on-air-photo-wrap">
+                <div class="on-air-dj-photo-placeholder">🎙</div>
+            </div>
+            <div class="on-air-info">
+                <div class="on-air-label">On Air Now</div>
+                <div class="on-air-show" id="on-air-show">Loading...</div>
+                <div class="on-air-dj-name" id="on-air-dj"></div>
+            </div>
+            <div class="on-air-time" id="on-air-time"></div>
+        </div>
+    </div>
+
+    <!-- DAY TABS -->
+    <div class="day-tabs-wrap">
+        <div class="day-tabs" id="day-tabs">
+            <button class="day-tab" data-day="0">Sunday</button>
+            <button class="day-tab" data-day="1">Monday</button>
+            <button class="day-tab" data-day="2">Tuesday</button>
+            <button class="day-tab" data-day="3">Wednesday</button>
+            <button class="day-tab" data-day="4">Thursday</button>
+            <button class="day-tab" data-day="5">Friday</button>
+            <button class="day-tab" data-day="6">Saturday</button>
+        </div>
+    </div>
+
+    <!-- SCHEDULE PANELS -->
+    <main class="sched-main">
+        <div id="sched-loading" class="sched-loading">
+            <div class="sched-loading-dot"></div>
+            <div class="sched-loading-dot"></div>
+            <div class="sched-loading-dot"></div>
+            <span>Loading schedule</span>
+        </div>
+        <div id="sched-panels"></div>
+    </main>
+
+    <hr class="sched-footer-rule">
+
+    <script>
+    // ── CONFIG ────────────────────────────────────────────────────
+    var SUPABASE_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
+    var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
+
+    var DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    var DAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+    // ── STATE ─────────────────────────────────────────────────────
+    var scheduleData = {}; // keyed by day_of_week 0-6
+    var djCache = {};
+    var currentDay = new Date().getDay();
+    var activeTab = currentDay;
+
+    // ── SUPABASE FETCH ────────────────────────────────────────────
+    function sbFetch(path) {
+        return fetch(SUPABASE_URL + '/rest/v1/' + path, {
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': 'Bearer ' + SUPABASE_KEY,
+                'Accept': 'application/json'
+            }
+        }).then(function(r) { return r.json(); });
+    }
+
+    // ── TIME HELPERS ──────────────────────────────────────────────
+    function fmtTime(t) {
+        // t = "HH:MM:SS" or "HH:MM"
+        var parts = t.split(':');
+        var h = parseInt(parts[0]);
+        var m = parts[1];
+        var ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        return h + ':' + m + ' ' + ampm;
+    }
+
+    function timeToMins(t) {
+        var parts = t.split(':');
+        return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+    }
+
+    function nowMins() {
+        var n = new Date();
+        return n.getHours() * 60 + n.getMinutes();
+    }
+
+    function isOnAirNow(slot) {
+        if (slot.day_of_week !== currentDay) return false;
+        var now = nowMins();
+        var start = timeToMins(slot.start_time);
+        var end = timeToMins(slot.end_time);
+        if (end < start) { // crosses midnight
+            return now >= start || now < end;
+        }
+        return now >= start && now < end;
+    }
+
+    // ── GENRE TAG CLASS ───────────────────────────────────────────
+    function genreClass(g) {
+        if (!g) return '';
+        var gl = g.toLowerCase();
+        if (gl.includes('metal')) return 'genre-metal';
+        if (gl.includes('punk')) return 'genre-punk';
+        if (gl.includes('classic')) return 'genre-classic';
+        if (gl.includes('alt')) return 'genre-alt';
+        return 'genre-rock';
+    }
+
+    // ── RENDER ON AIR BANNER ──────────────────────────────────────
+    function renderOnAir(slots, djs) {
+        var onAirSlot = null;
+        var allSlots = [];
+        Object.values(slots).forEach(function(daySlots) {
+            allSlots = allSlots.concat(daySlots);
+        });
+
+        for (var i = 0; i < allSlots.length; i++) {
+            if (isOnAirNow(allSlots[i])) {
+                onAirSlot = allSlots[i];
+                break;
+            }
+        }
+
+        var showEl  = document.getElementById('on-air-show');
+        var djEl    = document.getElementById('on-air-dj');
+        var timeEl  = document.getElementById('on-air-time');
+        var photoWrap = document.getElementById('on-air-photo-wrap');
+
+        if (onAirSlot) {
+            showEl.textContent  = onAirSlot.show_name || 'Rock.Scot Continuous';
+            timeEl.textContent  = fmtTime(onAirSlot.start_time) + ' – ' + fmtTime(onAirSlot.end_time);
+            var dj = onAirSlot.dj_id ? djs[onAirSlot.dj_id] : null;
+            djEl.textContent = dj ? (dj.name || dj.dj_name || '') : (onAirSlot.dj_name || '');
+            if (dj && dj.photo_url) {
+                photoWrap.innerHTML = '<img class="on-air-dj-photo" src="' + dj.photo_url + '" alt="' + (dj.name||'DJ') + '">';
+            } else {
+                photoWrap.innerHTML = '<div class="on-air-dj-photo-placeholder">🎙</div>';
+            }
+        } else {
+            showEl.textContent = 'Rock.Scot Continuous';
+            djEl.textContent   = 'Scotland\'s Rock Station — DAB+';
+            timeEl.textContent = '24/7';
+            photoWrap.innerHTML = '<div class="on-air-dj-photo-placeholder">📻</div>';
+        }
+    }
+
+    // ── RENDER SCHEDULE ───────────────────────────────────────────
+    function renderSchedule(slots, djs) {
+        document.getElementById('sched-loading').style.display = 'none';
+        var panels = document.getElementById('sched-panels');
+        panels.innerHTML = '';
+
+        // Mark today on tabs
+        var tabs = document.querySelectorAll('.day-tab');
+        tabs.forEach(function(tab) {
+            var d = parseInt(tab.dataset.day);
+            if (d === currentDay) {
+                tab.innerHTML = DAYS[d] + '<span class="today-dot"></span>';
+            }
+        });
+
+        DAYS.forEach(function(dayName, dayIdx) {
+            var panel = document.createElement('div');
+            panel.className = 'day-panel' + (dayIdx === activeTab ? ' active' : '');
+            panel.id = 'panel-' + dayIdx;
+
+            // Date string for this upcoming day
+            var now = new Date();
+            var diff = (dayIdx - now.getDay() + 7) % 7;
+            var target = new Date(now);
+            target.setDate(now.getDate() + diff);
+            var dateStr = target.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+
+            panel.innerHTML =
+                '<div class="day-header">' + dayName +
+                '<span class="day-header-date">' + dateStr + '</span></div>' +
+                '<div class="slot-list" id="slots-' + dayIdx + '"></div>';
+
+            panels.appendChild(panel);
+
+            var daySlots = (slots[dayIdx] || []).slice().sort(function(a,b) {
+                return timeToMins(a.start_time) - timeToMins(b.start_time);
+            });
+
+            var slotList = panel.querySelector('.slot-list');
+
+            if (!daySlots.length) {
+                slotList.innerHTML =
+                    '<div class="empty-day">' +
+                    '<div class="empty-day-icon">🎸</div>' +
+                    '<div class="empty-day-text">Schedule coming soon</div>' +
+                    '</div>';
+                return;
+            }
+
+            daySlots.forEach(function(slot, idx) {
+                var dj = slot.dj_id ? djs[slot.dj_id] : null;
+                var djName = dj ? (dj.name || dj.dj_name || slot.dj_name || '') : (slot.dj_name || '');
+                var photoUrl = dj ? dj.photo_url : null;
+                var isContinuous = !slot.show_name || slot.show_name.toLowerCase().includes('continuous');
+                var isNow = isOnAirNow(slot);
+
+                var photoHtml = photoUrl
+                    ? '<img class="slot-photo" src="' + photoUrl + '" alt="' + djName + '" loading="lazy">'
+                    : '<div class="slot-photo-placeholder">' + (isContinuous ? '📻' : '🎙') + '</div>';
+
+                var genreHtml = '';
+                if (slot.genre) {
+                    var genres = slot.genre.split(',');
+                    genreHtml = '<div class="slot-tags">' +
+                        genres.map(function(g) {
+                            var gt = g.trim();
+                            return '<span class="slot-tag ' + genreClass(gt) + '">' + gt + '</span>';
+                        }).join('') +
+                        '</div>';
+                }
+
+                var nowBadge = isNow ? '<span class="slot-now-badge">On Air</span>' : '';
+
+                var slotEl = document.createElement('div');
+                slotEl.className = 'slot' +
+                    (isNow ? ' on-air-now' : '') +
+                    (isContinuous ? ' slot-continuous' : '');
+                slotEl.innerHTML =
+                    '<div class="slot-time-col">' +
+                        '<div class="slot-time">' + fmtTime(slot.start_time) + '</div>' +
+                    '</div>' +
+                    '<div class="slot-body">' +
+                        photoHtml +
+                        '<div class="slot-info">' +
+                            '<div class="slot-show">' + (slot.show_name || 'Rock.Scot Continuous') + '</div>' +
+                            (djName ? '<div class="slot-dj">' + djName + '</div>' : '') +
+                            genreHtml +
+                        '</div>' +
+                        nowBadge +
+                    '</div>';
+
+                slotList.appendChild(slotEl);
+
+                // Staggered entrance animation
+                setTimeout(function() {
+                    slotEl.classList.add('visible');
+                }, 80 * idx);
+            });
+        });
+
+        renderOnAir(slots, djs);
+    }
+
+    // ── TAB SWITCHING ─────────────────────────────────────────────
+    function switchTab(dayIdx) {
+        activeTab = dayIdx;
+        document.querySelectorAll('.day-tab').forEach(function(t) {
+            t.classList.toggle('active', parseInt(t.dataset.day) === dayIdx);
+        });
+        document.querySelectorAll('.day-panel').forEach(function(p) {
+            p.classList.toggle('active', p.id === 'panel-' + dayIdx);
+        });
+        // Re-trigger slot animations
+        var slots = document.querySelectorAll('#panel-' + dayIdx + ' .slot');
+        slots.forEach(function(s, i) {
+            s.classList.remove('visible');
+            setTimeout(function() { s.classList.add('visible'); }, 60 * i);
+        });
+        // Scroll tabs into view
+        var activeTabEl = document.querySelector('.day-tab[data-day="' + dayIdx + '"]');
+        if (activeTabEl) activeTabEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+
+    // ── INIT ──────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set up tabs
+        document.querySelectorAll('.day-tab').forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                switchTab(parseInt(tab.dataset.day));
+            });
+        });
+
+        // Activate today's tab
+        var todayTab = document.querySelector('.day-tab[data-day="' + currentDay + '"]');
+        if (todayTab) todayTab.classList.add('active');
+
+        // Load schedule + DJs in parallel
+        Promise.all([
+            sbFetch('schedule_slots?select=*&order=day_of_week.asc,start_time.asc'),
+            sbFetch('djs?select=id,name,dj_name,photo_url,genres')
+        ]).then(function(results) {
+            var slots = results[0] || [];
+            var djList = results[1] || [];
+
+            // Index DJs by id
+            var djs = {};
+            djList.forEach(function(dj) { djs[dj.id] = dj; });
+
+            // Group slots by day
+            var grouped = {};
+            slots.forEach(function(slot) {
+                var d = slot.day_of_week;
+                if (!grouped[d]) grouped[d] = [];
+                grouped[d].push(slot);
+            });
+
+            renderSchedule(grouped, djs);
+        }).catch(function(err) {
+            console.error('Schedule load failed:', err); document.getElementById('sched-loading').innerHTML = '<span style="color:var(--red)">' + err + '</span>';
+            document.getElementById('sched-loading').innerHTML =
+                '<span style="color:var(--muted)">Schedule temporarily unavailable — check back soon.</span>';
+        });
+
+        // Refresh on-air indicator every minute
+        setInterval(function() {
+            currentDay = new Date().getDay();
+        }, 60000);
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<body>
+<form id="subscribeForm">
+    <input type="email" id="email" placeholder="Enter your email" required>
+    <button type="submit">Join the List</button>
+</form>
+<div id="message"></div>
+
+<script>
+document.getElementById('subscribeForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const response = await fetch('mailing-proxy.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ email })
+    });
+    document.getElementById('message').innerText = "Check your email to verify your subscription!";
+});
+</script>
+</body>
+</html>
