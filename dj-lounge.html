@@ -347,7 +347,6 @@ async function submitAck(){
     });
 
     document.getElementById('ack-overlay').style.display='none';
-    loadAckHistory();
 }
 
 async function checkNeedsAck(){
@@ -603,6 +602,56 @@ async function signOut(){
     window.location.href='dj-login.html';
 }
 
+
+async function loadUpNext(){
+    var el=document.getElementById('up-next');
+    if(!el) return;
+    var today=new Date().getDay();
+    var now=nowMins();
+
+    // Get all of today's slots sorted by start time
+    var {data:todaySlots}=await sb.from('schedule_slots')
+        .select('*,djs(name,photo_url)')
+        .eq('day_of_week',today).eq('is_active',true)
+        .order('start_time');
+
+    // Get tomorrow's first slot too
+    var tomorrow=(today+1)%7;
+    var {data:tomorrowSlots}=await sb.from('schedule_slots')
+        .select('*,djs(name,photo_url)')
+        .eq('day_of_week',tomorrow).eq('is_active',true)
+        .order('start_time').limit(1);
+
+    var upcoming=[];
+    if(todaySlots){
+        todaySlots.forEach(function(s){
+            if(timeToMins(s.start_time)>now) upcoming.push({slot:s,label:'Today'});
+        });
+    }
+    if(tomorrowSlots&&tomorrowSlots.length&&upcoming.length<2){
+        upcoming.push({slot:tomorrowSlots[0],label:'Tomorrow'});
+    }
+
+    if(!upcoming.length){
+        el.innerHTML='<div style="font-size:0.85rem;color:var(--dim)">No more shows scheduled today</div>';
+        return;
+    }
+
+    el.innerHTML=upcoming.slice(0,3).map(function(item){
+        var s=item.slot;
+        var dj=s.djs;
+        var djName=dj?dj.name:(s.dj_name||'Rock.Scot');
+        var photo=dj&&dj.photo_url?'<img style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0" src="'+dj.photo_url+'" alt="'+djName+'">':'<div style="width:36px;height:36px;border-radius:50%;background:var(--dark);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">🎙</div>';
+        return '<div style="display:flex;align-items:center;gap:1rem;padding:0.75rem 0;border-bottom:1px solid var(--border)">'+
+            photo+
+            '<div>'+
+            '<div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--orange)">'+item.label+' · '+fmtTime(s.start_time)+'</div>'+
+            '<div style="font-size:0.92rem;font-weight:500;margin-top:0.1rem">'+(s.show_name||'Rock.Scot Continuous')+'</div>'+
+            '<div style="font-size:0.8rem;color:var(--muted)">'+djName+'</div>'+
+            '</div></div>';
+    }).join('');
+}
+
 // ── INIT ──────────────────────────────────────────────────────────
 async function init(){
     var {data:{session},error}=await sb.auth.getSession();
@@ -638,7 +687,6 @@ async function init(){
     loadRecentMessages();
     loadGenreNews();
     loadStreamStats();
-    loadAckHistory();
     initPusher();
 
     // Refresh on-air every minute
