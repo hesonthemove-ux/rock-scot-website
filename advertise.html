@@ -721,9 +721,9 @@
                             <label>Package *</label>
                             <select id="package" required onchange="onPackageChange()">
                                 <option value="">Select package...</option>
-                                <option value="regional">Regional — Single Mux (£495)</option>
-                                <option value="multi-regional">Multi-Regional — All 3 Mux (£1,245)</option>
-                                <option value="top-of-hour">Top of Hour — Station Ident (£350)</option>
+                                <option value="regional">Regional — Single Mux (£495 ex. VAT)</option>
+                                <option value="multi-regional">Multi-Regional — All 3 Mux (£1,295 ex. VAT)</option>
+                                <option value="top-of-hour">Top of Hour — Station Ident (£2,495 ex. VAT)</option>
                             </select>
                         </div>
                     </div>
@@ -1112,6 +1112,9 @@
     };
 
     // ── PACKAGE CHANGE: show/hide mux selector ───────────────────
+      } catch(err) { console.error('calculateQuote error:', err); }
+    };
+
     window.onPackageChange = function() {
         const pkg = document.getElementById('package').value;
         const muxGroup = document.getElementById('mux-selector-group');
@@ -1202,6 +1205,7 @@
 
     // ── QUOTE CALCULATOR ─────────────────────────────────────────
     window.calculateQuote = function() {
+      try {
         const pkgKey    = document.getElementById('package').value;
         let startDate   = document.getElementById('start-date').value;
         const length    = parseInt(document.getElementById('campaign-length').value) || 28;
@@ -1211,10 +1215,13 @@
         const quoteBreakdown = document.getElementById('quote-breakdown');
         const submitBtn = document.getElementById('submit-btn');
 
+        // Use window.PACKAGES to ensure correct scope
+        const PKGS = window.PACKAGES || {};
+
         if (!pkgKey) {
-            quoteResult.classList.add('show');
-            quoteTotal.textContent = '—';
-            quoteBreakdown.innerHTML = '<p style="color:rgba(255,255,255,0.7);">Select a <strong>package</strong> above, then click <strong>Calculate Quote</strong> to see your price.</p>';
+            if (quoteResult) quoteResult.classList.add('show');
+            if (quoteTotal) quoteTotal.textContent = '—';
+            if (quoteBreakdown) quoteBreakdown.innerHTML = '<p style="color:rgba(255,255,255,0.7);">Select a <strong>package</strong> above, then click <strong>Calculate Quote</strong> to see your price.</p>';
             if (submitBtn) submitBtn.style.display = 'none';
             return;
         }
@@ -1231,11 +1238,11 @@
             return;
         }
 
-        const pkg = PACKAGES[pkgKey];
+        const pkg = PKGS[pkgKey];
         if (!pkg) {
-            quoteResult.classList.add('show');
-            quoteTotal.textContent = '—';
-            quoteBreakdown.innerHTML = '<p style="color:rgba(255,255,255,0.7);">Please select a package and start date.</p>';
+            if (quoteResult) quoteResult.classList.add('show');
+            if (quoteTotal) quoteTotal.textContent = '—';
+            if (quoteBreakdown) quoteBreakdown.innerHTML = '<p style="color:rgba(255,255,255,0.7);">Package not found — please refresh and try again.</p>';
             if (submitBtn) submitBtn.style.display = 'none';
             return;
         }
