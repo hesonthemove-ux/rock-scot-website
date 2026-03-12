@@ -588,6 +588,12 @@
                         <div class="quote-breakdown" id="quote-breakdown"><p style="color:rgba(255,255,255,0.7);">Select a <strong>package</strong> and <strong>start date</strong> above, then click <strong>Calculate Quote</strong> to see your price.</p></div>
                     </div>
                     
+                    <div id="consent-notice" style="display:none;margin-bottom:1rem;padding:1rem;border:1px solid rgba(255,255,255,0.1);border-radius:8px;background:rgba(255,255,255,0.03);">
+                        <label style="display:flex;gap:0.75rem;align-items:flex-start;cursor:pointer;font-size:0.85rem;color:rgba(242,242,242,0.65);line-height:1.5;">
+                            <input type="checkbox" id="consent-check" required style="margin-top:3px;accent-color:var(--orange);flex-shrink:0;">
+                            <span>I confirm I am authorised to advertise on behalf of this business. I understand that ROCK.SCOT carries out standard due diligence checks on all advertising enquiries prior to confirming bookings, and that my details will be used solely to process this request in accordance with applicable data protection law.</span>
+                        </label>
+                    </div>
                     <button type="submit" class="btn-submit" id="submit-btn" style="display: none;">Submit Booking Request</button>
                 </form>
                 
@@ -775,6 +781,7 @@
             '<p>VAT ('+Math.round(RATES.vat*100)+'%): '+fmt(vat)+'</p>'+
             '<p><strong>Total inc. VAT: '+fmt(total)+'</strong></p>';
         if(subBtn) subBtn.style.display='block';
+        var cn=document.getElementById('consent-notice'); if(cn) cn.style.display='block';
     };
 
     document.addEventListener('DOMContentLoaded',function(){
