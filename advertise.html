@@ -914,7 +914,7 @@
     async function loadLiveRates() {
         try {
             const resp = await fetch(
-                '/rock/rates-proxy.php'
+                'rates-proxy.php?t=' + Date.now()
             );
             if (!resp.ok) throw new Error('rates fetch failed');
             const rows = await resp.json();
@@ -925,10 +925,10 @@
 
             // ── Update PACKAGES in place ──────────────────────────
             PACKAGES['regional'].pricePence       = Math.round((r.single_inverclyde  || 495)  * 100);
-            PACKAGES['multi-regional'].pricePence = Math.round((r.multi_regional     || 1245) * 100);
-            PACKAGES['top-of-hour'].pricePence    = Math.round((r.top_of_hour        || 350)  * 100);
-            BOLT_ON_PENCE_LIVE                    = Math.round((r.production_bolt_on || 150)  * 100);
-            RUSH_PENCE_LIVE                       = Math.round((r.rush_fee           || 75)   * 100);
+            PACKAGES['multi-regional'].pricePence = Math.round((r.multi_regional     || 1295) * 100);
+            PACKAGES['top-of-hour'].pricePence    = Math.round((r.top_of_hour        || 2495) * 100);
+            BOLT_ON_PENCE_LIVE                    = Math.round((r.production_bolt_on || 350)  * 100);
+            RUSH_PENCE_LIVE                       = Math.round((r.rush_fee           || 195)  * 100);
             VAT_RATE_LIVE                         = (r.vat_rate || 20) / 100;
 
             // ── Helpers ───────────────────────────────────────────
@@ -1072,8 +1072,8 @@
         },
     };
 
-    const BOLT_ON_PENCE = 25000;  // £250 production add-on
-    const RUSH_PENCE     = 5000;   // £50 rush surcharge
+    const BOLT_ON_PENCE = 35000;  // £350 production add-on
+    const RUSH_PENCE     = 19500;  // £195 rush surcharge
 
     function defaultStartDate(daysAhead = 28) {
         const d = new Date();
