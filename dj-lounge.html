@@ -471,7 +471,7 @@ async function loadUpNext(){
 }
 
 // ── NEWS FROM WIRE ────────────────────────────────────────
-async function loadNews(){
+async function loadNews(){ try {
     var el = document.getElementById('genre-news');
     var { data, error } = await sb.from('wire_news')
         .select('id,title,source_name,genre,created_at')
@@ -496,7 +496,7 @@ async function loadNews(){
             '</div>';
     }).join('');
     dbg('news OK', true);
-}
+} catch(e){ document.getElementById('genre-news').innerHTML='<p style="color:red;font-size:0.8rem">'+e.message+'</p>'; dbg('news CRASH:'+e.message,false); } }
 
 // ── STREAM STATS ──────────────────────────────────────────
 async function loadStreamStats(){
@@ -514,7 +514,7 @@ async function loadStreamStats(){
 }
 
 // ── MESSAGES ──────────────────────────────────────────────
-async function loadMessages(){
+async function loadMessages(){ try {
     var list = document.getElementById('msg-list');
     var djId = currentDJ ? currentDJ.id : null;
     var { data, error } = await sb.from('dj_messages').select('*').order('created_at',{ascending:false}).limit(20);
@@ -523,7 +523,7 @@ async function loadMessages(){
     list.innerHTML = '';
     data.reverse().forEach(function(m){ addMsg(m.sender_name||'Fan', m.message, m.created_at, m.message_type||'fan'); });
     dbg('msgs OK', true);
-}
+} catch(e){ document.getElementById('msg-list').innerHTML='<p style="color:red;font-size:0.8rem">'+e.message+'</p>'; dbg('msgs CRASH:'+e.message,false); } }
 
 function addMsg(from, text, ts, type){
     var list = document.getElementById('msg-list');
