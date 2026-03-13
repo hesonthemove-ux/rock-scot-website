@@ -135,6 +135,31 @@
         .handbook-btn:hover{border-color:var(--orange);color:var(--orange)}
         .handbook-note{font-size:0.8rem;color:var(--dim);line-height:1.5}
 
+
+        /* NEWS POPOUT */
+        .gf-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9000;display:none;align-items:flex-end;justify-content:center}
+        .gf-overlay.open{display:flex}
+        .gf-panel{background:var(--panel);border:1px solid var(--border);border-radius:16px 16px 0 0;width:100%;max-width:560px;overflow:hidden;animation:slideUp 0.3s ease}
+        @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+        .gf-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0.75rem auto 0}
+        .gf-art-wrap{position:relative;height:200px;overflow:hidden}
+        .gf-art-wrap img{width:100%;height:100%;object-fit:cover}
+        .gf-art-grad{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,var(--panel))}
+        .gf-close-x{position:absolute;top:0.75rem;right:0.75rem;background:rgba(0,0,0,0.6);border:none;color:var(--white);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center}
+        .gf-genre-badge{position:absolute;top:0.75rem;left:0.75rem;background:rgba(255,85,0,0.85);color:#000;font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;font-weight:900;letter-spacing:0.16em;text-transform:uppercase;padding:0.2rem 0.5rem;border-radius:4px}
+        .gf-body{padding:1rem 1.25rem 0.5rem}
+        .gf-body h2{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.04em;line-height:1.2;margin-bottom:0.5rem}
+        .gf-body p{font-size:0.85rem;color:rgba(242,242,242,0.75);line-height:1.6;margin-bottom:0.75rem}
+        .gf-source-line{font-size:0.75rem;color:var(--dim);margin-bottom:0.75rem}
+        .gf-link{display:inline-flex;align-items:center;gap:0.4rem;background:var(--orange);color:#000;font-family:'Barlow Condensed',sans-serif;font-size:0.82rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.5rem 1rem;border-radius:6px;text-decoration:none;margin-bottom:0.75rem}
+        .gf-link:hover{background:var(--orange2)}
+        .gf-nav{display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.25rem;border-top:1px solid var(--border)}
+        .gf-nav-btn{background:none;border:1px solid var(--border2);color:var(--white);padding:0.4rem 0.9rem;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:0.78rem;font-weight:700;letter-spacing:0.08em}
+        .gf-nav-btn:hover{border-color:var(--orange);color:var(--orange)}
+        .gf-counter{font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;color:var(--dim)}
+        .news-item{cursor:pointer}
+        .news-item:hover .news-title{color:var(--orange)}
+
         /* SPINNER */
         .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(242,242,242,0.1);border-top-color:var(--orange);border-radius:50%;animation:sp 0.7s linear infinite;vertical-align:middle;margin-right:5px}
         @keyframes sp{to{transform:rotate(360deg)}}
@@ -488,8 +513,9 @@ async function loadNews(){ try {
         : data;
     if(!filtered.length) filtered = data;
 
-    el.innerHTML = filtered.slice(0,10).map(function(item){
-        return '<div class="news-item">'+
+    gfStories = filtered.slice(0,10);
+    el.innerHTML = filtered.slice(0,10).map(function(item, idx){
+        return '<div class="news-item" onclick="gfOpen(gfStories,'+idx+')">'+
             '<div class="news-source">'+esc(item.source_name||'The Wire')+'</div>'+
             '<div class="news-title">'+esc(item.title||'')+'</div>'+
             '<div class="news-date">'+fmtDate(item.created_at)+'</div>'+
@@ -614,7 +640,74 @@ async function init(){
     setInterval(loadStreamStats, 120000);
 }
 
+// ── NEWS POPOUT ───────────────────────────────────────────
+var gfStories = [];
+var gfIdx = 0;
+var GENRE_PHOTOS = {
+    rock:   ['https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80','https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=600&q=80','https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80'],
+    metal:  ['https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=600&q=80','https://images.unsplash.com/photo-1504898770365-14faca6a7320?w=600&q=80'],
+    punk:   ['https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=600&q=80','https://images.unsplash.com/photo-1501386761578-eaa54b915bce?w=600&q=80'],
+    indie:  ['https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=600&q=80','https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=600&q=80'],
+    classic:['https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=600&q=80','https://images.unsplash.com/photo-1571935441834-df3ae5b61b8b?w=600&q=80']
+};
+function genrePhoto(genre, seed){
+    var g=(genre||'').toLowerCase();
+    for(var k in GENRE_PHOTOS){ if(g.includes(k)){ var p=GENRE_PHOTOS[k]; return p[seed%p.length]; } }
+    return GENRE_PHOTOS.rock[seed%GENRE_PHOTOS.rock.length];
+}
+function gfOpen(stories, idx){
+    gfStories = stories; gfIdx = idx;
+    gfRender();
+    document.getElementById('gf-overlay').classList.add('open');
+    document.body.style.overflow='hidden';
+}
+function gfClose(){
+    document.getElementById('gf-overlay').classList.remove('open');
+    document.body.style.overflow='';
+}
+function gfNav(dir){
+    gfIdx = (gfIdx + dir + gfStories.length) % gfStories.length;
+    gfRender();
+}
+function gfRender(){
+    var s = gfStories[gfIdx];
+    document.getElementById('gf-art').src = genrePhoto(s.genre, gfIdx);
+    document.getElementById('gf-genre-badge').textContent = s.genre||'Rock';
+    document.getElementById('gf-title').textContent = s.title||'';
+    document.getElementById('gf-summary').textContent = s.summary||s.description||'';
+    document.getElementById('gf-source').textContent = s.source_name||'The Wire';
+    var lnk = document.getElementById('gf-link');
+    if(s.source_url){ lnk.href=s.source_url; lnk.style.display='inline-flex'; }
+    else { lnk.style.display='none'; }
+    document.getElementById('gf-counter').textContent = (gfIdx+1)+' / '+gfStories.length;
+}
+
 document.addEventListener('DOMContentLoaded', init);
 </script>
+
+<!-- NEWS POPOUT -->
+<div class="gf-overlay" id="gf-overlay" onclick="if(event.target===this)gfClose()">
+    <div class="gf-panel">
+        <div class="gf-handle"></div>
+        <div class="gf-art-wrap">
+            <img id="gf-art" src="" alt="">
+            <div class="gf-art-grad"></div>
+            <span class="gf-genre-badge" id="gf-genre-badge"></span>
+            <button class="gf-close-x" onclick="gfClose()">&#x2715;</button>
+        </div>
+        <div class="gf-body">
+            <h2 id="gf-title"></h2>
+            <p id="gf-summary"></p>
+            <div class="gf-source-line">Source: <span id="gf-source"></span></div>
+            <a id="gf-link" href="#" target="_blank" rel="noopener noreferrer" class="gf-link">Read Full Story &#8599;</a>
+        </div>
+        <div class="gf-nav">
+            <button class="gf-nav-btn" onclick="gfNav(-1)">&#8592; Prev</button>
+            <span class="gf-counter" id="gf-counter"></span>
+            <button class="gf-nav-btn" onclick="gfNav(1)">Next &#8594;</button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
