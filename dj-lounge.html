@@ -489,8 +489,7 @@ async function loadNews(){
     if(!filtered.length) filtered = data;
 
     el.innerHTML = filtered.slice(0,10).map(function(item){
-        var link = item.url||'#';
-        return '<div class="news-item"'+(link!=='#'?' onclick="window.open(\''+esc(link)+'\',\'_blank\')"':'')+'>'+
+        return '<div class="news-item">'+
             '<div class="news-source">'+esc(item.source_name||'The Wire')+'</div>'+
             '<div class="news-title">'+esc(item.title||'')+'</div>'+
             '<div class="news-date">'+fmtDate(item.created_at)+'</div>'+
@@ -518,9 +517,7 @@ async function loadStreamStats(){
 async function loadMessages(){
     var list = document.getElementById('msg-list');
     var djId = currentDJ ? currentDJ.id : null;
-    var query = sb.from('dj_messages').select('*').order('created_at',{ascending:false}).limit(20);
-    if(djId) query = query.or('dj_id.eq.'+djId+',dj_id.is.null');
-    var { data, error } = await query;
+    var { data, error } = await sb.from('dj_messages').select('*').order('created_at',{ascending:false}).limit(20);
     if(error){ list.innerHTML='<p class="panel-empty">Messages unavailable</p>'; dbg('msgs ERR:'+error.message, false); return; }
     if(!data||!data.length){ list.innerHTML='<p class="panel-empty">No messages yet — fan messages appear here in real time</p>'; dbg('msgs: empty', true); return; }
     list.innerHTML = '';
