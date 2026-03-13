@@ -307,10 +307,38 @@
     </div>
 
     <!-- NEWS -->
-    <div class="panel col-full">
-        <div class="panel-head"><span class="panel-icon">📰</span><span class="panel-title">Music News</span></div>
-        <div class="panel-body" id="genre-news">
-            <div class="loading"><span class="spin"></span>Loading...</div>
+    <div class="panel col-full" id="news-panel">
+        <div class="panel-head" onclick="toggleWire()" style="cursor:pointer;user-select:none;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:0.5rem">
+                <span class="panel-icon">📰</span>
+                <span class="panel-title">The Wire — Music News</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.75rem">
+                <span id="wire-count" style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--dim)"></span>
+                <span id="wire-chevron" style="color:var(--muted);font-size:0.8rem;transition:transform 0.25s">▼</span>
+            </div>
+        </div>
+        <div id="wire-body" style="display:none">
+            <!-- CARD GRID -->
+            <div id="wire-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:1rem"></div>
+            <!-- FULL STORY VIEW -->
+            <div id="wire-story" style="display:none;padding:1.25rem;border-top:1px solid var(--border)">
+                <button onclick="wireBackToCards()" style="background:none;border:none;color:var(--orange);font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer;margin-bottom:1rem;padding:0">&#8592; Back to News</button>
+                <div id="wire-story-art" style="height:180px;border-radius:10px;overflow:hidden;margin-bottom:1rem;position:relative">
+                    <img id="wire-story-img" src="" alt="" style="width:100%;height:100%;object-fit:cover">
+                    <div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,var(--panel))"></div>
+                    <span id="wire-story-genre" style="position:absolute;top:0.6rem;left:0.6rem;background:rgba(255,85,0,0.85);color:#000;font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;font-weight:900;letter-spacing:0.16em;text-transform:uppercase;padding:0.2rem 0.5rem;border-radius:4px"></span>
+                </div>
+                <h2 id="wire-story-title" style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:0.04em;line-height:1.2;margin-bottom:0.75rem"></h2>
+                <p id="wire-story-body" style="font-size:0.88rem;line-height:1.7;color:rgba(242,242,242,0.82);margin-bottom:1rem"></p>
+                <div id="wire-story-source" style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--dim)"></div>
+                <!-- NAV -->
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1.25rem;padding-top:0.75rem;border-top:1px solid var(--border)">
+                    <button onclick="wireStoryNav(-1)" style="background:none;border:1px solid var(--border2);color:var(--white);padding:0.4rem 0.9rem;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:0.78rem;font-weight:700">&#8592; Prev</button>
+                    <span id="wire-story-counter" style="font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;color:var(--dim)"></span>
+                    <button onclick="wireStoryNav(1)" style="background:none;border:1px solid var(--border2);color:var(--white);padding:0.4rem 0.9rem;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:0.78rem;font-weight:700">Next &#8594;</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -496,33 +524,99 @@ async function loadUpNext(){
 }
 
 // ── NEWS FROM WIRE ────────────────────────────────────────
-async function loadNews(){ try {
-    var el = document.getElementById('genre-news');
-    var { data, error } = await sb.from('wire_news')
-        .select('id,title,source_name,genre,created_at')
-        .order('created_at', {ascending:false}).limit(30);
-    if(error){ el.innerHTML='<p class="panel-empty">News unavailable</p>'; dbg('news ERR:'+error.message, false); return; }
-    if(!data||!data.length){ el.innerHTML='<p class="panel-empty">No news items yet</p>'; dbg('news: empty', true); return; }
+async function loadNews(){
+    var GENRE_PHOTOS_W = {
+        rock:   ['https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&q=80','https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&q=80','https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&q=80'],
+        metal:  ['https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=400&q=80','https://images.unsplash.com/photo-1504898770365-14faca6a7320?w=400&q=80'],
+        punk:   ['https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=400&q=80','https://images.unsplash.com/photo-1501386761578-eaa54b915bce?w=400&q=80'],
+        indie:  ['https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=400&q=80','https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=400&q=80'],
+        classic:['https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=400&q=80','https://images.unsplash.com/photo-1571935441834-df3ae5b61b8b?w=400&q=80']
+    };
+    window.wireGetPhoto = function(genre, idx){
+        var g=(genre||'').toLowerCase();
+        for(var k in GENRE_PHOTOS_W){ if(g.includes(k)){ var p=GENRE_PHOTOS_W[k]; return p[idx%p.length]; } }
+        return GENRE_PHOTOS_W.rock[idx%GENRE_PHOTOS_W.rock.length];
+    };
+    try {
+        var { data, error } = await sb.from('wire_news')
+            .select('id,title,source_name,genre,summary,created_at')
+            .order('created_at', {ascending:false}).limit(30);
+        if(error){ dbg('news ERR:'+error.message, false); return; }
+        if(!data||!data.length){ dbg('news: empty', true); return; }
+        window.wireStories = data;
+        var countEl = document.getElementById('wire-count');
+        if(countEl) countEl.textContent = data.length + ' stories';
+        renderWireCards();
+        dbg('news OK', true);
+    } catch(e){ dbg('news CRASH:'+e.message, false); }
+}
 
-    // Filter by DJ genres if available
-    var djGenres = currentDJ && currentDJ.genres && typeof currentDJ.genres === 'string'
-        ? currentDJ.genres.split(',').map(function(g){return g.trim().toLowerCase();})
-        : [];
-    var filtered = djGenres.length
-        ? data.filter(function(i){ if(!i.genre) return true; var g=i.genre.toLowerCase(); return djGenres.some(function(dg){return g.includes(dg)||dg.includes(g);}); })
-        : data;
-    if(!filtered.length) filtered = data;
-
-    gfStories = filtered.slice(0,10);
-    el.innerHTML = filtered.slice(0,10).map(function(item, idx){
-        return '<div class="news-item" onclick="gfOpen(gfStories,'+idx+')">'+
-            '<div class="news-source">'+esc(item.source_name||'The Wire')+'</div>'+
-            '<div class="news-title">'+esc(item.title||'')+'</div>'+
-            '<div class="news-date">'+fmtDate(item.created_at)+'</div>'+
-            '</div>';
+function renderWireCards(){
+    var grid = document.getElementById('wire-cards');
+    if(!grid) return;
+    var stories = window.wireStories || [];
+    grid.innerHTML = stories.map(function(item, idx){
+        var photo = window.wireGetPhoto(item.genre, idx);
+        var ago = timeAgo(item.created_at);
+        return '<div onclick="wireOpenStory('+idx+')" style="cursor:pointer;border-radius:10px;overflow:hidden;background:var(--dark);border:1px solid var(--border);transition:border-color 0.15s" onmouseover="this.style.borderColor='var(--orange)'" onmouseout="this.style.borderColor='var(--border)'">' +
+            '<div style="height:90px;overflow:hidden;position:relative">' +
+            '<img src="'+photo+'" alt="" style="width:100%;height:100%;object-fit:cover" loading="lazy">' +
+            '<div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,rgba(0,0,0,0.7))"></div>' +
+            '<span style="position:absolute;bottom:0.4rem;left:0.4rem;font-family:'Barlow Condensed',sans-serif;font-size:0.58rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(242,242,242,0.7)">'+(item.genre||'Rock')+'</span>' +
+            '</div>' +
+            '<div style="padding:0.5rem 0.6rem">' +
+            '<div style="font-size:0.78rem;line-height:1.35;font-weight:500;margin-bottom:0.25rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">'+esc(item.title||'')+'</div>' +
+            '<div style="font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--dim)">'+esc(item.source_name||'The Wire')+' · '+ago+'</div>' +
+            '</div></div>';
     }).join('');
-    dbg('news OK', true);
-} catch(e){ document.getElementById('genre-news').innerHTML='<p style="color:red;font-size:0.8rem">'+e.message+'</p>'; dbg('news CRASH:'+e.message,false); } }
+}
+
+function wireOpenStory(idx){
+    var stories = window.wireStories || [];
+    window.wireStoryIdx = idx;
+    wireRenderStory();
+    document.getElementById('wire-cards').style.display = 'none';
+    document.getElementById('wire-story').style.display = 'block';
+}
+
+function wireBackToCards(){
+    document.getElementById('wire-story').style.display = 'none';
+    document.getElementById('wire-cards').style.display = 'grid';
+}
+
+function wireStoryNav(dir){
+    var stories = window.wireStories || [];
+    window.wireStoryIdx = (window.wireStoryIdx + dir + stories.length) % stories.length;
+    wireRenderStory();
+}
+
+function wireRenderStory(){
+    var stories = window.wireStories || [];
+    var idx = window.wireStoryIdx || 0;
+    var s = stories[idx];
+    if(!s) return;
+    document.getElementById('wire-story-img').src = window.wireGetPhoto(s.genre, idx);
+    document.getElementById('wire-story-genre').textContent = s.genre||'Rock';
+    document.getElementById('wire-story-title').textContent = s.title||'';
+    document.getElementById('wire-story-body').textContent = s.summary||'No summary available for this story.';
+    document.getElementById('wire-story-source').textContent = 'Source: '+(s.source_name||'The Wire');
+    document.getElementById('wire-story-counter').textContent = (idx+1)+' / '+stories.length;
+}
+
+function toggleWire(){
+    var body = document.getElementById('wire-body');
+    var chevron = document.getElementById('wire-chevron');
+    var open = body.style.display === 'none';
+    body.style.display = open ? 'block' : 'none';
+    chevron.style.transform = open ? 'rotate(180deg)' : '';
+}
+
+function timeAgo(d){
+    var s = Math.floor((Date.now()-new Date(d))/1000);
+    if(s<3600) return Math.floor(s/60)+'m ago';
+    if(s<86400) return Math.floor(s/3600)+'h ago';
+    return Math.floor(s/86400)+'d ago';
+}
 
 // ── STREAM STATS ──────────────────────────────────────────
 async function loadStreamStats(){
