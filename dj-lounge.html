@@ -680,6 +680,7 @@ async function signOut(){ await sb.auth.signOut(); window.location.href='dj-logi
 // ── INIT ──────────────────────────────────────────────────
 async function init(){
     dbg('init...');
+    try {
 
     var { data: { session } } = await sb.auth.getSession();
     if(!session){ window.location.href='dj-login.html'; return; }
@@ -737,6 +738,10 @@ async function init(){
     // Refresh on-air every minute
     setInterval(loadOnAir, 60000);
     setInterval(loadStreamStats, 120000);
+    } catch(e){
+        dbg('FATAL: '+e.message, false);
+        document.getElementById('on-air-label').textContent = 'Error: '+e.message;
+    }
 }
 
 // ── NEWS POPOUT ───────────────────────────────────────────
