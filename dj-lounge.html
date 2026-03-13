@@ -354,6 +354,11 @@
 </div>
 
 <script>
+window.onerror = function(msg, src, line, col, err){
+    var bar = document.getElementById('debug-bar');
+    if(bar){ var s=document.createElement('span'); s.className='err'; s.textContent='JS ERR line '+line+': '+msg; bar.appendChild(s); }
+    return false;
+};
 var SB_URL = 'https://pwzeapvopeeoahpyicdm.supabase.co';
 var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3emVhcHZvcGVlb2FocHlpY2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNjg3NDEsImV4cCI6MjA4Njc0NDc0MX0.rc8IqfQF537UA5iWarxDia174HyCZ_xc2VPWOWdGxYk';
 var PUSHER_KEY = '829db0071d7d65b2440f';
