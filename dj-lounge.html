@@ -480,7 +480,7 @@ async function loadNews(){ try {
     if(!data||!data.length){ el.innerHTML='<p class="panel-empty">No news items yet</p>'; dbg('news: empty', true); return; }
 
     // Filter by DJ genres if available
-    var djGenres = currentDJ && currentDJ.genres
+    var djGenres = currentDJ && currentDJ.genres && typeof currentDJ.genres === 'string'
         ? currentDJ.genres.split(',').map(function(g){return g.trim().toLowerCase();})
         : [];
     var filtered = djGenres.length
