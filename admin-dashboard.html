@@ -818,6 +818,9 @@
       ⚡ Wire News
       <span class="nav-count muted" id="nav-count-wirenews">—</span>
     </div>
+    <div class="nav-item" data-panel="stationsettings" onclick="showPanel('stationsettings')">
+      ⚙️ Station Settings
+    </div>
     <div style="padding:1.25rem;margin-top:auto;border-top:1px solid var(--border);display:none;" id="nav-signout-mobile">
       <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="signOut()">Sign Out</button>
     </div>
@@ -1312,6 +1315,22 @@
     </div>
 
   <!-- DJ MANAGEMENT PANEL -->
+  <div id="panel-stationsettings" class="panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">⚙️ Station Settings</div>
+        <div class="panel-subtitle">Manage station-wide configuration stored in Supabase</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <span id="settings-status" style="font-size:0.78rem;color:var(--muted);"></span>
+        <button class="btn btn-primary" onclick="saveStationSettings()">Save Settings</button>
+      </div>
+    </div>
+    <div id="station-settings-body" style="padding:1.5rem;">
+      <div class="empty-state"><div class="empty-icon">⏳</div><div class="empty-text">Loading...</div></div>
+    </div>
+  </div>
+
   <div id="panel-djs" class="panel">
     <div class="table-wrap">
       <div class="table-header">
@@ -3194,6 +3213,80 @@ async function saveRates() {
       statusEl.style.color = 'var(--red)';
     }
   };
+}
+
+// ── STATION SETTINGS ─────────────────────────────────────────────────────
+const STATION_SETTING_FIELDS = [
+  { key: 'myriad_url',      label: 'Myriad Launch URL',      type: 'url',  hint: 'URL DJs click to open Myriad from the lounge' },
+  { key: 'stream_status',   label: 'Stream Status',          type: 'text', hint: 'live or offline' },
+  { key: 'stream_listeners',label: 'Listener Count',         type: 'text', hint: 'Updated manually or via automation' },
+  { key: 'stream_url',      label: 'Stream URL',             type: 'url',  hint: 'Public stream URL for players' },
+];
+
+let currentStationSettings = {};
+
+async function loadStationSettings() {
+  const token = currentSession?.access_token;
+  const body = document.getElementById('station-settings-body');
+  try {
+    const rows = await sbGet('/rest/v1/site_settings?select=key,value', token);
+    rows.forEach(r => { currentStationSettings[r.key] = r.value; });
+    renderStationSettingsForm();
+  } catch(e) {
+    body.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠</div><div class="empty-text">Could not load settings: ${escH(e.message)}</div></div>`;
+  }
+}
+
+function renderStationSettingsForm() {
+  const body = document.getElementById('station-settings-body');
+  body.innerHTML = STATION_SETTING_FIELDS.map(f => {
+    const val = currentStationSettings[f.key] || '';
+    return `<div style="margin-bottom:1.25rem;">
+      <label style="font-family:var(--font-cond);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:0.3rem;">${escH(f.label)}</label>
+      <input type="${f.type||'text'}" id="setting-${f.key}" value="${escH(val)}"
+        class="field-input" style="width:100%;font-size:0.9rem;" oninput="markSettingsDirty()"
+        placeholder="${escH(f.hint||'')}">
+      ${f.hint ? `<div style="font-size:0.72rem;color:var(--dim);margin-top:0.25rem;">${escH(f.hint)}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function markSettingsDirty() {
+  const s = document.getElementById('settings-status');
+  if(s){ s.textContent = '● Unsaved changes'; s.style.color = 'var(--gold)'; }
+}
+
+async function saveStationSettings() {
+  const token = currentSession?.access_token;
+  const statusEl = document.getElementById('settings-status');
+  const updates = STATION_SETTING_FIELDS.map(f => ({
+    key: f.key,
+    value: document.getElementById('setting-' + f.key)?.value || '',
+    updated_at: new Date().toISOString()
+  }));
+  try {
+    for (const u of updates) {
+      await fetch(SUPABASE_URL + '/rest/v1/site_settings?on_conflict=key', {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify([u])
+      });
+    }
+    updates.forEach(u => { currentStationSettings[u.key] = u.value; });
+    statusEl.textContent = '✓ Saved';
+    statusEl.style.color = 'var(--green)';
+    setTimeout(() => { statusEl.textContent = ''; }, 3000);
+    toast('Station settings saved', 'ok');
+  } catch(e) {
+    toast('Save failed: ' + e.message, 'err');
+    statusEl.textContent = '⚠ Save failed';
+    statusEl.style.color = 'var(--red)';
+  }
 }
 
 function getRate(key) {
